@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "287534834538",
+    "firebase_url": "https://jollofradio-92494-default-rtdb.firebaseio.com",
+    "project_id": "jollofradio-92494",
+    "storage_bucket": "jollofradio-92494.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:287534834538:android:f71f756d2cdc627db2fb13",
+        "android_client_info": {
+          "package_name": "com.example.jollofradio"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "287534834538-auivl02redbqhm1rc09l1skgkaglfgtr.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDcprtM72bodku2XAS4H7avGYBw6Y2qRjI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "287534834538-auivl02redbqhm1rc09l1skgkaglfgtr.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

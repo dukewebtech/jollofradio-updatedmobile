@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100px" height="100px" viewBox="0 0 100 100" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 45.1 (43504) - http://www.bohemiancoding.com/sketch -->
+    <title>icCriticalLg</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="V-2.0" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="GRR_Dashboard_noAppealSteps" transform="translate(-565.000000, -190.000000)">
+            <g id="icCriticalLg" transform="translate(555.000000, 180.000000)">
+                <rect id="specs" fill-opacity="0.3" fill="#FF4D54" opacity="0" x="0" y="0" width="120" height="120"></rect>
+                <g id="Critical-Lg" transform="translate(11.000000, 10.000000)">
+                    <path d="M48.9995,71.9997 C50.1035,71.9997 50.9995,71.1037 50.9995,69.9997 C50.9995,68.8957 50.1035,67.9997 48.9995,67.9997 C47.8955,67.9997 46.9995,68.8957 46.9995,69.9997 C46.9995,71.1037 47.8955,71.9997 48.9995,71.9997" id="Fill-1" fill="#D20000"></path>
+                    <path d="M49,55.4465 L49,3.4125 C49,2.3075 48.265,1.3435 47.22,1.0715 C46.169,0.8045 45.074,1.2945 44.557,2.2695 C44.497,2.3835 44.437,2.4985 44.383,2.6175 L1.072,89.6435 C-1.438,94.6525 0.614,99.0025 5.629,99.0025 L92.371,99.0025 C97.386,99.0025 99.438,94.6525 96.928,89.6435 L63.684,23.0245" id="Stroke-3" stroke="#D20000" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
