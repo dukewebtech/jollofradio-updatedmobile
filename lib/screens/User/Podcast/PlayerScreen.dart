@@ -1,13 +1,19 @@
 import 'dart:async';
+import 'dart:math';
+import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:jollofradio/config/services/controllers/User/StreamController.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Episode.dart';
+import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/utils/colors.dart';
+import 'package:jollofradio/utils/helper.dart';
+import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:just_audio/just_audio.dart';
 
 class PlayerScreen extends StatefulWidget {
   final Episode track;
@@ -26,158 +32,272 @@ class PlayerScreen extends StatefulWidget {
 class _PlayerScreenState extends State<PlayerScreen> 
 with SingleTickerProviderStateMixin {
   late AnimationController _controller;
-  late ColorTween _colorTween;
-  late Animation<Color?> _colorTweenAnimation;
-  Color beginColor = Colors.transparent;
-  Color endColor = AppColor.primary;
+  ColorTween? _colorTween;
+  Animation<Color?>? _colorTweenAnimation;
+  Color defaultColor = AppColor.primary;
 
+  AudioServiceHandler player = AudioServiceHandler();
   late Episode track;
   late String channel;
-  bool isLoading = false;
-  bool isPlaying = false;
   bool _fav = false;
-  dynamic currentTrack;
-  double _seek = 2.0;
-  String startPos = '0:00';
-  String duration = '0:00';
 
   @override
   void initState() {
-    channel = widget.channel;     /////////////////////////
+    channel = widget.channel;       ///////////////////////
     track = widget.track;
+    _fav = track.liked;
 
     _controller = AnimationController(
       duration: Duration(seconds: 2),
       vsync: this
     );
 
-    _colorTween = ColorTween(
-      begin: beginColor, end: endColor
-    );
+    Future.delayed(
+      Duration(seconds: 1), () => { ///////////////////////
+      getEffects()
+    });
 
-    _colorTweenAnimation = _colorTween.animate(
-      CurvedAnimation(
-          parent: _controller, curve: Curves.easeIn //////
-        )
-    );
-
-    _controller.forward();
+    initializeAudio();
 
     super.initState();
   }
 
-  void paint(beginColor, endColor) {
-    // setState(() {
+  Future<void> getEffects() async {
+    var logo = track.logo;
+    Colorly().fromNetwork().get(logo).then((colors) async {
       _colorTween = ColorTween(
-        begin: beginColor, end: endColor
+        begin: defaultColor, 
+        end: colors['primary']
       );
 
-      _colorTweenAnimation = _colorTween.animate(
+      _colorTweenAnimation = _colorTween!.animate(  //////
         CurvedAnimation(
-          parent: _controller, curve: Curves.easeIn //////
-        )
-      );
+            parent: _controller, 
+            curve: Curves.easeIn
+          )
+      )..addListener(() {
+        setState(() {});
+      });
 
-    // });
+      _controller.forward();
+
+    });////////////////////////////////////////////////////
+  }
+
+  Future initializeAudio() async {
+    MediaItem? currentTrack = player.currentTrack(); //////
+    var podcast 
+    = currentTrack?.extras? ['episode'] ['podcast']; //////
+    final playlist = player.getPlaylist( ) ;
+    
+    if(podcast != track.podcast || podcast == track.podcast 
+    && playlist.length == 1 
+    && currentTrack?.title != track.title) {
+      //fire loading
+      /*
+      setState(() => isLoading = true) ; // inform UI state
+      */
+
+      //mount playlist      
+      await player.setPlaylist([
+        MediaItem(
+          id: track.id.toString(),
+          title: track.title,
+          album: track.podcast,
+          artist: track.creator.username(),
+          artUri: Uri.parse(track.logo),
+          duration: Duration(),
+          extras: {
+            "url": track.source,
+            "episode": track.toJson()
+          }
+        )
+      ]);
+
+      player.play();
+
+      //track stream
+      //
+      StreamController.create ({ 'episode_id': track.id });
+      //
+    }
+
+    if(podcast == track.podcast) {
+      if(currentTrack?.title == track.title) return false ;
+      
+      if(playlist.length > 1){
+        int index = playlist.
+        indexWhere((media)=>media.id==track.id.toString());
+
+        if(index >= 0){
+          player.skipToQueueItem(
+            index
+          );
+        }
+      }
+    }
+
+    player.streams().listen((dynamic event) {
+      final MediaItem? currentTrack = player.currentTrack();
+
+      if(mounted) {
+        setState(() {
+          track = Episode.fromJson(
+            currentTrack?.extras!['episode']
+          );     
+        });
+      }
+    });
+    
+    ///////////////////////////////////////////////////////
+  }
+
+  Future skipTrack(mode) async {
+    late MediaItem media;
+
+    if(mode == 'prev'){
+      media = player.previousTrack();
+      player.skipToPrevious();
+    }
+    if(mode == 'next'){
+      media = player.nextTrack();
+      player.skipToNext();
+    }
+
+    setState(() {
+      track = Episode.fromJson(
+        media.extras!['episode']
+      );     
+    });
+  }
+
+  bool canSkip(String mode) {
+    final playlist = player.getPlaylist(); //total playlist
+    String id = track.id.toString();
+    int first = 0;
+    int last = playlist.length - 1 ;
+    
+    if(mode == 'prev') {
+      if(!playlist.asMap(  ).containsKey(
+        first
+      ))
+        return false;
+
+      return ( playlist[first] != player.currentTrack( ) );
+    } 
+    if(mode == 'next') {
+      if(!playlist.asMap(  ).containsKey(
+        last
+      ))
+        return false;
+
+      return ( playlist[last ] != player.currentTrack( ) );
+    }
+    return false;
+  }
+
+  Future<void> _doSubscribe() async {
+    bool liked = !_fav;
+    Map data = {
+      'episode_id': track.id
+    };
+
+    setState(() {
+      _fav = !_fav;
+    });
+
+    await StreamController.engage(data).then((status)async{
+      if(liked && !status){
+        setState(() => _fav = !_fav);
+      }
+    });    
   }
 
   @override
   void dispose() {
     _controller.dispose();
-    
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return FutureBuilder(
-      future: Colorly().fromNetwork().get(track.logo),
+    return AnimatedBuilder(
+      animation: _controller,
       builder: (context, snapshot) {
-        dynamic colors = snapshot.data;
-
-        if(snapshot.hasData){
-          paint(
-            Colors.transparent, 
-            colors['primary']
-          );
-
-          Timer(Duration(milliseconds: 500), () async {
-            _controller.forward();
-          });
-        }
-
-        return AnimatedBuilder(
-          animation: _controller,
-          builder: (context, snapshot) {
-            return Scaffold(
-              backgroundColor: _colorTweenAnimation.value,
-              appBar: AppBar(
-                leading: Buttons.back(),
+        return Scaffold(
+          backgroundColor: _colorTweenAnimation == null ? defaultColor
+          : _colorTweenAnimation!.value,
+          appBar: AppBar(
+            leading: Buttons.back(),
+          ),
+          body: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter, end: Alignment.bottomCenter, 
+                colors: [
+                  Colors.transparent, 
+                  Color.fromRGBO(0, 0, 0, .1), 
+                  Color.fromRGBO(0, 0, 0, .5)
+                ], 
+                stops: [0.0, 0.1, 0.8]
               ),
-              body: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topCenter, end: Alignment.bottomCenter, 
-                    colors: [
+            ),
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: double.infinity,
+              margin: EdgeInsets.only(
+                top: 00,
+                left: 20, 
+                right: 20
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(height: 20),
+                        Container(
+                          width: MediaQuery.of(context).size.width,
+                          height: 320,
+                          decoration: BoxDecoration(
+                            color: Color(0XFF0D1921),
+                          ),
+                          child: Stack(
+                            fit: StackFit.expand,
+                            alignment: Alignment.center,
+                            children: [
+                              CachedNetworkImage(
+                                imageUrl: track.logo,
+                                placeholder: (context, url) {
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 50,
+                                      height: 50,
+                                      child: CircularProgressIndicator()
+                                    )
+                                  );
+                                },
+                                errorWidget: (context, url, error) => Icon(
+                                  Icons.error
+                                ),
+                                fit: BoxFit.cover,
+                              ),
+                            ],
+                          ),
+                        ),
+                        SizedBox(height: 30),
+                        SizedBox(
+                          width: double.infinity,
+                          child: StreamBuilder<Map>(
+                            stream: player.streams(),
+                            builder: (context, snapshot) {
+                              final streams = snapshot.data ?? <String, Duration>{
+                                'duration': Duration(),
+                                'position': Duration(),
+                              };
 
-                      Colors.transparent, 
-                      Color.fromRGBO(0, 0, 0, .1), 
-                      Color.fromRGBO(0, 0, 0, .5)
-                      
-                    ], 
-                    stops: [0.0, 0.1, 0.8]
-                  ),
-                ),
-                child: Container(
-                  width: MediaQuery.of(context).size.width,
-                  height: double.infinity,
-                  margin: EdgeInsets.only(
-                    top: 00,
-                    left: 20, 
-                    right: 20
-                  ),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.start,
-                    children: [
-                      Expanded(
-                        child: Column(
-                          children: <Widget>[
-                            SizedBox(height: 20),
-                            Container(
-                              width: MediaQuery.of(context).size.width,
-                              height: 320,
-                              decoration: BoxDecoration(
-                                color: Color(0XFF0D1921),
-                              ),
-                              child: Stack(
-                                fit: StackFit.expand,
-                                alignment: Alignment.center,
-                                children: [
-                                  CachedNetworkImage(
-                                    imageUrl: track.logo,
-                                    placeholder: (context, url) {
-                                      return Center(
-                                        child: SizedBox(
-                                          width: 50,
-                                          height: 50,
-                                          child: CircularProgressIndicator()
-                                        )
-                                      );
-                                    },
-                                    errorWidget: (context, url, error) => Icon(
-                                      Icons.error
-                                    ),
-                                    fit: BoxFit.cover,
-                                    color: Colors.black,
-                                    colorBlendMode: BlendMode.softLight
-                                  ),
-                                ],
-                              ),
-                            ),
-                            SizedBox(height: 30),
-                            SizedBox(
-                              width: double.infinity,
-                              child: Column(
+                              return Column(
                                 mainAxisAlignment: MainAxisAlignment.start,
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
@@ -204,73 +324,157 @@ with SingleTickerProviderStateMixin {
                                     ),
                                   ),
                                   SizedBox(height: 20),
-                                  SliderTheme(
-                                    data: SliderTheme.of(context).copyWith(
-                                      trackHeight: 2,
-                                      overlayShape: SliderComponentShape.noOverlay,
-                                      trackShape: CustomTrackShape()
-                                    ),
-                                    child: Slider(  
-                                      min: 0,  
-                                      max: 100,  
-                                      value: _seek,
-                                      activeColor: AppColor.secondary,
-                                      thumbColor: Colors.white,
-                                      onChanged: (value) {  
-                                        setState(() {  
-                                          _seek = value;
-                                        });  
-                                      },  
-                                    ),
+                                  Stack(
+                                    fit: StackFit.loose,
+                                    children: [
+                                      SliderTheme(
+                                        data: SliderTheme.of(context).copyWith(
+                                          trackHeight: 2,
+                                          overlayShape: SliderComponentShape.noOverlay,
+                                          trackShape: CustomTrackShape(),
+                                          activeTrackColor: AppColor.secondary,
+                                          inactiveTrackColor: Colors.white24,
+                                        ),
+                                        child: Slider(  
+                                          min: 0,  
+                                          max: 
+                                          streams['duration'].inMilliseconds.toDouble(),  
+                                          value: min(
+                                            streams[
+                                              'position'
+                                            ].inMilliseconds.toDouble(), 
+                                            streams[
+                                              'duration'
+                                            ].inMilliseconds.toDouble()
+                                          ),
+                                          thumbColor: Colors.white,
+                                          onChanged: (value) {
+                                            player.seek(
+                                              Duration(  milliseconds: value.round()  )
+                                            ); 
+                                          },  
+                                        )
+                                      ),
+                                    ],
                                   ),
                                   SizedBox(height: 10),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment: 
+                                       MainAxisAlignment.spaceBetween,
                                     children: <Widget>[
-                                      Text(startPos, style: TextStyle(fontSize: 12)),
-                                      Text(duration, style: TextStyle(fontSize: 12)),
+                                      Text(
+                                        formatTime(
+                                          streams['position']
+                                        ), 
+                                        style: TextStyle(fontSize: 12)
+                                      ),
+                                      Text(
+                                        formatTime(
+                                          streams['duration']
+                                        ), 
+                                        style: TextStyle(fontSize: 12)
+                                      ),
                                     ],
                                   ),
                                   SizedBox(height: 50),
                                 ],
-                              ),
-                            )
-                          ],
-                        ),
-                      ),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: <Widget>[
-                          IconButton(
+                              );
+                            }
+                          ),
+                        )
+                      ],
+                    ),
+                  ),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: <Widget>[
+                      StreamBuilder<Map>(
+                        stream: player.streams(),
+                        builder: (context, snapshot) {
+                          final stream = snapshot.data?['loopMode'] 
+                          ?? LoopMode.off;
+
+                          final repeatMode = {
+                            LoopMode.off: {
+                              "task" : AudioServiceRepeatMode.all,
+                              "label": "Repeat All"
+                            },
+                            LoopMode.all: {
+                              "task" : AudioServiceRepeatMode.one,
+                              "label": "Repeat One"
+                            },
+                            LoopMode.one: {
+                              "task" : AudioServiceRepeatMode.none,
+                              "label": "Repeat Off"
+                            },
+                          };
+
+                          final repeatIcon = {
+                            LoopMode.all: Icon(
+                              Iconsax.repeat, color: Colors.white
+                            ),
+                            LoopMode.one: Icon(
+                              Icons.repeat_one, color: Colors.white
+                            ),
+                            LoopMode.off: Icon(
+                              Iconsax.repeat, color: Colors.white54
+                            ),
+                          }[stream]!;
+
+                          return IconButton(
                             padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
+                            constraints: BoxConstraints(), //edge patch
                             tooltip: "Repeat",
                             onPressed: () {
-                              //
+                              player.setRepeatMode(
+                                repeatMode[stream]!['task']! 
+                                as AudioServiceRepeatMode 
+                              );
+                              Toaster.info(
+                                repeatMode[stream]!['label'].toString()
+                              );
+
                             },
-                            icon: Icon(
-                              Iconsax.repeat,
-                              color: Colors.white,
-                            ),
-                          ),
-                          IconButton(
+                            icon: repeatIcon,
+                          );
+                        }
+                      ),
+                      StreamBuilder<Map>(
+                        stream: player.streams(),
+                        builder: (context, snapshot) {
+                          return IconButton(
                             tooltip: "Previous Track",
-                            onPressed: () {
-                              //
-                            },
+                            onPressed: () async => await skipTrack('prev'),
                             icon: Icon(
                               Iconsax.backward,
-                              color: Colors.white,
+                              color: 
+                              canSkip('prev') ? Colors.white : Colors.grey,
                             ),
-                          ),
-                          Container(
-                            width: 50,
-                            height: 50,
-                            decoration: BoxDecoration(
-                              color: AppColor.secondary,
-                              borderRadius: BorderRadius.circular(100)
-                            ),
-                            child: isLoading ? Center(
+                          );
+                        }
+                      ),
+                      Container(
+                        width: 50,
+                        height: 50,
+                        decoration: BoxDecoration(
+                          color: AppColor.secondary,
+                          borderRadius: /* */ BorderRadius.circular(100)
+                        ),
+                        child: StreamBuilder<Map>(
+                          stream: player.streams(),
+                          builder: (context, snapshot) {
+                            final state = snapshot.data?['playState'];
+                            final playing = state?.playing ?? false;
+                            final processingState = state?.processingState 
+                            ?? ProcessingState.loading;
+
+                            List loading = [
+                              ProcessingState.loading,
+                              ProcessingState.buffering,
+                            ];
+
+                            if(loading.contains(processingState) == true){
+                              return Center(
                                 child: SizedBox(
                                   width: 20,
                                   height: 20,
@@ -279,55 +483,94 @@ with SingleTickerProviderStateMixin {
                                     color: AppColor.primary,
                                   )
                                 ),
-                              ) : IconButton(
-                              tooltip: !isPlaying ? 'Play' : 'Pause',
+                              );
+                            }
+
+                            return IconButton(
+                              tooltip: playing == false ? 'Play' : 'Pause',
                               onPressed: () {
                                 setState(() {
-                                  isPlaying = !isPlaying;
+                                  if( !playing ){
+                                    player.play ();
+                                  }
+                                  else{
+                                    player.pause();
+                                  }                                  
                                 });
                               },
                               icon: Icon(
-                                !isPlaying ? Icons.play_arrow : Icons.pause,
+                                !playing ? Icons.play_arrow : Icons.pause,
                                 color: Colors.black,
                               ),
-                            ),
-                          ),
-                          IconButton(
+                            );
+                          },
+                        ),
+                      ),
+                      StreamBuilder<Map>(
+                        stream: player.streams(),
+                        builder: (context, snapshot) {
+                          return IconButton(
                             tooltip: "Forward Track",
-                            onPressed: () {
-                              //
-                            },
+                            onPressed: () async => await skipTrack('next'),
                             icon: Icon(
                               Iconsax.forward,
-                              color: Colors.white,
+                              color: 
+                              canSkip('next') ? Colors.white : Colors.grey,
                             ),
-                          ),
-                          IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(),
-                            tooltip: "Add to Favorites",
-                            onPressed: () {
-                              setState(() {
-                                _fav = !_fav;
-                              });
-                            },
-                            icon: !_fav ? Icon(
-                              Iconsax.heart,
-                              color: Colors.white,
-                            ) : Icon(
-                              FontAwesomeIcons.solidHeart, ////////////////
-                              color: AppColor.secondary, //////////////////
-                            ),
-                          ),
-                        ],
+                          );
+                        }
                       ),
-                      SizedBox(height: 20),
+                      StreamBuilder<Map>(
+                        stream: player.streams(),
+                        builder: (context, snapshot) {
+                          final stream = snapshot.data?['shuffleMode'] 
+                          ?? false;
+
+                          final shuffleMode = {
+                            true: {
+                              "task" : AudioServiceShuffleMode.none,
+                              "label": "Shuffle Off"
+                            },
+                            false: {
+                              "task" : AudioServiceShuffleMode.all,
+                              "label": "Shuffle On"
+                            },
+                          };
+
+                          final shuffleIcon = {
+                            true: Icon(
+                              Iconsax.shuffle, color: Colors.white
+                            ),
+                            false: Icon(
+                              Iconsax.shuffle, color: Colors.grey
+                            ),
+                          }[stream]!;
+
+                          return IconButton(
+                            padding: EdgeInsets.zero,
+                            constraints: BoxConstraints(), //edge patch
+                            tooltip: "Shuffle",
+                            onPressed: () {
+                              player.setShuffleMode(
+                                shuffleMode[stream]!['task']! 
+                                as AudioServiceShuffleMode 
+                              );
+                              Toaster.info(
+                                shuffleMode[stream]!['label'].toString()
+                              );
+
+                            },
+                            icon: shuffleIcon,
+                          );
+                        }
+                      ),
                     ],
                   ),
-                ),
+                  SizedBox(height: 20),
+                ],
               ),
-            );
-          }
+            ),
+          ),
         );
       }
     );
@@ -335,7 +578,6 @@ with SingleTickerProviderStateMixin {
 }
 
 class CustomTrackShape extends RoundedRectSliderTrackShape {
-  
   @override
   Rect getPreferredRect({
     required RenderBox parentBox,
@@ -354,7 +596,5 @@ class CustomTrackShape extends RoundedRectSliderTrackShape {
     return Rect.fromLTWH(
       trackLeft, trackTop,  trackWidth, trackHeight ///////
     );
-
   }
-
 }

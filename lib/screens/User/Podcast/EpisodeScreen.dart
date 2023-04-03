@@ -1,4 +1,5 @@
 import 'package:animate_do/animate_do.dart';
+import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:confetti/confetti.dart';
 import 'package:flutter/material.dart';
@@ -7,6 +8,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Podcast.dart';
 import 'package:jollofradio/config/services/controllers/User/PlaylistController.dart';
 import 'package:jollofradio/config/services/controllers/User/SubscriptionController.dart';
+import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Shimmers/Podcast.dart';
@@ -15,6 +17,7 @@ import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:just_audio/just_audio.dart';
 import 'package:share_plus/share_plus.dart';
 
 class EpisodeScreen extends StatefulWidget {
@@ -28,12 +31,11 @@ class EpisodeScreen extends StatefulWidget {
 class _EpisodeScreenState extends State<EpisodeScreen> {
   late Podcast playlist;
   late ConfettiController confettiController;
+  AudioServiceHandler player = AudioServiceHandler();
+  late PlaybackState playerState;
   bool isLoading = true;
   bool _fav = false;
-  bool isPlaying = false;
-  dynamic currentTrack;
-  double? duration;
-  double? currentSeek;
+  MediaItem? currentTrack;
 
   @override
   void initState() {
@@ -43,6 +45,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
       seconds: 1
     ));
 
+    initPlayer ();
     getPlaylist();
 
     super.initState();
@@ -55,18 +58,57 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
     super.dispose();
   }
 
+  Future<void> initPlayer() async {
+    audioHandler.playbackState.listen((PlaybackState state) {
+
+      currentTrack = player.currentTrack(); // updating track
+
+    });
+  }
+
   Future<void> getPlaylist() async {
     int id = playlist.id;
 
-    await PlaylistController.show(id).then((playlist)  async {
+    await PlaylistController.show(id).then((playlist) async {
       if(playlist != null){
         setState(() {
-          isLoading =  false;
           this.playlist = playlist;
+          isLoading =  false;
         });
       }
     });
-    
+  }
+
+  Future<void> playPodcast() async {
+    var podcast = currentTrack?.extras?['episode']['podcast'];
+
+    if(podcast != playlist.title){
+      await player.setPlaylist(playlist.episodes.map((item) {
+
+        return MediaItem(
+          id: item.id.toString(),
+          title: item.title,
+          album: item.podcast,
+          artist: item.creator.username(),
+          artUri: Uri.parse(item.logo),
+          extras: {
+            "url": item.source,
+            "episode": item.toJson()
+          }
+        );
+
+      }).toList());
+
+      player.play();
+    }
+    else{
+      if(!player.isPlaying())
+        player.play();
+      
+      else 
+        player.pause();
+      
+    }
   }
 
   Future<void> _doSubscribe() async {
@@ -91,7 +133,6 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
         );
       });
     }
-    
     if(!subscribing){    
       await SubscriptionController.delete(data).then((status){
       });
@@ -164,23 +205,26 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
               ),
               Wrap(
                 children: [
-                  Text(
-                    playlist.description ?? "No description currently ${
-                      ""
-                    }available on this podcast at the moment.", ////////
-                    style: TextStyle(
-                      color: Color(0XFFBBBBBB),
-                      fontSize: 14
+                  SizedBox(
+                    width: double.infinity,
+                    child: Text(
+                      playlist.description ?? "No description currently ${
+                        ""
+                      }available on this podcast at the moment.", ////////
+                      style: TextStyle(
+                        color: Color(0XFFBBBBBB),
+                        fontSize: 14
+                      ),
+                      maxLines: 5,
+                      overflow: TextOverflow.ellipsis,
                     ),
-                    maxLines: 7,
-                    overflow: TextOverflow.ellipsis,
                   ),
                   if(textOverflow(
                     playlist.description ?? '',
                     TextStyle(
                       fontSize: 14
                     ),
-                    maxLines: 7, 
+                    maxLines: 5, 
                     maxWidth: MediaQuery.of(context).size.width.toDouble()
                   ))
                   GestureDetector(
@@ -277,20 +321,52 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                               Color(0XFF0D1921) : AppColor.secondary,
                               borderRadius: BorderRadius.circular(100)
                             ),
-                            child: IconButton(
-                              padding: EdgeInsets.all(2.5),
-                              onPressed: () {
-                                // RouteGenerator.goto(TRACK_PLAYER, {
-                                //   "track": null,
-                                //   "channel": "podcast"
-                                // });
-                              },
-                              icon: Icon(
-                                Icons.play_arrow, 
-                                color: playlist.episodes
-                                .isEmpty ? Colors.white : Colors.black,
-                                size: 20,
-                              ),
+                            child: StreamBuilder<Map>(
+                              stream: player.streams(),
+                              builder: (context, snapshot) {
+                                final state = snapshot.data?['playState'];
+                                bool playing = state?.playing ?? false;
+                                var processingState = state?.processingState;
+
+                                if(
+                                  playing == true && currentTrack?.extras?
+                                  ['episode']['podcast'] != playlist.title) {
+                                    playing = false;
+                                    processingState = ProcessingState.ready;
+                                }
+
+                                List loading = [
+                                  ProcessingState.loading,
+                                  ProcessingState.buffering,
+                                ];
+
+                                if(loading.contains(processingState) == true 
+                                || isLoading){
+                                  return Center(
+                                    child: SizedBox(
+                                      width: 15,
+                                      height: 15,
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 2,
+                                        color: AppColor.primary,
+                                      )
+                                    ),
+                                  );
+                                }
+
+                                return IconButton(
+                                  padding: EdgeInsets.all(2.5),
+                                  tooltip: playing == false ? 'Play' : 'Pause',
+                                  onPressed:()=> playPodcast(),
+                                  icon: Icon(
+                                    !playing ? Icons.play_arrow : Icons.pause,
+                                    color: playlist.episodes
+                                    .isEmpty ? Colors.white : Colors.black,
+                                    size: 20,
+                                  ),
+                                );
+
+                              }
                             )
                           ),
                           SizedBox(
@@ -303,7 +379,6 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                 subject: 'Listen to: ${
                                   playlist.title
                                 } on Jollof Radio for FREE');
-
                             },
                             child: Icon(
                               FontAwesomeIcons.share, 

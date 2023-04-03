@@ -34,7 +34,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late User user;
   late Map streams;
-  List categories = [];
+  late Future categories;
   bool isLoading = true;
   bool refresh = false;
   
@@ -50,6 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //cache manager
     (() async {
+      /*
       await cacheManager.mount({
         'streams': {
           'data': () async {
@@ -68,10 +69,13 @@ class _HomeScreenState extends State<HomeScreen> {
       }, Duration(
         seconds: 60
       ));
+      */
 
       fetchStreams() ;
 
     }());
+
+    categories = (category());
 
     super.initState();
   }
@@ -109,7 +113,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     await StreamController.delete({'episode_id' : episode.id})
     .then((value) async {
-
       refresh = true;
       fetchStreams();
     });
@@ -127,10 +130,8 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     );
-
-    categories = category;
     
-    return categories as List<Category>;
+    return category;
 
     /*
     return await CategoryController.index().then((categories) {
@@ -323,9 +324,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         fontWeight: FontWeight.bold
                       ),
                       GestureDetector(
-                        onTap: () {
+                        onTap: () async {
                           RouteGenerator.goto(CATEGORY, {
-                            "categories": categories
+                            "categories": await categories
                           });
                         },
                         child: Labels.secondary(
@@ -342,10 +343,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: /**/CrossAxisAlignment.start,
                       children: <Widget>[
                         FutureBuilder(
-                          future: category(),
+                          future: categories,
                           builder: (context, snapshot) {
                             List<Category>? categories = snapshot.data;
-
                             if(!snapshot.hasData || 
                             snapshot.data!.isEmpty){                            
                               return const CategoryShimmer(

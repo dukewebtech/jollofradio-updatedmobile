@@ -92,7 +92,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     }
 
     // if(liked){
-      await StreamController.create(data).then((status){
+      await StreamController.engage(data).then((status){
         if(liked && !status){
           setState(() => _fav = !_fav);
         }
@@ -401,20 +401,20 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     }
 
     if(layout == 'LIST'){
-      return Container(
-        width: double.infinity,
-        height: 80,
-        padding: EdgeInsets.all(5),
-        margin: EdgeInsets.only(bottom: 10),
-        decoration: BoxDecoration(
-          color: Color(0XFF12222D),
-          borderRadius: BorderRadius.circular(5)
-        ),
-        child: GestureDetector(
-          onTap: () => RouteGenerator.goto(TRACK_PLAYER, {
-            "track": episode,
-            "channel": "podcast"
-          }),
+      return GestureDetector(
+        onTap: () => RouteGenerator.goto(TRACK_PLAYER, {
+          "track": episode,
+          "channel": "podcast"
+        }),
+        child: Container(
+          width: double.infinity,
+          height: 80,
+          padding: EdgeInsets.all(5),
+          margin: EdgeInsets.only(bottom: 10),
+          decoration: BoxDecoration(
+            color: Color(0XFF12222D),
+            borderRadius: BorderRadius.circular(5)
+          ),
           child: Row(
             children: <Widget>[
               Container(

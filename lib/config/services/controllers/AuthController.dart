@@ -205,6 +205,26 @@ class AuthController {
     return;
   }
 
+  static Future service(Map data) async {
+    String userType = data['userType'];
+    String route = routeScope(
+      userType, {
+      'user': USER_SERVICE_ROUTE,
+      'creator': CREATOR_SERVICE_ROUTE,
+    });
+
+    var request = await api(auth: true).get(endpoint(route));
+        request = (request) as Map;
+       
+    if (request.containsKey('data')){
+      dynamic data = request['data'];
+            
+      return data;
+    }
+
+    return {};
+  }
+
   static Future<void> logout() async {
     RouteGenerator.exit(SIGNIN);
 

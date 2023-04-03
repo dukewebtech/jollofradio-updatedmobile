@@ -95,6 +95,22 @@ class StreamController {
   }
 
   static Future<bool> create(Map data) async {
+    var request = await api(auth: true).post(endpoint(USER_STREAM_ROUTE), 
+      data
+    );
+        request = (request) as Map;
+
+    if (request.containsKey('data')){
+      dynamic data = request['data'];
+
+      return true;
+    }
+
+    return false;
+
+  }
+
+  static Future<bool> engage(Map data) async {
     var request = await api(auth: true).post(endpoint(USER_STREAM_ROUTE
     +'/like'), 
       data

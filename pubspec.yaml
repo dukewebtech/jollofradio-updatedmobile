@@ -63,6 +63,7 @@ dependencies:
   confetti: ^0.7.0
   just_audio: ^0.9.32
   audio_service: ^0.18.9
+  rxdart: ^0.27.7
   audio_session: ^0.1.13
 
 dev_dependencies:

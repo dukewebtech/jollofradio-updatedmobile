@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 Map login(Map response) {
-
   return {
     'token': response['data']['access_token'],
     'user': response['data']['data'],
@@ -15,6 +14,13 @@ String numberFormat(num amount){
 
   return NumberFormat.compact().format( amount );
   
+}
+
+String formatTime(Duration time){
+
+  return time
+  .toString().split('.').first.padLeft( 8, "0") ;
+
 }
 
 bool textOverflow(String text, TextStyle style, { 

@@ -52,7 +52,6 @@ class _SplashScreenState extends State<SplashScreen> {
            .login(json.decode(user));
 
         }
-
         RouteGenerator.exit(redirect);
       }
     });
@@ -78,11 +77,9 @@ class _SplashScreenState extends State<SplashScreen> {
                 width: double.infinity,
                 alignment: Alignment.bottomRight,
                 margin: EdgeInsets.only(top: 30),
-                child: FittedBox(
-                  child: Image(
-                    image: AssetImage("assets/images/splash.png"), 
-                    fit: BoxFit.contain
-                  ),
+                child: Image(
+                  image: AssetImage("assets/images/splash.png"), 
+                  fit: BoxFit.contain
                 )
               ),
             ),
@@ -131,9 +128,7 @@ class _SplashScreenState extends State<SplashScreen> {
                             )
                           ),
                           onPressed: () {
-                            RouteGenerator.goto(
-                              ONBOARDING
-                            );
+                            RouteGenerator.goto(ONBOARDING);
                           },
                           child: Text("Get Started", style: TextStyle(
                             color: AppColor.primary,

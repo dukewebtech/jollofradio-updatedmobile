@@ -45,7 +45,7 @@ class Episode {
 
     Map<String, dynamic> toJson() => {
       'id': id,
-      'creator': creator,
+      'creator': creator.toJson(),
       'title': title,
       'logo': logo,
       'description': description,

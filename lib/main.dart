@@ -1,5 +1,5 @@
 import 'package:jollofradio/config/services/core/NotificationService.dart';
-// import 'package:jollofradio/config/services/core/AudioService.dart';
+import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
@@ -26,7 +26,11 @@ Future main() async {
     DeviceOrientation.portraitUp
   ])
   .then((_) async {
-    // AudioServiceHandler.init();
+    AudioServiceHandler.init({
+      'userAgent': "Jollofradio/1.0 (Linux;Android 12) - v2.0 player",
+      'channelId': "com.jollofradio.com",
+      'channelName': "Audio Service App",
+    });
     NotificationService.initialize(
       sound: true
     );
