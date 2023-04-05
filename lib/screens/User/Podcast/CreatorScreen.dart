@@ -5,6 +5,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Creator.dart';
 import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/models/User.dart';
+import 'package:jollofradio/config/services/controllers/CreatorController.dart';
 import 'package:jollofradio/config/services/controllers/User/SubscriptionController.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
@@ -27,6 +28,7 @@ class CreatorScreen extends StatefulWidget {
 class _CreatorScreenState extends State<CreatorScreen> {
   late User user;
   bool isLoading = true;
+  bool isSyncing = true;
   late Creator creator;
   late bool subscribed;
   String subscribers = "0";
@@ -39,10 +41,27 @@ class _CreatorScreenState extends State<CreatorScreen> {
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
 
+    //get creator live
     creator = widget.creator;
+    init();
+    
+    super.initState();
+  }
+
+  Future<void> init() async {
+    if(creator.episodes == null ){
+      final profile = await getCreator(); // trying to get user
+      if(profile != null){
+        setState(() {
+          creator = profile;
+        });
+      }
+    }
+
     subscribers = /* */ numberFormat(creator.followers!.length);
     subscribed = creator.subscribed(user);
     
+    if(creator.episodes != null ){
     for(var podcast in creator.episodes!){
       podcasts.add(
         Episode.fromJson(podcast)
@@ -64,12 +83,24 @@ class _CreatorScreenState extends State<CreatorScreen> {
     //limit data model
     topPick = Factory(topPick).get(0,5);
     latest = Factory(latest).get(0,5);
+    }
 
     setState(() {
       isLoading = false;
     });
+  }
 
-    super.initState();
+  Future<Creator?> getCreator() async {
+    return await CreatorController.show({ // fetch creator data
+      'id': widget.creator.id
+    })
+      .then((creator){
+        setState(() {
+          isSyncing = false;
+        });
+
+        return creator;
+    });
   }
 
   Future<void> _doSubscribe() async {
@@ -86,17 +117,29 @@ class _CreatorScreenState extends State<CreatorScreen> {
       await SubscriptionController.create(data).then((status){
         if(!status){
           setState(() => subscribed = !subscribed);
+          
         }
       });
-      return;
-    }
-    if(!subscribing){    
+    } else {    
       await SubscriptionController.delete(data).then((status){
         if(!status){
           // setState(() => _fav = !_fav);
+
         }
       });
     }
+
+    getCreator().then((creator) async{
+      if(creator == null)
+        return;
+
+      setState(() {
+        subscribers = numberFormat(creator.followers!.length);
+        subscribed = creator.subscribed(user);
+      });
+
+    });
+
   }
 
   @override
@@ -162,8 +205,6 @@ class _CreatorScreenState extends State<CreatorScreen> {
                           Icons.error
                         ),
                         fit: BoxFit.cover,
-                        color: Colors.black,
-                        colorBlendMode: BlendMode.softLight
                       ),
                       Container(
                         width: double.infinity,
@@ -209,9 +250,18 @@ class _CreatorScreenState extends State<CreatorScreen> {
                         // child: Buttons.primary(
                         //   label: !subscribed ? "Follow" : "Subscribed"
                         // )
+
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(50),
-                          child: ElevatedButton.icon(
+                          child: isSyncing ? 
+                            ElevatedButton(
+                              onPressed: (){},
+                              child: Center(
+                                child: const Text('...',style: TextStyle(
+                                  color: Colors.black
+                                )),
+                              ),
+                            ) : ElevatedButton.icon(
                             onPressed: () async {
                               await _doSubscribe();
                             }, 

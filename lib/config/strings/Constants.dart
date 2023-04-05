@@ -22,6 +22,7 @@ const STATIONS = '/user/radio/:id';
 const CATEGORY = '/user/category';
 const CATEGORY_TRACK = '/user/category/:id';
 const TRENDING = '/user/playlist/trending';
+const NEW_RELEASE = '/user/playlist/release';
 
 const CREATOR_PROFILE = '/user/creator/:id';
 const PODCAST = '/user/podcasts';
@@ -29,6 +30,7 @@ const SEARCH_PAGE = '/user/search/result';
 const SEARCH_PLAYLIST = '/user/search/playlist';
 const SEARCH_PODCAST = '/user/search/podcast';
 const TRACK_PLAYER = '/track/player/:id';
+const RADIO_PLAYER = '/radio/player/:id';
 const SETTINGS = '/user/setting';
 const NOTIFICATION = '/user/notifications';
 

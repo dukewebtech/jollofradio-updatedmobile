@@ -53,6 +53,7 @@ class AudioServiceHandler
         }).where((e) => e!=null).toList()
       );
       
+            
       playbackState.add(playbackState.value.copyWith ( ///////
         controls: buttons,
         systemActions: {
@@ -91,17 +92,18 @@ class AudioServiceHandler
     });
     // */
     
-    // listen to duration stream    
+    // listen to duration stream
     player.durationStream.listen( (Duration? duration) /* */ {
       var index = player.currentIndex;
       final getQueue = queue.value;
-
-      if(index==null||getQueue.isEmpty)
+      
+      if(index == ( null)
+      || getQueue.isEmpty 
+      || player.processingState==ProcessingState.idle) ///////
         return;
 
       if(player.shuffleModeEnabled)   {
         index = player.shuffleIndices!.indexOf(index); ///////
-
       }
 
       final oldMediaItem = ( getQueue [
@@ -125,7 +127,6 @@ class AudioServiceHandler
 
       if(player.shuffleModeEnabled)   {
         index = player.shuffleIndices!.indexOf(index); ///////
-
       }
       mediaItem.add(playlist[index]);
     });
@@ -350,7 +351,6 @@ class AudioServiceHandler
     // */
 
     await player.seek(position);
-    await player.play();
   }
 
   @override

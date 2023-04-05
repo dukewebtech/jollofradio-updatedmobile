@@ -1,4 +1,5 @@
 import 'package:jollofradio/config/models/Episode.dart';
+import 'package:jollofradio/config/models/Podcast.dart';
 import 'package:jollofradio/config/services/api.dart';
 import 'package:jollofradio/config/strings/Endpoints.dart';
 
@@ -35,9 +36,9 @@ class StreamController {
         streams['likes'].add(Episode.fromJson(episode));
 
       }
-      for(var episode in data['release']){
+      for(var podcast in data['release']){
 
-        streams['release'].add(Episode.fromJson(episode));
+        streams['release'].add(Podcast.fromJson(podcast));
 
       }
     // }
@@ -83,15 +84,13 @@ class StreamController {
         streams['likes'].add(Episode.fromJson(episode));
 
       }
-      for(var episode in data['release']){
+      for(var podcast in data['release']){
 
-        streams['release'].add(Episode.fromJson(episode));
+        streams['release'].add(Podcast.fromJson(podcast));
 
       }
     }
-
     return streams;
-
   }
 
   static Future<bool> create(Map data) async {
@@ -107,7 +106,6 @@ class StreamController {
     }
 
     return false;
-
   }
 
   static Future<bool> engage(Map data) async {
@@ -122,9 +120,7 @@ class StreamController {
 
       return true;
     }
-
     return false;
-
   }
 
   static Future<bool> delete(Map data) async {
@@ -138,9 +134,7 @@ class StreamController {
 
       return true;
     }
-
     return false;
-
   }
 
 }

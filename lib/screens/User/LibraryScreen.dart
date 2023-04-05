@@ -104,6 +104,7 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   void callback(resource, [Map? data]){
     data = data ?? {};
+    getSubscription();
 
     if(data.containsKey ('unliked')){
       subscriptions
@@ -115,9 +116,8 @@ class _LibraryScreenState extends State<LibraryScreen>
       ['podcasts'].removeWhere((e) => e.id == ( resource.id ));
     }
 
-    setState(() {
-      //
-    });
+    setState(() {});
+    
   }
 
   @override

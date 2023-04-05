@@ -24,6 +24,7 @@ class _UserLayoutState extends State<UserLayout>
   int currentPage = 0 ;
   late TabController tabController = TabController(length: 5, vsync: this);
   late Timer socket;
+  CacheStream cacheManager = CacheStream();
 
   void controller( int page ) {
     setState(() {
@@ -45,20 +46,19 @@ class _UserLayoutState extends State<UserLayout>
       Map data = {
         'userType': 'user'
       };
-
       await AuthController.service(data)
       .then((data) async {
         if(data.isEmpty) return;
 
         var user = data['user'];
-        var streams = data['streams'];
-        var category = data['category'];
-
         Provider.of<UserProvider>(context, listen: false).login(  user  );
-        CacheStream().mount({
+        
+        /*
+        cacheManager.unmount();
+        cacheManager.mount({
           'streams': {
             'data': () async {
-              return streams;
+              return data['streams'];
             },
             'rules': (data){
               return data['trending'].isNotEmpty;
@@ -66,16 +66,16 @@ class _UserLayoutState extends State<UserLayout>
           },
           'category': {
             'data': () async {
-              return category;
+              return data['category'];
             },
             'rules': (data) => data.isNotEmpty,
           }
         }, Duration(
           seconds: 20
         ));
+        */
       });
     });
-
     super.initState();
   }
 

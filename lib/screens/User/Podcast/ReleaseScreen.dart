@@ -2,33 +2,31 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/User.dart';
-import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
-import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/config/strings/Message.dart';
-import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
+import 'package:jollofradio/screens/Layouts/Templates/Playlist.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:provider/provider.dart';
 
-class TrendingScreen extends StatefulWidget {
-  final List episodes;
-  const TrendingScreen({super.key, required this.episodes});
+class ReleaseScreen extends StatefulWidget {
+  final List podcasts;
+  const ReleaseScreen({super.key, required this.podcasts});
 
   @override
-  State<TrendingScreen> createState() => _TrendingScreenState();
+  State<ReleaseScreen> createState() => _ReleaseScreenState();
 }
 
-class _TrendingScreenState extends State<TrendingScreen> {
+class _ReleaseScreenState extends State<ReleaseScreen> {
   late User user;
   bool isLoading = false;
-  List episodes = [];
+  List podcasts = [];
 
   @override
   void initState() {
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
 
-    episodes = widget.episodes;
+    podcasts = widget.podcasts;
     
     super.initState();
   }
@@ -72,7 +70,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
                 else ...[
                   Column(
                     children: [
-                      if(episodes.isEmpty)
+                      if(podcasts.isEmpty)
                         Container(
                           height: 300,
                           margin: EdgeInsets.only(
@@ -112,26 +110,14 @@ class _TrendingScreenState extends State<TrendingScreen> {
                             ),
                             physics: 
                             ScrollPhysics(parent: NeverScrollableScrollPhysics(  )),
-                            itemCount: episodes.length,
+                            itemCount: podcasts.length,
                             itemBuilder: (context, index){
-                              return GestureDetector(
-                                onTap: () {
-                                  RouteGenerator.goto(TRACK_PLAYER, {
-                                    "track": episodes[index],
-                                    "channel": "podcast"
-                                  });
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.only(
-                                    bottom: 10
-                                  ),
-                                  child: AbsorbPointer(
-                                    child: PodcastTemplate(
-                                      type: 'grid',
-                                      compact: true,
-                                      episode: episodes[index] ///////////////////////
-                                    ),
-                                  ),
+                              return Container(
+                                margin: EdgeInsets.only(
+                                  bottom: 10
+                                ),
+                                child: PlaylistTemplate(
+                                  playlist: podcasts[index] ///////////////////////
                                 ),
                               );
                             }

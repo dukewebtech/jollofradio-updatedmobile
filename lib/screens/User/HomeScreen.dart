@@ -14,6 +14,7 @@ import 'package:jollofradio/screens/Layouts/Shimmers/Category.dart';
 import 'package:jollofradio/screens/Layouts/Shimmers/Playlist.dart';
 import 'package:jollofradio/screens/Layouts/Shimmers/Podcast.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Category.dart';
+import 'package:jollofradio/screens/Layouts/Templates/Playlist.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
 import 'package:jollofradio/screens/User/LibraryScreen.dart';
 import 'package:jollofradio/utils/date.dart';
@@ -34,10 +35,9 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late User user;
   late Map streams;
-  late Future categories;
   bool isLoading = true;
   bool refresh = false;
-  
+
   List recently = PodcastFactory().get(0, 3);
   List podcasts = PodcastFactory().get(0, 3);
   List userLikes = PodcastFactory().get(3, 3);
@@ -50,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //cache manager
     (() async {
-      /*
+      // /*
       await cacheManager.mount({
         'streams': {
           'data': () async {
@@ -67,15 +67,13 @@ class _HomeScreenState extends State<HomeScreen> {
           'rules': (data) => data.isNotEmpty,
         }
       }, Duration(
-        seconds: 60
+        seconds: 20
       ));
-      */
+      // */
 
       fetchStreams() ;
 
     }());
-
-    categories = (category());
 
     super.initState();
   }
@@ -87,6 +85,10 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchStreams() async {
+    setState(() {
+      isLoading = true;
+    });
+
     final streams = await cacheManager.stream( ////////////////
       'streams', 
       refresh: refresh,
@@ -137,13 +139,11 @@ class _HomeScreenState extends State<HomeScreen> {
     return await CategoryController.index().then((categories) {
       //prefetch instance
       List cat = categories.map((e) => e.toJson()).toList(  ) ;
-
       Storage.set(
         'category', 
         jsonEncode (cat)
       );
       this.categories = categories;
-
       return categories;
     });
     */
@@ -326,7 +326,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       GestureDetector(
                         onTap: () async {
                           RouteGenerator.goto(CATEGORY, {
-                            "categories": await categories
+                            "categories": await category()
                           });
                         },
                         child: Labels.secondary(
@@ -343,7 +343,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: /**/CrossAxisAlignment.start,
                       children: <Widget>[
                         FutureBuilder(
-                          future: categories,
+                          future: category(),
                           builder: (context, snapshot) {
                             List<Category>? categories = snapshot.data;
                             if(!snapshot.hasData || 
@@ -382,7 +382,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       GestureDetector(
                         onTap: () {
                           RouteGenerator.goto(TRENDING, {
-                            "podcasts": streams['trending'] ?? []
+                            "episodes": streams['trending'] ?? []
                           });
                         },
                         child: Labels.secondary(
@@ -429,7 +429,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          RouteGenerator.goto(TRENDING, {
+                          RouteGenerator.goto(NEW_RELEASE, {
                             "podcasts": streams['release'] ?? []
                           });
                         },
@@ -455,9 +455,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         else ...[
                           ...Factory(streams['release'])
                           .get(0, 5).map(
-                                    (episode) => /** */ PodcastTemplate (
-                            type: 'grid',
-                            episode: episode,
+                                    (podcast) => /** */ PlaylistTemplate (
+                            playlist: podcast,
+                            compact: true
                           ))
                         ]
                       ],

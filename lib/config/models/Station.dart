@@ -36,7 +36,7 @@ class Station {
         link: json['link'],
         country: json['country'],
         state: json['state'],
-        handles: json['handles'],
+        handles: json['handles'] ?? {},
         type: json['type'],
         active: json['active'] == 1,
         createdAt: json['created_at'],        
@@ -56,4 +56,10 @@ class Station {
       'active': active,
       'created_at': createdAt,
     };
+
+    String? social(String handle) => /* %%% */ handles!['handle'];
+
+    String signal() => frequency.toString() + ' FM'; //full signal
+    
+    
 }

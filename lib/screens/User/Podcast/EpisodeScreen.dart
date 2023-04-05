@@ -1,15 +1,20 @@
+import 'dart:ui';
+
 import 'package:animate_do/animate_do.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:confetti/confetti.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Podcast.dart';
+import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/User/PlaylistController.dart';
 import 'package:jollofradio/config/services/controllers/User/SubscriptionController.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
+import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Shimmers/Podcast.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
@@ -269,13 +274,33 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                             ),
                           ),
                           SizedBox(height: 10),
-                          Text(
-                            "by ${playlist.creator.username()}", 
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Color(0XFFBBBBBB)
-                            ),
-                          ),
+                          Text.rich(
+                            TextSpan(
+                              text: "by ",
+                              children: <InlineSpan>[
+                                TextSpan(
+                                  text: playlist.creator.username(),
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColor.secondary.withOpacity(
+                                      0.8
+                                    )
+                                  ),
+                                  recognizer: 
+                                  TapGestureRecognizer()
+                                  ..onTap = (){
+                                    RouteGenerator.goto(CREATOR_PROFILE, {
+                                      "creator": playlist.creator,
+                                    }); 
+                                  },
+                                )
+                              ],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Color(0XFFBBBBBB)
+                              ),
+                            )
+                          )
                         ],
                       ),
                     ),

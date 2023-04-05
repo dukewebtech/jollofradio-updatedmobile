@@ -17,6 +17,7 @@ import 'package:jollofradio/screens/User/Podcast/CreatorScreen.dart';
 import 'package:jollofradio/screens/User/Podcast/EpisodeScreen.dart';
 import 'package:jollofradio/screens/User/Podcast/PlayerScreen.dart';
 import 'package:jollofradio/screens/User/Podcast/PlaylistScreen.dart' as track;
+import 'package:jollofradio/screens/User/Podcast/ReleaseScreen.dart';
 import 'package:jollofradio/screens/User/Podcast/TrendingScreen.dart';
 import 'package:jollofradio/screens/User/RadioScreen.dart';
 import 'package:jollofradio/screens/User/Search/PlaylistResult.dart';
@@ -24,6 +25,7 @@ import 'package:jollofradio/screens/User/Search/PodcastResult.dart';
 import 'package:jollofradio/screens/User/Search/ResultScreen.dart';
 import 'package:jollofradio/screens/User/SearchScreen.dart';
 import 'package:jollofradio/screens/User/Station/StationScreen.dart';
+import 'package:jollofradio/screens/User/Station/StreamScreen.dart';
 import 'package:jollofradio/screens/Welcome/SplashScreen.dart';
 import 'package:jollofradio/screens/Error/ErrorScreen.dart';
 import 'package:jollofradio/screens/Welcome/StartupScreen.dart';
@@ -108,6 +110,11 @@ class ScreenProvider {
 
       case TRENDING:
         return MaterialPageRoute(builder: (context) => TrendingScreen(
+          episodes: data['episodes'],
+        ));
+
+      case NEW_RELEASE:
+        return MaterialPageRoute(builder: (context) => ReleaseScreen(
           podcasts: data['podcasts'],
         ));
 
@@ -152,6 +159,12 @@ class ScreenProvider {
           channel: data['channel'],
         ));
 
+      case RADIO_PLAYER:
+        return MaterialPageRoute(builder: (context) => StreamScreen(
+          radio: data['radio'],
+          channel: data['channel'],
+        ));
+
       case SETTINGS:
         return MaterialPageRoute(builder: (context) => SettingScreen());
 
@@ -162,7 +175,6 @@ class ScreenProvider {
 
 
       // Creators
-      //
       //
 
       case WEBVIEW:

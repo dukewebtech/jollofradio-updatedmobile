@@ -1,35 +1,35 @@
 import 'dart:async';
-import 'dart:math';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:jollofradio/config/services/controllers/User/StreamController.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:jollofradio/config/models/Station.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/utils/colors.dart';
-import 'package:jollofradio/utils/helper.dart';
-import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:url_launcher/url_launcher_string.dart';
 
-class PlayerScreen extends StatefulWidget {
-  final Episode track;
+class StreamScreen extends StatefulWidget {
+  final Station radio;
   final String channel;
 
-  const PlayerScreen({
+  const StreamScreen({
     super.key,
-    required this.track,
+    required this.radio,
     required this.channel
   });
 
   @override
-  State<PlayerScreen> createState() => _PlayerScreenState();
+  State<StreamScreen> createState() => _StreamScreenState();
 }
 
-class _PlayerScreenState extends State<PlayerScreen> 
+class _StreamScreenState extends State<StreamScreen> 
 with SingleTickerProviderStateMixin {
   late AnimationController _controller;
   ColorTween? _colorTween;
@@ -37,15 +37,13 @@ with SingleTickerProviderStateMixin {
   Color defaultColor = AppColor.primary;
 
   AudioServiceHandler player = AudioServiceHandler();
-  late Episode track;
+  late Station radio;
   late String channel;
-  bool _fav = false;
 
   @override
   void initState() {
     channel = widget.channel;       ///////////////////////
-    track = widget.track;
-    _fav = track.liked;
+    radio = widget.radio;
 
     _controller = AnimationController(
       duration: Duration(seconds: 2),
@@ -57,13 +55,13 @@ with SingleTickerProviderStateMixin {
       getEffects()
     });
 
-    initializeAudio();
+    initializeRadio();
 
     super.initState();
   }
 
   Future<void> getEffects() async {
-    var logo = track.logo;
+    var logo = radio.logo;
     Colorly().fromNetwork().get(logo).then((colors) async {
       _colorTween = ColorTween(
         begin: defaultColor, 
@@ -84,20 +82,17 @@ with SingleTickerProviderStateMixin {
     });////////////////////////////////////////////////////
   }
 
-  Future initializeAudio() async {
+  Future initializeRadio() async {
     MediaItem? currentTrack = player.currentTrack(); //////
-    var podcast = "";
-    bool isPodcast = 
-    currentTrack?.extras?.containsKey('episode') ?? false ;
+    var station = "";
+    bool isRadio = 
+    currentTrack?.extras?.containsKey('station') ?? false ;
 
-    if(isPodcast){
-      podcast = currentTrack?.extras?['episode']['podcast'];
+    if(isRadio){
+      station = currentTrack?.extras? ['station']['title'];
     }
-    final playlist = player.getPlaylist( ) ;
-    
-    if(podcast != track.podcast || podcast == track.podcast 
-    && playlist.length == 1 
-    && currentTrack?.title != track.title) {
+        
+    if(!isRadio || station != radio.title) {
       //fire loading
       /*
       setState(() => isLoading = true) ; // inform UI state
@@ -106,119 +101,34 @@ with SingleTickerProviderStateMixin {
       //mount playlist      
       await player.setPlaylist([
         MediaItem(
-          id: track.id.toString(),
-          title: track.title,
-          album: track.podcast,
-          artist: track.creator.username(),
-          artUri: Uri.parse(track.logo),
+          id: radio.id.toString(),
+          title: radio.title,
+          album: radio.signal(),
+          artist: radio.signal(),
+          artUri: Uri.parse(radio.logo),
           duration: Duration(),
           extras: {
-            "url": track.source,
-            "episode": track.toJson()
+            "url": radio.link,
+            "station": radio.toJson()
           }
         )
       ]);
 
       player.play();
-
-      //track stream
-      StreamController.create ({ 'episode_id': track.id });
-      //
-    }
-
-    if(podcast == track.podcast) {
-      if(currentTrack?.title == track.title) return false ;
-      if(playlist.length > 1){
-        int index = playlist.
-        indexWhere((media)=>media.id==track.id.toString());
-
-        if(index >= 0){
-          player.skipToQueueItem(
-            index
-          );
-        }
-      }
     }
 
     player.streams().listen((dynamic event) {
       final MediaItem? currentTrack = player.currentTrack();
       if(mounted) {
         setState(() {
-          track = Episode.fromJson(
-            currentTrack?.extras!['episode']
+          radio = Station.fromJson(
+            currentTrack?.extras!['station']
           );     
         });
       }
     });
     
     ///////////////////////////////////////////////////////
-  }
-
-  Future skipTrack(mode) async {
-    late MediaItem media;
-
-    if(mode == 'prev'){
-      if(!canSkip('prev')) 
-        return;
-
-      media = player.previousTrack();
-      player.skipToPrevious();
-    }
-    if(mode == 'next'){
-      if(!canSkip('next')) 
-        return;
-
-      media = player.nextTrack();
-      player.skipToNext();
-    }
-
-    setState(() {
-      track = Episode.fromJson(
-        media.extras!['episode']
-      );     
-    });
-  }
-
-  bool canSkip(String mode) {
-    final playlist = player.getPlaylist(); //total playlist
-    String id = track.id.toString();
-    int first = 0;
-    int last = playlist.length - 1 ;
-    
-    if(mode == 'prev') {
-      if(!playlist.asMap(  ).containsKey(
-        first
-      ))
-        return false;
-
-      return ( playlist[first] != player.currentTrack( ) );
-    } 
-    if(mode == 'next') {
-      if(!playlist.asMap(  ).containsKey(
-        last
-      ))
-        return false;
-
-      return ( playlist[last ] != player.currentTrack( ) );
-    }
-    return false;
-  }
-
-  Future<void> _doSubscribe() async {
-    bool liked = !_fav;
-    Map data = {
-      'episode_id': track.id
-    };
-
-    setState(() {
-      _fav = !_fav;
-    });
-
-    await StreamController.engage(data).then((status)async{
-      if(liked && !status){
-        setState(() => _fav = !_fav);
-      }
-    });    
   }
 
   @override
@@ -276,7 +186,7 @@ with SingleTickerProviderStateMixin {
                             alignment: Alignment.center,
                             children: [
                               CachedNetworkImage(
-                                imageUrl: track.logo,
+                                imageUrl: radio.logo,
                                 placeholder: (context, url) {
                                   return Center(
                                     child: SizedBox(
@@ -318,14 +228,14 @@ with SingleTickerProviderStateMixin {
                                             maxHeight: 60
                                           ),
                                           child: Labels.primary(
-                                            track.title,
+                                            radio.title,
                                             fontSize: 20,
                                             fontWeight: FontWeight.bold,
                                             maxLines: 2
                                           ),
                                         ),
                                         Labels.secondary(
-                                          track.podcast
+                                          radio.signal()
                                         ),
                                       ],
                                     ),
@@ -341,50 +251,22 @@ with SingleTickerProviderStateMixin {
                                           trackShape: CustomTrackShape(),
                                           activeTrackColor: AppColor.secondary,
                                           inactiveTrackColor: Colors.white24,
+                                          thumbShape: SliderComponentShape.noThumb,
                                         ),
                                         child: Slider(  
-                                          min: 0,  
-                                          max: 
-                                          streams['duration'].inMilliseconds.toDouble(),  
-                                          value: min(
-                                            streams[
-                                              'position'
-                                            ].inMilliseconds.toDouble(), 
-                                            streams[
-                                              'duration'
-                                            ].inMilliseconds.toDouble()
-                                          ),
+                                          min: 0,
+                                          max: 100,
+                                          value: 0,
                                           thumbColor: Colors.white,
-                                          onChanged: (value) async {
-                                            await player.seek(
+                                          onChanged: (value) {
+                                            player.seek(
                                               Duration(  milliseconds: value.round()  )
                                             ); 
-                                            player.play();
                                           },  
                                         )
                                       ),
                                     ],
                                   ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment: 
-                                       MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Text(
-                                        formatTime(
-                                          streams['position']
-                                        ), 
-                                        style: TextStyle(fontSize: 12)
-                                      ),
-                                      Text(
-                                        formatTime(
-                                          streams['duration']
-                                        ), 
-                                        style: TextStyle(fontSize: 12)
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 50),
                                 ],
                               );
                             }
@@ -396,70 +278,48 @@ with SingleTickerProviderStateMixin {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
-                      StreamBuilder<Map>(
-                        stream: player.streams(),
-                        builder: (context, snapshot) {
-                          final stream = snapshot.data?['loopMode'] 
-                          ?? LoopMode.off;
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(), //edge patch
+                        tooltip: "Twitter",
+                        onPressed: () async {
+                          final twitter = radio.social ( 'twitter' );
 
-                          final repeatMode = {
-                            LoopMode.off: {
-                              "task" : AudioServiceRepeatMode.all,
-                              "label": "Repeat All"
-                            },
-                            LoopMode.all: {
-                              "task" : AudioServiceRepeatMode.one,
-                              "label": "Repeat One"
-                            },
-                            LoopMode.one: {
-                              "task" : AudioServiceRepeatMode.none,
-                              "label": "Repeat Off"
-                            },
-                          };
+                          if(twitter == null)
+                            return;
 
-                          final repeatIcon = {
-                            LoopMode.all: Icon(
-                              Iconsax.repeat, color: Colors.white
-                            ),
-                            LoopMode.one: Icon(
-                              Icons.repeat_one, color: Colors.white
-                            ),
-                            LoopMode.off: Icon(
-                              Iconsax.repeat, color: Colors.white54
-                            ),
-                          }[stream]!;
-
-                          return IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(), //edge patch
-                            tooltip: "Repeat",
-                            onPressed: () {
-                              player.setRepeatMode(
-                                repeatMode[stream]!['task']! 
-                                as AudioServiceRepeatMode 
-                              );
-                              Toaster.info(
-                                repeatMode[stream]!['label'].toString()
-                              );
-                            },
-                            icon: repeatIcon,
+                          await launchUrl(
+                            Uri.parse(twitter),
+                            mode: 
+                            LaunchMode.externalNonBrowserApplication
                           );
-                        }
+                        },
+                        icon: Icon(
+                          FontAwesomeIcons.twitter, 
+                          color: radio.social('twitter') == ( null )
+                          ? Colors.grey : Colors.white
+                        ),
                       ),
-                      StreamBuilder<Map>(
-                        stream: player.streams(),
-                        builder: (context, snapshot) {
-                          return IconButton(
-                            tooltip: "Previous Track",
-                            onPressed: () async => await skipTrack('prev'),
-                            icon: Icon(
-                              Iconsax.backward,
-                              color: 
-                              canSkip('prev') ? Colors.white : Colors.grey,
-                            ),
-                          );
-                        }
-                      ),
+                      // IconButton(
+                      //   tooltip: "Website",
+                      //   onPressed: () async {
+                      //     if(radio.website == null)
+                      //       return;
+
+                      //     if(await canLaunchUrlString(radio.website!)){
+                      //       await launchUrl(
+                      //         Uri.parse(radio.website!),
+                      //         mode: 
+                      //         LaunchMode.externalNonBrowserApplication
+                      //       );
+                      //     }
+                      //   },
+                      //   icon: Icon(
+                      //     Icons.link, 
+                      //     color: radio.website == null 
+                      //     ? Colors.grey : Colors.white
+                      //   ),
+                      // ),
                       Container(
                         width: 50,
                         height: 50,
@@ -513,62 +373,30 @@ with SingleTickerProviderStateMixin {
                           },
                         ),
                       ),
-                      StreamBuilder<Map>(
-                        stream: player.streams(),
-                        builder: (context, snapshot) {
-                          return IconButton(
-                            tooltip: "Forward Track",
-                            onPressed: () async => await skipTrack('next'),
-                            icon: Icon(
-                              Iconsax.forward,
-                              color: 
-                              canSkip('next') ? Colors.white : Colors.grey,
-                            ),
+                      // IconButton(
+                      //   tooltip: "Favorite",
+                      //   onPressed: () {
+                      //     //
+
+                      //   },
+                      //   icon: Icon(
+                      //     Iconsax.heart5,
+                      //     color: Colors.white
+                      //   ),
+                      // ),
+                      IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: BoxConstraints(), //edge patch
+                        tooltip: "Share",
+                        onPressed: () async {
+                          await Share.share(
+                            "Listen to ${ radio.title } on Jollof Radio"
                           );
-                        }
-                      ),
-                      StreamBuilder<Map>(
-                        stream: player.streams(),
-                        builder: (context, snapshot) {
-                          final stream = snapshot.data?['shuffleMode'] 
-                          ?? false;
-
-                          final shuffleMode = {
-                            true: {
-                              "task" : AudioServiceShuffleMode.none,
-                              "label": "Shuffle Off"
-                            },
-                            false: {
-                              "task" : AudioServiceShuffleMode.all,
-                              "label": "Shuffle On"
-                            },
-                          };
-
-                          final shuffleIcon = {
-                            true: Icon(
-                              Iconsax.shuffle, color: Colors.white
-                            ),
-                            false: Icon(
-                              Iconsax.shuffle, color: Colors.grey
-                            ),
-                          }[stream]!;
-
-                          return IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(), //edge patch
-                            tooltip: "Shuffle",
-                            onPressed: () {
-                              player.setShuffleMode(
-                                shuffleMode[stream]!['task']! 
-                                as AudioServiceShuffleMode 
-                              );
-                              Toaster.info(
-                                shuffleMode[stream]!['label'].toString()
-                              );
-                            },
-                            icon: shuffleIcon,
-                          );
-                        }
+                        },
+                        icon: Icon(
+                          Icons.share, 
+                          color: Colors.white
+                        ),
                       ),
                     ],
                   ),

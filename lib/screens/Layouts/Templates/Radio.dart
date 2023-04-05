@@ -32,8 +32,8 @@ class RadioTemplate extends StatelessWidget {
         borderRadius: BorderRadius.circular(5)
       ),
       child: GestureDetector(
-        onTap: () => RouteGenerator.goto(TRACK_PLAYER, {
-          "track": station,
+        onTap: () => RouteGenerator.goto(RADIO_PLAYER, {
+          "radio": station,
           "channel": "station"
         }),
         child: Row(

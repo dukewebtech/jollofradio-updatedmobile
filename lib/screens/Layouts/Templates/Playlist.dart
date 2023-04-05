@@ -10,11 +10,13 @@ import 'package:jollofradio/widget/Labels.dart';
 class PlaylistTemplate extends StatefulWidget {
   final dynamic playlist;
   final Function(dynamic v)? callback;
+  final bool compact;
 
   const PlaylistTemplate({
     super.key,
     required this.playlist,
-    this.callback
+    this.callback,
+    this.compact = false
   });
 
   @override
@@ -77,6 +79,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
     bool isPodcast = false;
+    bool compact = widget.compact;
 
     try {
       if(widget.playlist.collection == null){
@@ -84,6 +87,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
       }
     } catch(e){
       isPodcast = true;
+      
     }
       
     return GestureDetector(
@@ -98,9 +102,15 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
         RouteGenerator.goto(PODCAST, {
           "playlist": widget.playlist
         });
+
       },
       child: Container(
-        margin: EdgeInsets.only(bottom: 10), //edge inset
+        width: compact ? 140 : null,
+        height: compact ? 170 : null,
+        margin: EdgeInsets.only(
+          bottom: compact ? 0 : 10,
+          right: compact ? 10 : 0
+        ),
         padding: EdgeInsets.fromLTRB(5,5,5,0), //edge inset
         alignment: Alignment.topCenter,
         decoration: BoxDecoration(
@@ -112,8 +122,8 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              width: double.infinity,
-              height: 130,
+              width: compact ? 140 : double.infinity,
+              height: compact ? 120 : 130,
               margin: EdgeInsets.only(bottom: 5),
               decoration: BoxDecoration(
                 color: AppColor.primary,
@@ -124,7 +134,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                 children: <Widget>[
                   CachedNetworkImage(
                     width: double.infinity,
-                    height: 130,
+                    height: compact ? 120 : 130,
                     imageUrl: widget.playlist.logo,
                     placeholder: (context, url) {
                       return Center(

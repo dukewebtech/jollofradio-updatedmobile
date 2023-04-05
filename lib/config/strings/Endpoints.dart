@@ -10,7 +10,7 @@ String endpoint(String url, [
 */
 
 String endpoint(String url, [
-  String status = "", String env = 'TEST']){ //////////////
+  String status = "", String env = 'LIVE']){ //////////////
   Map<String, dynamic> api = {
     "TEST": "http://10.0.2.2:8000/api",
     "LIVE": "https://v2.jollofradio.com/api"
@@ -41,6 +41,7 @@ const CREATOR_LOGOUT_ROUTE = '/creator/logout';
 const CREATOR_NOTIFICATION_ROUTE = '/creator/notification';
 
 //SERVICE
+const CREATOR_ROUTE = '/services/creators';
 const CATEGORY_ROUTE = '/services/category';
 const SEARCH_ROUTE = '/services/search';
 const INTEREST_ROUTE = '/services/interests';
