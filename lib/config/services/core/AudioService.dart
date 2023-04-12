@@ -148,10 +148,12 @@ class AudioServiceHandler
     final AudioSessionHandler session = AudioSessionHandler();
     session.start();
 
+    //mount up just audio
     player = AudioPlayer(
       userAgent: meta['userAgent'] ?? "Audio Player (linux);",
     );
 
+    //mount audio service
     audioHandler = await AudioService.init(
       builder: () => AudioServiceHandler(listen: true),
       config: AudioServiceConfig(
@@ -162,6 +164,10 @@ class AudioServiceHandler
         androidNotificationIcon: "drawable/ic_notification"
       ),
     );
+
+    //initial repeat mode
+    audioHandler.setRepeatMode(  AudioServiceRepeatMode.all );
+
   }
 
   void dispose() async {
@@ -238,12 +244,10 @@ class AudioServiceHandler
   MediaItem? currentTrack() {
     int? index = player.currentIndex;
     if(index != null){
-
       final MediaItem track = audioHandler.queue.value[index];
-
       return track;
-
     }
+    
     return null;
   }
 
@@ -273,7 +277,7 @@ class AudioServiceHandler
       if((playlist.asMap().containsKey(seek) == true)==true){
 
         track = playlist[seek];
-        
+
       }
     }
     return track;
@@ -302,7 +306,6 @@ class AudioServiceHandler
   @override
   Future<void> play() async {
     await player.play();
-
     /*
     playbackState.add(playbackState.value.copyWith( //////////
       playing: true,
@@ -317,7 +320,6 @@ class AudioServiceHandler
   @override
   Future<void> pause() async {
     await player.pause();
-
     /*
     playbackState.add(playbackState.value.copyWith( //////////
       playing: false,
@@ -332,7 +334,6 @@ class AudioServiceHandler
   @override
   Future<void> stop() async {
     await player.stop();
-
     /*
     playbackState.add(playbackState.value.copyWith( //////////
       playing: false,
@@ -349,7 +350,6 @@ class AudioServiceHandler
       processingState: AudioProcessingState.loading,
     ));
     // */
-
     await player.seek(position);
   }
 

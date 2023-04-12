@@ -155,20 +155,64 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
               ),
               SizedBox(height: 10),
               Labels.primary("Password"),
-              Input.primary(
-                "",
-                controller: password,
-                password: true,
-                // trailingIcon: !showPassword ? Icons.visibility : 
-                // Icons.visibility_off
+              SizedBox(
+                child: Stack(
+                  children: [
+                    Input.primary(
+                      "",
+                      controller: password,
+                      password: !showPassword,
+                      // trailingIcon: Icons.visibility
+                    ),
+                    Positioned(
+                      top: 18,
+                      right: 16,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            showPassword = !showPassword;
+                          });
+                        },
+                        child: Icon(!showPassword ? 
+                          Icons.visibility_off : Icons.visibility,
+                          size: 15,
+                          color: !showPassword ? 
+                          Colors.white24 : Colors.white,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
               Labels.primary("Confirm Password"),
-              Input.primary(
-                "",
-                controller: confirmPassword,
-                password: true,
-                // trailingIcon: !showPassword ? Icons.visibility : 
-                // Icons.visibility_off
+              SizedBox(
+                child: Stack(
+                  children: [
+                    Input.primary(
+                      "",
+                      controller: confirmPassword,
+                      password: !showPassword,
+                      // trailingIcon: Icons.visibility
+                    ),
+                    Positioned(
+                      top: 18,
+                      right: 16,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            showPassword = !showPassword;
+                          });
+                        },
+                        child: Icon(!showPassword ? 
+                          Icons.visibility_off : Icons.visibility,
+                          size: 15,
+                          color: !showPassword ? 
+                          Colors.white24 : Colors.white,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

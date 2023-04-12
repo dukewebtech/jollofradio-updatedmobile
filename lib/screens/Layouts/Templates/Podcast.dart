@@ -332,7 +332,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                 height: widget.compact ? 130 : 120,
                 margin: EdgeInsets.only(bottom: 5),
                 decoration: BoxDecoration(
-                  color: Color(0XFF0D1925),
+                  color: AppColor.primary,
                   borderRadius: BorderRadius.circular(5)
                 ),
                 clipBehavior: Clip.hardEdge,

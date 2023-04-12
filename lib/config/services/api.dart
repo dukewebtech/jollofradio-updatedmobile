@@ -57,7 +57,7 @@ class api {
 
     try {
       var response = await client.post(url, //send request
-        body: json.encode(data ?? '{}'), 
+        body: json.encode(data ?? {}), 
         headers: {
           "Content-Type": "application/json",
           "Authorization": auth ? 'Bearer $token' : 'XXX',
@@ -93,7 +93,7 @@ class api {
 
     try {
       var response = await client.put(url, //send request
-        body: json.encode(data ?? '{}'), 
+        body: json.encode(data ?? {}), 
         headers: {
           "Content-Type": "application/json",
           "Authorization": auth ? 'Bearer $token' : 'XXX',
@@ -129,7 +129,7 @@ class api {
 
     try {
       var response = await client.delete(url, //send request
-        body: json.encode(data ?? '{}'), 
+        body: json.encode(data ?? {}), 
         headers: {
           "Content-Type": "application/json",
           "Authorization": auth ? 'Bearer $token' : 'XXX',

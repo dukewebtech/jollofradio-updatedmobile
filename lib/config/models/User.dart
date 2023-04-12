@@ -3,7 +3,7 @@ class User {
     final String firstname;
     final String lastname;
     final String email;
-    final String telephone;
+    final String? telephone;
     final String photo;
     final String? country;
     final String? state;
@@ -13,7 +13,7 @@ class User {
     final List interests;
     final List notifications;
     final List playlist;
-    final List settings;
+    final dynamic settings;
     final List subscriptions;
 
     User({
@@ -40,7 +40,7 @@ class User {
         firstname: json['firstname'],
         lastname: json['lastname'],
         email: json['email'],
-        telephone: json['telephone'],
+        telephone: json['telephone'] ?? '',
         photo: json['photo'],
         country: json['country'] ?? '',
         state: json['state'] ?? '',

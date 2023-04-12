@@ -49,8 +49,12 @@ class _CreatorScreenState extends State<CreatorScreen> {
   }
 
   Future<void> init() async {
+    if(creator.episodes != null ){
+      getCreator(); ////////////////////////////////////////////
+    }
+
     if(creator.episodes == null ){
-      final profile = await getCreator(); // trying to get user
+      final profile = await getCreator();  // trying to get user
       if(profile != null){
         setState(() {
           creator = profile;
@@ -64,7 +68,19 @@ class _CreatorScreenState extends State<CreatorScreen> {
     if(creator.episodes != null ){
     for(var podcast in creator.episodes!){
       podcasts.add(
-        Episode.fromJson(podcast)
+        Episode(
+          id: podcast['id'],
+          creator: creator,
+          title: podcast['title'],
+          logo: podcast['logo'],
+          description: podcast['description'],  ///////////////
+          source: podcast['source'],
+          duration: podcast['duration'],
+          streams: podcast['streams'],
+          podcast: podcast['podcast']['title'], ///////////////
+          liked: false,
+          createdAt: podcast['created_at']
+        )
       );
     }
 
@@ -98,7 +114,6 @@ class _CreatorScreenState extends State<CreatorScreen> {
         setState(() {
           isSyncing = false;
         });
-
         return creator;
     });
   }
@@ -117,14 +132,12 @@ class _CreatorScreenState extends State<CreatorScreen> {
       await SubscriptionController.create(data).then((status){
         if(!status){
           setState(() => subscribed = !subscribed);
-          
         }
       });
     } else {    
       await SubscriptionController.delete(data).then((status){
         if(!status){
           // setState(() => _fav = !_fav);
-
         }
       });
     }
@@ -139,7 +152,7 @@ class _CreatorScreenState extends State<CreatorScreen> {
       });
 
     });
-
+    
   }
 
   @override
@@ -191,7 +204,7 @@ class _CreatorScreenState extends State<CreatorScreen> {
                     fit: StackFit.expand,
                     children: [
                       CachedNetworkImage(
-                        imageUrl: creator.photo,
+                        imageUrl: creator.banner,
                         placeholder: (context, url) {
                           return Center(
                             child: SizedBox(
@@ -416,9 +429,10 @@ class _CreatorScreenState extends State<CreatorScreen> {
                         ),
                         SizedBox(height: 10),
                         Text(
-                          creator.about ?? "No description currently ${
+                          creator.about != 
+                          '' ? (creator.about)! : "No description currently ${
                             ""
-                          }available about this creator at the moment.",
+                          }available about this creator at the moment.", /////
                           style: TextStyle(
                             color: Color(0XFFBBBBBB),
                             fontSize: 14

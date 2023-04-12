@@ -1,5 +1,3 @@
-import 'dart:ui';
-
 import 'package:animate_do/animate_do.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -85,10 +83,12 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
   }
 
   Future<void> playPodcast() async {
-    var podcast = currentTrack?.extras?['episode']['podcast'];
-
+    if(playlist.episodes!.isEmpty) 
+      return;
+    
+    var podcast = currentTrack?.extras?['episode']?['podcast'];
     if(podcast != playlist.title){
-      await player.setPlaylist(playlist.episodes.map((item) {
+      await player.setPlaylist(playlist.episodes!.map((item) {
 
         return MediaItem(
           id: item.id.toString(),
@@ -112,7 +112,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
       
       else 
         player.pause();
-      
+
     }
   }
 
@@ -342,7 +342,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                             height: 40,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: playlist.episodes.isEmpty==true ? 
+                              color: playlist.episodes!.isEmpty==true ? 
                               Color(0XFF0D1921) : AppColor.secondary,
                               borderRadius: BorderRadius.circular(100)
                             ),
@@ -355,7 +355,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
 
                                 if(
                                   playing == true && currentTrack?.extras?
-                                  ['episode']['podcast'] != playlist.title) {
+                                  ['episode']?['podcast'] != playlist.title) {
                                     playing = false;
                                     processingState = ProcessingState.ready;
                                 }
@@ -373,7 +373,8 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                       height: 15,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: AppColor.primary,
+                                        color: playlist.episodes!.isEmpty ? 
+                                        AppColor.secondary : AppColor.primary
                                       )
                                     ),
                                   );
@@ -385,12 +386,11 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                   onPressed:()=> playPodcast(),
                                   icon: Icon(
                                     !playing ? Icons.play_arrow : Icons.pause,
-                                    color: playlist.episodes
+                                    color: playlist.episodes!
                                     .isEmpty ? Colors.white : Colors.black,
                                     size: 20,
                                   ),
                                 );
-
                               }
                             )
                           ),
@@ -430,7 +430,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                   Spacer(),
                   if(!isLoading)
                   Labels.secondary(
-                    "${playlist.episodes.length} Episode(s)",
+                    "${playlist.episodes!.length} Episode(s)",
                     margin: EdgeInsets.zero
                   )
                 ],
@@ -445,7 +445,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                       )
                     ]
                     else
-                    if(playlist.episodes.isEmpty)
+                    if(playlist.episodes!.isEmpty)
                       FadeIn(
                         child: Container(
                           width: double.infinity,
@@ -479,7 +479,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                           child: Column(
                             children: [
                               ...playlist
-                                .episodes.map((episode) => PodcastTemplate(
+                                .episodes!.map((episode) => PodcastTemplate(
                                 key: UniqueKey(),
                                 type: 'list',
                                 episode: episode,

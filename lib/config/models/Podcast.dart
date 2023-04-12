@@ -12,7 +12,8 @@ class Podcast {
     final bool approved;
     final bool active;
     final Map category;
-    final List<Episode> episodes;
+    final int episodeCount;
+    final List<Episode>? episodes;
     final String createdAt;
 
     Podcast({
@@ -26,6 +27,7 @@ class Podcast {
       required this.approved,
       required this.active,
       required this.category,
+      required this.episodeCount,
       required this.episodes,
       required this.createdAt,
     });
@@ -43,11 +45,14 @@ class Podcast {
         approved: json['approved'] == 1,
         active: json['active'] == 1,
         category: json['category'],
+        episodeCount: json['item_count'],
 
-        episodes: json['episodes'].map
-        <Episode>((episode) => Episode.fromJson(episode)).toList(),
+        episodes: json['episodes']?.map
+        <Episode>((episode) => Episode.fromJson(episode)).toList()
+        ?? [],
         
         createdAt: json['created_at'],
+        
     );
 
     Map<String, dynamic> toJson() => {
@@ -61,6 +66,7 @@ class Podcast {
       'approved': approved,
       'active': active,
       'category': category,
+      'item_count': episodeCount,
       'episodes': episodes,
       'created_at': createdAt,
     };

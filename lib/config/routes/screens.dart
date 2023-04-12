@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/screens/Auth/AccountScreen.dart';
+import 'package:jollofradio/screens/Layouts/Creator.dart';
 import 'package:jollofradio/screens/Auth/InterestScreen.dart';
 import 'package:jollofradio/screens/Auth/ProfileScreen.dart';
 import 'package:jollofradio/screens/Auth/SettingScreen.dart';
@@ -166,7 +167,9 @@ class ScreenProvider {
         ));
 
       case SETTINGS:
-        return MaterialPageRoute(builder: (context) => SettingScreen());
+        return MaterialPageRoute(builder: (context) => SettingScreen(
+          user: data['user'],
+        ));
 
       case NOTIFICATION:
         return MaterialPageRoute(builder: (context) => NotificationScreen(
@@ -175,7 +178,8 @@ class ScreenProvider {
 
 
       // Creators
-      //
+      case CREATOR_DASHBOARD:
+        return MaterialPageRoute(builder: (context) => CreatorLayout());
 
       case WEBVIEW:
         return MaterialPageRoute(builder: (context) => WebViewScreen(

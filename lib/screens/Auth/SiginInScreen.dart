@@ -1,7 +1,9 @@
 // ignore_for_file: use_build_context_synchronously
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jollofradio/config/routes/router.dart';
+import 'package:jollofradio/config/services/core/NotificationService.dart';
 import 'package:flutter/material.dart';
+import 'package:jollofradio/config/services/auth/GoogleSignin.dart';
 import 'package:jollofradio/config/services/controllers/AuthController.dart';
 import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
@@ -28,12 +30,21 @@ class _SiginInScreenState extends State<SiginInScreen> {
   String userType = "user";
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
+  GoogleSigninAuth googleSignIn = GoogleSigninAuth();
+  String? token;
 
   @override
   void initState() {
     // email.text = 'smithjohn@gmail.com';
     // password.text = 'smith.com';
 
+    Future(() async {
+
+      token = await NotificationService.getToken(); // device ID
+
+    });
+
+    googleSignIn.init();
     super.initState();
   }
 
@@ -41,6 +52,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
     Map data = {
       'email': email.text,
       'password': password.text,
+      'device_id': token,
       'userType': userType
     };
 
@@ -51,20 +63,54 @@ class _SiginInScreenState extends State<SiginInScreen> {
       isLoading = true;
     });
 
-    var signin = await AuthController.signin(data); //send request
+    await AuthController.signin(data).then((dynamic data) async {
+      
+      completeSignin(data);
+
+    });
+  }
+
+  Future<void> _googleSignin() async {
+    final signIn = await googleSignIn.signIn(); // attempt login
+    if(signIn == null){
+      setState(() {
+        isLoading = false;
+      });
+      return Toaster.error('Signin failed!, please try again!');
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    Map data = {
+      'oauth': 'google',
+      'token': signIn.accessToken,
+      'device_id': token
+    };
+
+    Toaster.info("Signing with Google account... please wait.");
+
+    await AuthController.social(data).then((dynamic data) async {
+
+      completeSignin(data);
+
+    });
+  }
+
+  void completeSignin(dynamic result) {
     setState(() {
       isLoading = false;
     });
     
-    if (signin['error']){
+    if (result['error']){
       Toaster.error(
-        signin['message']
+        result['message']
       );
     }
     else{     
-      final Map auth = login(signin)['user'];
-      final String token = login(signin)['token'];
-
+      final Map auth = login(result)['user'];
+      final String token = login(result)['token'];
       Storage.set('token', token);
 
       //Invoking providers
@@ -74,8 +120,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
       final creator = Provider
       .of<CreatorProvider>(context, listen: false ); ////////////
 
-
-      if(userType == 'user'){
+      if(auth['role'] == 'USER'){
         user.login(auth);
         RouteGenerator.goto(DASHBOARD, {  });
         return;
@@ -92,7 +137,6 @@ class _SiginInScreenState extends State<SiginInScreen> {
   void dispose() {
     email.dispose();
     password.dispose();
-    
     super.dispose();
   }
 
@@ -126,11 +170,33 @@ class _SiginInScreenState extends State<SiginInScreen> {
               ),
               SizedBox(height: 10),
               Labels.primary("Password"),
-              Input.primary(
-                "",
-                controller: password,
-                password: true
-                // trailingIcon: Icons.visibility
+              SizedBox(
+                child: Stack(
+                  children: [
+                    Input.primary(
+                      "",
+                      controller: password,
+                      password: !showPassword,
+                    ),
+                    Positioned(
+                      top: 18,
+                      right: 16,
+                      child: GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            showPassword = !showPassword;
+                          });
+                        },
+                        child: Icon(!showPassword ? 
+                          Icons.visibility_off : Icons.visibility,
+                          size: 15,
+                          color: !showPassword ? 
+                          Colors.white24 : Colors.white,
+                        ),
+                      ),
+                    )
+                  ],
+                ),
               ),
               Row(
                 children: <Widget>[
@@ -211,14 +277,23 @@ class _SiginInScreenState extends State<SiginInScreen> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
-                          SvgPicture.asset(
-                            "assets/images/icons/svg/google.svg"
+                          GestureDetector(
+                            onTap: () => _googleSignin(),
+                            child: SvgPicture.asset(
+                              "assets/images/icons/svg/google.svg"
+                            ),
                           ),
-                          SvgPicture.asset(
-                            "assets/images/icons/svg/facebook.svg"
+                          GestureDetector(
+                            onTap: () => {},
+                            child: SvgPicture.asset(
+                              "assets/images/icons/svg/facebook.svg"
+                            ),
                           ),
-                          SvgPicture.asset(
-                            "assets/images/icons/svg/apple.svg"
+                          GestureDetector(
+                            onTap: () => {},
+                            child: SvgPicture.asset(
+                              "assets/images/icons/svg/apple.svg"
+                            ),
                           ),
                         ],
                       ),

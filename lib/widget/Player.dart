@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
@@ -112,14 +113,18 @@ class _PlayerState extends State<Player> {
       }
 
       //color effect
-      if(this.track != track){
-        final color = Colorly ( ).from ('network')
-        .get(track?.logo).then( (color){
+      if(this.track?.title != currentTrack?.title){
+        // print('color effect executed!');
+
+        trackColor = AppColor.primary;
+        Colorly().from('network').get(track?.logo)
+        .then((color){
           trackColor = 
           color?['primary'] ?? AppColor.primary;
         });
       }
-
+            
+      if(mounted)
       setState(() {
         isVisible = state != ProcessingState.idle;
         isPlaying = playState.playing;
@@ -142,9 +147,14 @@ class _PlayerState extends State<Player> {
         }
       };
       
-      Storage.set(
-        'lastTrack', jsonEncode(media)  // saving...
-      );
+      Timer(Duration(seconds: 1), () =>{
+        // print('storage api executed!'),
+        
+        if(isPlaying)
+        Storage.set(
+          'lastTrack', jsonEncode(media) // saving...
+        )
+      });
     });
   }
 
@@ -165,11 +175,11 @@ class _PlayerState extends State<Player> {
               key: UniqueKey(),
               confirmDismiss: (direction) async {
                 await player.stop();
+                await Storage.delete('lastTrack');
                 return true;
               },
               onDismissed: (DismissDirection direction) {
                 // do nothing!
-                
               },
               child: Container(
                 width: MediaQuery.of(context).size.width,
@@ -177,7 +187,7 @@ class _PlayerState extends State<Player> {
                 color: trackColor,
                 child: Container(
                   color: Colors.black.withAlpha(50),
-                  padding: EdgeInsets.fromLTRB(22,5,22,5),
+                  padding: EdgeInsets.fromLTRB(22,5,20,5),
                   child: Row(
                     children: <Widget>[
                       Container(

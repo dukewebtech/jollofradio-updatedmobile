@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/AuthController.dart';
+import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/utils/scope.dart';
+import 'package:jollofradio/config/services/auth/GoogleSignin.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Labels.dart';
 
@@ -22,6 +24,7 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
+  GoogleSigninAuth googleSignIn = GoogleSigninAuth();
   late dynamic user;
   bool creator = false;
   List<Map> menu = [
@@ -61,9 +64,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
   @override
   void initState() {
     user = widget.user;
-
     (() async {
-      creator = ( await isCreator() );
+      var creator = (await isCreator());
+
+      setState(() {
+        this.creator = creator;
+      });
     }());
     
     super.initState();
@@ -147,7 +153,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
                             Text(
-                              user.telephone,
+                              user.telephone!='' ? user.telephone : 'n/a',
                               style: TextStyle(
                                 color: Colors.grey,
                                 fontSize: 12
@@ -159,7 +165,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                               height: 20,
                               decoration: BoxDecoration(
                                 color: AppColor.secondary,
-                                borderRadius: BorderRadius.circular(50)
+                                borderRadius: BorderRadius.circular ( 50 )
                               ),
                               child: Text(
                                 creator ? "CREATOR" : "USER",
@@ -215,7 +221,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: Color(0XFF17252E)
                 ),
                 onPressed: () async {
+
                   await AuthController.logout();
+                  await googleSignIn.signOut ();
+                  audioHandler.stop();
+                  
                 },
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,

@@ -127,15 +127,17 @@ with SingleTickerProviderStateMixin {
     }
 
     if(podcast == track.podcast) {
-      if(currentTrack?.title == track.title) return false ;
-      if(playlist.length > 1){
-        int index = playlist.
-        indexWhere((media)=>media.id==track.id.toString());
-
-        if(index >= 0){
-          player.skipToQueueItem(
-            index
+      if(currentTrack?.title != track.title){
+        if(playlist.length > 1){
+          int index = playlist.indexWhere(
+            (media) => media.id == track.id.toString (   ) 
           );
+
+          if(index >= 0){
+            player.skipToQueueItem(
+              index
+            );
+          }
         }
       }
     }
@@ -152,6 +154,7 @@ with SingleTickerProviderStateMixin {
     });
     
     ///////////////////////////////////////////////////////
+    
   }
 
   Future skipTrack(mode) async {
@@ -301,7 +304,7 @@ with SingleTickerProviderStateMixin {
                             stream: player.streams(),
                             builder: (context, snapshot) {
                               final streams = snapshot.data ?? <String, Duration>{
-                                'duration': Duration(),
+                                'duration': Duration(milliseconds: 1000),
                                 'position': Duration(),
                               };
                               return Column(

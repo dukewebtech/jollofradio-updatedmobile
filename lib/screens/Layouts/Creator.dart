@@ -2,25 +2,25 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/services/controllers/AuthController.dart';
-import 'package:jollofradio/config/services/providers/UserProvider.dart';
-import 'package:jollofradio/screens/User/HomeScreen.dart';
-import 'package:jollofradio/screens/User/LibraryScreen.dart';
-import 'package:jollofradio/screens/User/PlaylistScreen.dart';
-import 'package:jollofradio/screens/User/RadioScreen.dart';
-import 'package:jollofradio/screens/User/SearchScreen.dart';
+import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
+import 'package:jollofradio/screens/Creator/HomeScreen.dart';
+import 'package:jollofradio/screens/Creator/PodcastScreen.dart';
+import 'package:jollofradio/screens/Creator/SubscrScreen.dart';
+import 'package:jollofradio/screens/Creator/AdvertScreen.dart';
+import 'package:jollofradio/screens/Creator/EpisodeScreen.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/widget/Player.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:provider/provider.dart';
 
-class UserLayout extends StatefulWidget {
-  const UserLayout({ Key? key }) : super(key: key);
+class CreatorLayout extends StatefulWidget {
+  const CreatorLayout({ Key? key }) : super(key: key);
 
   @override
-  State<UserLayout> createState() => _UserLayoutState();
+  State<CreatorLayout> createState() => _CreatorLayoutState();
 }
 
-class _UserLayoutState extends State<UserLayout> 
+class _CreatorLayoutState extends State<CreatorLayout> 
                                       with SingleTickerProviderStateMixin {
   int currentPage = 0 ;
   late TabController tabController = TabController(length: 5, vsync: this);
@@ -34,11 +34,11 @@ class _UserLayoutState extends State<UserLayout>
   }
 
   late List<Widget> screens = [
-    HomeScreen(controller),
-    LibraryScreen(controller),
-    SearchScreen(controller),
-    RadioScreen(controller),
-    PlaylistScreen(controller)
+    HomeScreen(),
+    PodcastScreen(),
+    SubscriberScreen(),
+    AdvertScreen(),
+    EpisodeScreen(),
   ];
 
   @override
@@ -48,15 +48,15 @@ class _UserLayoutState extends State<UserLayout>
       if(user == null) return;
 
       Map data = {
-        'userType': 'user'
+        'userType': 'creator'
       };
       await AuthController.service(data)
       .then((data) async {
         if(data.isEmpty) return;
 
         var user = data['user'];
-        Provider.of<UserProvider>(context, listen: false).login(  user  );
-
+        Provider.of<CreatorProvider>(context, listen: false).login( user );
+        
         /*
         cacheManager.unmount();
         cacheManager.mount({
@@ -114,22 +114,22 @@ class _UserLayoutState extends State<UserLayout>
             currentIndex: currentPage,
             items: [
               BottomNavigationBarItem(
-                label: "Discover",
+                label: "Dashboard",
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
-                    Iconsax.home_1
+                    Iconsax.graph
                   ),
                 ),
                 activeIcon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
-                    Iconsax.home_1
+                    Iconsax.graph
                   ),
                 )
               ),
               BottomNavigationBarItem(
-                label: "My Library",
+                label: "Podcasts",
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
@@ -144,47 +144,47 @@ class _UserLayoutState extends State<UserLayout>
                 )
               ),
               BottomNavigationBarItem(
-                label: "Search",
+                label: "Subscribers",
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
-                    Iconsax.search_normal_1
+                    Iconsax.people5
                   ),
                 ),
                 activeIcon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
-                    Iconsax.search_normal_1
+                    Iconsax.people5
                   ),
                 )
               ),
               BottomNavigationBarItem(
-                label: "Radio",
+                label: "Monetization",
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
-                    Iconsax.radio
+                    Iconsax.money
                   ),
                 ),
                 activeIcon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
-                    Iconsax.radio
+                    Iconsax.money
                   ),
                 )
               ),
               BottomNavigationBarItem(
-                label: "Playlist",
+                label: "Episodes",
                 icon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
-                    Iconsax.music_square
+                    Iconsax.menu
                   ),
                 ),
                 activeIcon: Padding(
                   padding: const EdgeInsets.only(bottom: 5),
                   child: Icon(
-                    Iconsax.music_square
+                    Iconsax.menu
                   ),
                 )
               ),

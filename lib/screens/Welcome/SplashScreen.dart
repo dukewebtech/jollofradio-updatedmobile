@@ -128,7 +128,7 @@ class _SplashScreenState extends State<SplashScreen> {
                             )
                           ),
                           onPressed: () {
-                            RouteGenerator.goto(ONBOARDING);
+                            RouteGenerator.goto(SIGNIN);
                           },
                           child: Text("Get Started", style: TextStyle(
                             color: AppColor.primary,

@@ -50,8 +50,8 @@ class CategoryTemplate extends StatelessWidget {
               placeholder: (context, url) {
                 return Center(
                   child: Container(
-                    width: 30,
-                    height: 30,
+                    width: 50,
+                    height: 50,
                     margin: const EdgeInsets.only(top: 20),
                     child: CircularProgressIndicator()
                   )

@@ -1,8 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/container.dart';
-import 'package:flutter/src/widgets/framework.dart';
+import 'package:jollofradio/config/services/controllers/AuthController.dart';
+import 'package:provider/provider.dart';
+import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
+import 'package:jollofradio/config/services/providers/UserProvider.dart';
+import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
+import 'package:jollofradio/utils/scope.dart';
 import 'package:jollofradio/widget/Labels.dart';
 
 class SettingTemplate extends StatefulWidget {
@@ -14,6 +18,47 @@ class SettingTemplate extends StatefulWidget {
 }
 
 class _SettingTemplateState extends State<SettingTemplate> {
+
+  Future<void> _updateSetting(Map option) async {
+    bool creator = await isCreator();
+    
+    setState(() {
+      option['active'] = !option['active'];
+    });
+
+    Map payload = {
+      'userType': (creator) 
+      ? 'creator' : 'user',
+      'settings': {
+        option['name']: option['active']
+      }
+    };
+
+    AuthController.update(payload).then((dynamic response) {
+      if(response['error']){
+        //revert state change
+        setState(() {
+          option['active'] = !option['active'];
+        });
+
+        Toaster.error(response['message']);
+        return;
+      }
+
+      if(!creator){
+
+         Provider.of<UserProvider   >(context, listen: false)
+        .login(response['data']);
+
+      }
+      else {
+
+         Provider.of<CreatorProvider>(context, listen: false)
+        .login(response['data']);
+
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,7 +95,7 @@ class _SettingTemplateState extends State<SettingTemplate> {
                     value: option['active'], 
                     onChanged: (value) {
                       setState(() {
-                        option['active'] = !option['active'];
+                        _updateSetting(option);
                       });
                     },
                   )

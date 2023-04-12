@@ -147,6 +147,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return categories;
     });
     */
+    
   }
 
   bool hasNotifications(){
@@ -174,7 +175,6 @@ class _HomeScreenState extends State<HomeScreen> {
         onRefresh: () async => {
           await Future.delayed(Duration(seconds: 1), () async {
             setState(() {
-              isLoading = true;
               fetchStreams();
             });
           })

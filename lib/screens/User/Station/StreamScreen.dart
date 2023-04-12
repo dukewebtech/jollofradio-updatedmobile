@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -8,8 +9,11 @@ import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/utils/colors.dart';
+import 'package:jollofradio/config/services/controllers/StationController.dart';
 import 'package:jollofradio/widget/Buttons.dart';
+import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -37,8 +41,11 @@ with SingleTickerProviderStateMixin {
   Color defaultColor = AppColor.primary;
 
   AudioServiceHandler player = AudioServiceHandler();
+  CacheStream cacheManager = CacheStream();
   late Station radio;
   late String channel;
+  bool _fav = false;
+  late dynamic stations;
 
   @override
   void initState() {
@@ -55,6 +62,7 @@ with SingleTickerProviderStateMixin {
       getEffects()
     });
 
+    syncAllStations();
     initializeRadio();
 
     super.initState();
@@ -80,6 +88,35 @@ with SingleTickerProviderStateMixin {
       _controller.forward();
 
     });////////////////////////////////////////////////////
+  }
+
+  Future<dynamic> getFavorites() async {
+    //favorites
+    await Storage.get('favRadio',Map).then((stations)/**/ {
+      if(stations == null)
+        return;
+
+      _fav = stations.any((item){
+        return item['title'] == radio.title;
+      });
+
+      setState(() { });
+    });
+  }
+
+  Future<dynamic> syncAllStations() async {
+    final stations = await cacheManager.stream( ///////////
+      'stations', 
+      fallback: () async {
+        return StationController.index();
+      },
+      callback: StationController.construct
+    );
+
+    this.stations = [
+      ...stations['local'], 
+      ...stations['international'],
+    ];
   }
 
   Future initializeRadio() async {
@@ -127,6 +164,8 @@ with SingleTickerProviderStateMixin {
         });
       }
     });
+
+    getFavorites();
     
     ///////////////////////////////////////////////////////
   }
@@ -261,7 +300,7 @@ with SingleTickerProviderStateMixin {
                                           onChanged: (value) {
                                             player.seek(
                                               Duration(  milliseconds: value.round()  )
-                                            ); 
+                                            );
                                           },  
                                         )
                                       ),
@@ -300,26 +339,39 @@ with SingleTickerProviderStateMixin {
                           ? Colors.grey : Colors.white
                         ),
                       ),
-                      // IconButton(
-                      //   tooltip: "Website",
-                      //   onPressed: () async {
-                      //     if(radio.website == null)
-                      //       return;
+                      IconButton(
+                        tooltip: "Favorite",
+                        onPressed: () async {
+                          var stations = await Storage.get('favRadio',Map);
+                          stations = stations ?? [];
 
-                      //     if(await canLaunchUrlString(radio.website!)){
-                      //       await launchUrl(
-                      //         Uri.parse(radio.website!),
-                      //         mode: 
-                      //         LaunchMode.externalNonBrowserApplication
-                      //       );
-                      //     }
-                      //   },
-                      //   icon: Icon(
-                      //     Icons.link, 
-                      //     color: radio.website == null 
-                      //     ? Colors.grey : Colors.white
-                      //   ),
-                      // ),
+                          if(!_fav){
+
+                            stations.add(radio.toJson());
+
+                          }
+                          else{
+
+                            stations.removeWhere((item){
+
+                              return item['title'] == radio.title; //flush
+
+                            });
+
+                          }
+
+                          Storage.set(
+                            'favRadio',jsonEncode(stations)
+                          );
+                          setState(() {
+                            _fav = !_fav;
+                          });
+                        },
+                        icon: Icon(
+                          !_fav ? Iconsax.heart : Iconsax.heart5, 
+                          color: !_fav ? Colors.white : AppColor.secondary
+                        ),
+                      ),
                       Container(
                         width: 50,
                         height: 50,
@@ -373,17 +425,25 @@ with SingleTickerProviderStateMixin {
                           },
                         ),
                       ),
-                      // IconButton(
-                      //   tooltip: "Favorite",
-                      //   onPressed: () {
-                      //     //
+                      IconButton(
+                        tooltip: "Tune Station",
+                        onPressed: () {
+                          if(stations != null && (stations is List)==true){
 
-                      //   },
-                      //   icon: Icon(
-                      //     Iconsax.heart5,
-                      //     color: Colors.white
-                      //   ),
-                      // ),
+                            stations.shuffle();
+
+                            setState(() {
+                              radio = stations[0];
+                              initializeRadio();
+                            });
+
+                          }
+                        },
+                        icon: Icon(
+                          Iconsax.rotate_right,
+                          color: Colors.white
+                        ),
+                      ),
                       IconButton(
                         padding: EdgeInsets.zero,
                         constraints: BoxConstraints(), //edge patch

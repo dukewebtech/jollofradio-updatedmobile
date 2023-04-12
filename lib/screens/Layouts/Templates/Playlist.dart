@@ -245,7 +245,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
             ),
             Text(
               isPodcast ?
-              "${widget.playlist.episodes.length} Episodes"  : //podcasts
+              "${widget.playlist.episodeCount} Episodes"  : //podcasts
               "${widget.playlist.collection.length} Collection", //playlist
               style: TextStyle(
                 color: Colors.grey,

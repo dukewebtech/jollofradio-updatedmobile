@@ -41,6 +41,20 @@ class AuthController {
     }
   }
 
+  static Future<Map<String, dynamic>> social(Map data) async {
+    String oauth = data['oauth'];
+    String token = data['token'];
+
+    var request = await api().post(endpoint(SOCIAL_LOGIN_ROUTE
+      +'/$oauth/$token'
+    ));
+
+    return response(request['status'], 
+      message: request['message'],
+      data: request
+    );
+  }
+
   static Future<Map<String, dynamic>> signup(Map data) async {
     String userType = data['userType'];
     String route = routeScope(
@@ -186,6 +200,28 @@ class AuthController {
         data: result['data'], ///////////////////////////////
       );
     }
+  }
+
+  static Future close(Map data) async {
+    String userType = data['userType'];
+    String route = routeScope(
+      userType, {
+      'user': USER_TERMINATE_ROUTE,
+      'creator': CREATOR_TERMINATE_ROUTE,
+    });
+
+    var request = await api(auth: true).delete(endpoint(route), 
+      data
+    ).then(
+      (data){
+
+      return response(data['status'], 
+        message: data['message'],
+        data: data['data'], ///////////////////////////////
+      );
+    });
+
+    return request;
   }
 
   static Future onboard(Map data) async {

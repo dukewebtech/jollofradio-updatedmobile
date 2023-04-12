@@ -36,7 +36,7 @@ class _ReleaseScreenState extends State<ReleaseScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: Buttons.back(),
-        title: Text("Trending Podcasts"),
+        title: Text("New Release"),
       ),
       body: Center(
         child: Container(

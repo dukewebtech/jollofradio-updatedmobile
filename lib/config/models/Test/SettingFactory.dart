@@ -7,6 +7,7 @@ class SettingFactory {
       "title": "Explicit content",
       "options": [
         {
+          "name": "explicit_content",
           "description": "Give explicit content a chance to playback audio",
           "active": false
         },
@@ -16,6 +17,7 @@ class SettingFactory {
       "title": "Autoplay",
       "options": [
         {
+          "name": "autoplay",
           "description": "Autoplay similar podcasts based on my playlist",
           "active": false
         },
@@ -25,10 +27,12 @@ class SettingFactory {
       "title": "Notification",
       "options": [
         {
+          "name": "new_release",
           "description": "Show a new release announcement once i open app",
           "active": false
         },
         {
+          "name": "push_notification",
           "description": "Send push notifications regarding product offer",
           "active": false
         },
@@ -38,6 +42,7 @@ class SettingFactory {
       "title": "Security",
       "options": [
         {
+          "name": "biometric_login",
           "description": "Enable biometrics login when i opened the app",
           "active": false
         },
@@ -51,10 +56,12 @@ class SettingFactory {
       "title": "Audio Quality",
       "options": [
         {
+          "name": "optimize_stream",
           "description": "Optimize streaming quality for faster buffering",
           "active": false
         },
         {
+          "name": "lower_latency",
           "description": "Switch to lower audio quality for lower latency",
           "active": false
         },
