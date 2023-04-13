@@ -13,6 +13,7 @@ import 'package:jollofradio/config/services/controllers/StationController.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:jollofradio/widget/Slider.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:share_plus/share_plus.dart';
@@ -91,6 +92,7 @@ with SingleTickerProviderStateMixin {
   }
 
   Future<dynamic> getFavorites() async {
+    
     //favorites
     await Storage.get('favRadio',Map).then((stations)/**/ {
       if(stations == null)
@@ -101,10 +103,13 @@ with SingleTickerProviderStateMixin {
       });
 
       setState(() { });
+      
     });
+
   }
 
   Future<dynamic> syncAllStations() async {
+
     final stations = await cacheManager.stream( ///////////
       'stations', 
       fallback: () async {
@@ -117,6 +122,7 @@ with SingleTickerProviderStateMixin {
       ...stations['local'], 
       ...stations['international'],
     ];
+
   }
 
   Future initializeRadio() async {
@@ -182,7 +188,8 @@ with SingleTickerProviderStateMixin {
       animation: _controller,
       builder: (context, snapshot) {
         return Scaffold(
-          backgroundColor: _colorTweenAnimation == null ? defaultColor
+          backgroundColor: _colorTweenAnimation == (null) ? 
+          defaultColor
           : _colorTweenAnimation!.value,
           appBar: AppBar(
             leading: Buttons.back(),
@@ -190,7 +197,8 @@ with SingleTickerProviderStateMixin {
           body: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter, end: Alignment.bottomCenter, 
+                begin: Alignment.topCenter, 
+                end: Alignment.bottomCenter, 
                 colors: [
                   Colors.transparent, 
                   Color.fromRGBO(0, 0, 0, .1), 
@@ -332,6 +340,7 @@ with SingleTickerProviderStateMixin {
                             mode: 
                             LaunchMode.externalNonBrowserApplication
                           );
+                          
                         },
                         icon: Icon(
                           FontAwesomeIcons.twitter, 
@@ -411,9 +420,11 @@ with SingleTickerProviderStateMixin {
                                 setState(() {
                                   if( !playing ){
                                     player.play ();
+
                                   }
                                   else{
                                     player.pause();
+
                                   }                                  
                                 });
                               },
@@ -422,6 +433,7 @@ with SingleTickerProviderStateMixin {
                                 color: Colors.black,
                               ),
                             );
+                            
                           },
                         ),
                       ),
@@ -467,28 +479,6 @@ with SingleTickerProviderStateMixin {
           ),
         );
       }
-    );
-  }
-}
-
-class CustomTrackShape extends RoundedRectSliderTrackShape {
-  @override
-  Rect getPreferredRect({
-    required RenderBox parentBox,
-    Offset offset = Offset.zero,
-    required SliderThemeData sliderTheme,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-  }) {
-    final double trackHeight = sliderTheme . trackHeight !;
-    final double trackLeft = offset.dx;
-    final double trackTop = offset.dy + (
-      parentBox.size.height - trackHeight
-    ) / 2;
-    final double trackWidth = parentBox.size.width; ///////
-
-    return Rect.fromLTWH(
-      trackLeft, trackTop,  trackWidth, trackHeight ///////
     );
   }
 }

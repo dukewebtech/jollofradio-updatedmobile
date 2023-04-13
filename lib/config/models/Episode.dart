@@ -9,6 +9,7 @@ class Episode {
     final String source;
     final String duration;
     final Map streams;
+    final Map meta;
     final String podcast;
     final bool liked;
     final String createdAt;
@@ -22,6 +23,7 @@ class Episode {
       required this.source,
       required this.duration,
       required this.streams,
+      required this.meta,
       required this.podcast,
       required this.liked,
       required this.createdAt,
@@ -38,6 +40,7 @@ class Episode {
         source: json['source'],
         duration: json['duration'],
         streams: json['streams'],
+        meta: json['meta'],
         podcast: json['podcast'],
         liked: json['liked'],
         createdAt: json['created_at'],
@@ -52,6 +55,7 @@ class Episode {
       'source': source,
       'duration': duration,
       'streams': streams,
+      'meta': meta,
       'podcast': podcast,
       'liked': liked,
       'created_at': createdAt,

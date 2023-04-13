@@ -279,20 +279,20 @@ class _SiginInScreenState extends State<SiginInScreen> {
                         children: <Widget>[
                           GestureDetector(
                             onTap: () => _googleSignin(),
-                            child: SvgPicture.asset(
-                              "assets/images/icons/svg/google.svg"
+                            child: Image.asset(
+                              "assets/images/icons/google.png"
                             ),
                           ),
                           GestureDetector(
                             onTap: () => {},
-                            child: SvgPicture.asset(
-                              "assets/images/icons/svg/facebook.svg"
+                            child: Image.asset(
+                              "assets/images/icons/facebook.png"
                             ),
                           ),
                           GestureDetector(
                             onTap: () => {},
-                            child: SvgPicture.asset(
-                              "assets/images/icons/svg/apple.svg"
+                            child: Image.asset(
+                              "assets/images/icons/apple.png"
                             ),
                           ),
                         ],

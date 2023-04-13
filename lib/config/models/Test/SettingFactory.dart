@@ -18,7 +18,7 @@ class SettingFactory {
       "options": [
         {
           "name": "autoplay",
-          "description": "Autoplay similar podcasts based on my playlist",
+          "description": "Autoplay / resume podcasts based on my activity",
           "active": false
         },
       ]
@@ -32,7 +32,7 @@ class SettingFactory {
           "active": false
         },
         {
-          "name": "push_notification",
+          "name": "product_offer",
           "description": "Send push notifications regarding product offer",
           "active": false
         },

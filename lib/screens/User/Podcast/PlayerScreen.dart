@@ -5,6 +5,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jollofradio/config/services/controllers/User/StreamController.dart';
 import 'package:iconsax/iconsax.dart';
+import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
@@ -12,7 +13,9 @@ import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
+import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:jollofradio/widget/Slider.dart';
 import 'package:just_audio/just_audio.dart';
 
 class PlayerScreen extends StatefulWidget {
@@ -57,7 +60,7 @@ with SingleTickerProviderStateMixin {
       getEffects()
     });
 
-    initializeAudio();
+    _verifyPlayback();
 
     super.initState();
   }
@@ -82,6 +85,41 @@ with SingleTickerProviderStateMixin {
       _controller.forward();
 
     });////////////////////////////////////////////////////
+  }
+
+  Future<void> _verifyPlayback() async {
+    //context wait
+    await Future.delayed(const Duration(milliseconds:500));
+
+    //get the user
+    final user = await Storage.get(
+      'user', Map
+    );
+
+    //check safety
+    bool explicitContent = track.meta ['explicit_content'];
+
+    //public users
+    if(user == null)
+      return initializeAudio();
+
+
+    if(explicitContent){
+      bool enabled = user['settings']?['explicit_content'] 
+      ?? false;
+
+      if(!enabled){
+        if(player.currentTrack()?.title == (track.title)){
+          return;
+          
+        }
+
+        return safetyDialog();
+
+      }
+    }
+    initializeAudio(); ////////////////////////////////////
+
   }
 
   Future initializeAudio() async {
@@ -154,7 +192,6 @@ with SingleTickerProviderStateMixin {
     });
     
     ///////////////////////////////////////////////////////
-    
   }
 
   Future skipTrack(mode) async {
@@ -236,7 +273,8 @@ with SingleTickerProviderStateMixin {
       animation: _controller,
       builder: (context, snapshot) {
         return Scaffold(
-          backgroundColor: _colorTweenAnimation == null ? defaultColor
+          backgroundColor: _colorTweenAnimation == (null) ? 
+          defaultColor
           : _colorTweenAnimation!.value,
           appBar: AppBar(
             leading: Buttons.back(),
@@ -244,7 +282,8 @@ with SingleTickerProviderStateMixin {
           body: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                begin: Alignment.topCenter, end: Alignment.bottomCenter, 
+                begin: Alignment.topCenter, 
+                end: Alignment.bottomCenter, 
                 colors: [
                   Colors.transparent, 
                   Color.fromRGBO(0, 0, 0, .1), 
@@ -542,17 +581,17 @@ with SingleTickerProviderStateMixin {
                               "label": "Shuffle Off"
                             },
                             false: {
-                              "task" : AudioServiceShuffleMode.all,
+                              "task" : AudioServiceShuffleMode.all ,
                               "label": "Shuffle On"
                             },
                           };
 
                           final shuffleIcon = {
                             true: Icon(
-                              Iconsax.shuffle, color: Colors.white
+                              Iconsax.shuffle, color: (Colors.white)
                             ),
                             false: Icon(
-                              Iconsax.shuffle, color: Colors.grey
+                              Iconsax.shuffle, color: (Colors.grey )
                             ),
                           }[stream]!;
 
@@ -584,26 +623,68 @@ with SingleTickerProviderStateMixin {
       }
     );
   }
-}
 
-class CustomTrackShape extends RoundedRectSliderTrackShape {
-  @override
-  Rect getPreferredRect({
-    required RenderBox parentBox,
-    Offset offset = Offset.zero,
-    required SliderThemeData sliderTheme,
-    bool isEnabled = false,
-    bool isDiscrete = false,
-  }) {
-    final double trackHeight = sliderTheme . trackHeight !;
-    final double trackLeft = offset.dx;
-    final double trackTop = offset.dy + (
-      parentBox.size.height - trackHeight
-    ) / 2;
-    final double trackWidth = parentBox.size.width; ///////
-
-    return Rect.fromLTWH(
-      trackLeft, trackTop,  trackWidth, trackHeight ///////
+  Future<void> safetyDialog() async {
+    return showDialog(
+      barrierDismissible: false,
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Heads up!", style: /**/TextStyle(
+            color: Colors.red,
+            fontSize: 15,
+            fontWeight: FontWeight.bold
+          )),
+          content: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "This podcast might contains explicit content, hard ${""
+                }language or unappeali${
+                    ""
+                  }ng materials.",
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+              SizedBox(
+                height: 20,
+              ),
+              Text("To turn off this warning - goto profile settings ${
+                  ""
+                }and enable 'Explicit Content'",
+                style: TextStyle(
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.transparent
+              ),
+              onPressed: () {
+                Navigator.pop(context);
+                initializeAudio();
+              },
+              child: Text("Continue playback", style:/**/ TextStyle()),
+            ),
+            TextButton(
+              style: TextButton.styleFrom(
+                backgroundColor: Colors.transparent
+              ),
+              onPressed: () {
+                RouteGenerator.goBack(2);
+              },
+              child: Text(
+                "Cancel", style: const TextStyle(color: Colors.black)
+              ),
+            )
+          ],
+        );
+      },
     );
   }
 }

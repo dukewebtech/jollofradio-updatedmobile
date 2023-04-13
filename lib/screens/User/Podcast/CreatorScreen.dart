@@ -77,6 +77,7 @@ class _CreatorScreenState extends State<CreatorScreen> {
           source: podcast['source'],
           duration: podcast['duration'],
           streams: podcast['streams'],
+          meta: podcast['meta'],
           podcast: podcast['podcast']['title'], ///////////////
           liked: false,
           createdAt: podcast['created_at']
@@ -150,7 +151,6 @@ class _CreatorScreenState extends State<CreatorScreen> {
         subscribers = numberFormat(creator.followers!.length);
         subscribed = creator.subscribed(user);
       });
-
     });
     
   }

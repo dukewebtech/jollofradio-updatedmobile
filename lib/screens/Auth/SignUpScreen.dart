@@ -1,6 +1,8 @@
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jollofradio/config/routes/router.dart';
+import 'package:jollofradio/config/services/core/NotificationService.dart';
 import 'package:flutter/material.dart';
+import 'package:jollofradio/config/services/auth/GoogleSignin.dart';
 import 'package:jollofradio/config/services/controllers/AuthController.dart';
 import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
@@ -30,10 +32,20 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
   final TextEditingController telephone = TextEditingController();
   final TextEditingController password = TextEditingController();
   final TextEditingController confirmPassword = TextEditingController();
+  GoogleSigninAuth googleSignIn = GoogleSigninAuth();
+  String? token;
 
   @override
   void initState() {
     userType = widget.userType;
+
+    Future(() async {
+
+      token = await NotificationService.getToken(); // device ID
+
+    });
+
+    googleSignIn.init();
     super.initState();
   }
 
@@ -99,6 +111,70 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
       }
       
       RouteGenerator.goto(CREATOR_DASHBOARD); // redirect creator
+      
+    }
+  }
+
+  Future<void> _googleSignin() async {
+    final signIn = await googleSignIn.signIn(); // attempt login
+    if(signIn == null){
+      setState(() {
+        isLoading = false;
+      });
+      return Toaster.error('Signin failed!, please try again!');
+    }
+
+    setState(() {
+      isLoading = true;
+    });
+
+    Map data = {
+      'oauth': 'google',
+      'token': signIn.accessToken,
+      'device_id': token
+    };
+
+    Toaster.info("Signing with Google account... please wait.");
+
+    await AuthController.social(data).then((dynamic data) async {
+
+      completeSignin(data);
+
+    });
+  }
+
+  void completeSignin(dynamic result) {
+    setState(() {
+      isLoading = false;
+    });
+    
+    if (result['error']){
+      Toaster.error(
+        result['message']
+      );
+    }
+    else{     
+      final Map auth = login(result)['user'];
+      final String token = login(result)['token'];
+      Storage.set('token', token);
+
+      //Invoking providers
+      final user = Provider
+      .of<UserProvider   >(context, listen: false ); ////////////
+
+      final creator = Provider
+      .of<CreatorProvider>(context, listen: false ); ////////////
+
+      if(auth['role'] == 'USER'){
+        user.login(auth);
+        RouteGenerator.goto(DASHBOARD, {  });
+        return;
+      }
+      
+      creator.login(auth);
+      RouteGenerator.goto(CREATOR_DASHBOARD);
+
+      ///////////////////////////////////////////////////////////
     }
   }
 
@@ -240,16 +316,24 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
                       margin: EdgeInsets.only(bottom: 30),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
-
                         children: <Widget>[
-                          SvgPicture.asset(
-                            "assets/images/icons/svg/google.svg"
+                          GestureDetector(
+                            onTap: () => _googleSignin(),
+                            child: Image.asset(
+                              "assets/images/icons/google.png"
+                            ),
                           ),
-                          SvgPicture.asset(
-                            "assets/images/icons/svg/facebook.svg"
+                          GestureDetector(
+                            onTap: () => {},
+                            child: Image.asset(
+                              "assets/images/icons/facebook.png"
+                            ),
                           ),
-                          SvgPicture.asset(
-                            "assets/images/icons/svg/apple.svg"
+                          GestureDetector(
+                            onTap: () => {},
+                            child: Image.asset(
+                              "assets/images/icons/apple.png"
+                            ),
                           ),
                         ],
                       ),

@@ -7,6 +7,7 @@ import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/config/strings/Message.dart';
+import 'package:jollofradio/widget/Player.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:flutter/material.dart';
 import 'package:jollofradio/utils/scope.dart';
@@ -32,6 +33,7 @@ class _SplashScreenState extends State<SplashScreen> {
   Future<dynamic> _boostrapApp() async {
     var user = await Storage.get('user').then((user) async {
       var redirect = DASHBOARD;
+      dynamic auth;
 
       if(user.runtimeType == String){
         setState(() {
@@ -42,17 +44,23 @@ class _SplashScreenState extends State<SplashScreen> {
         if ( creator ){
           redirect = CREATOR_DASHBOARD;
           
+          auth =
            Provider.of<CreatorProvider>(context, listen: false)
            .login(json.decode(user));
 
         }
         else {
 
+          auth =
            Provider.of<UserProvider>(context, listen: false)
            .login(json.decode(user));
 
         }
+
+        Player.user = auth; //prefmap
+
         RouteGenerator.exit(redirect);
+
       }
     });
   }
@@ -128,7 +136,9 @@ class _SplashScreenState extends State<SplashScreen> {
                             )
                           ),
                           onPressed: () {
+
                             RouteGenerator.goto(SIGNIN);
+
                           },
                           child: Text("Get Started", style: TextStyle(
                             color: AppColor.primary,

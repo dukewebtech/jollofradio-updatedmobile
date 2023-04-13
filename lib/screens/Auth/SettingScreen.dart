@@ -200,7 +200,7 @@ class _SettingScreenState extends State<SettingScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Come On!, ",
+                "Come On 😟",
                 style: TextStyle(fontSize: 14),
               ),
               SizedBox(
@@ -209,7 +209,7 @@ class _SettingScreenState extends State<SettingScreen> {
               Text(
                 "We can talk this through and improve your ${  ///
                   ""
-                }experience. else if you've made up your mind. ${
+                }experience, else if you've made up your mind. ${
                   ""
                 }click on the confirm button to delete your ${ ///
                   ""
@@ -296,7 +296,7 @@ class _SettingScreenState extends State<SettingScreen> {
                 children: [
                   Text(
                     "This action cannot be undone! You still have a ${""
-                    }chance to stop this and enjoy our awesome services",
+                    }chance to cancel and enjoy our awesome services", //
                     style: TextStyle(
                       fontSize: 14,
                       color: Colors.red
@@ -306,9 +306,9 @@ class _SettingScreenState extends State<SettingScreen> {
                     height: 20,
                   ),
                   Text(
-                    "Enter your password to authorize account deletion ${
+                    "Enter your password to authorize deletion of all ${
                       ""
-                    }of all related services on the JollofRadio platform",
+                    }related services on the JollofRadio platform", ////
                     style: TextStyle(fontSize: 14),
                   ),
                   SizedBox(

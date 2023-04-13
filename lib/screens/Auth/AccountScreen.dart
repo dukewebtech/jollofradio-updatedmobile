@@ -35,6 +35,7 @@ class AccountScreen extends StatefulWidget {
 class _AccountScreenState extends State<AccountScreen> {
   late dynamic user;
   bool isLoading = true;
+  bool showPassword = false;
   TextEditingController firstname = TextEditingController();
   TextEditingController lastname = TextEditingController();
   TextEditingController email = TextEditingController();
@@ -385,11 +386,36 @@ class _AccountScreenState extends State<AccountScreen> {
                           children: <Widget>[
                             SizedBox(height: 10),
                             Labels.primary(form['label']),
-                            Input.primary(
-                              form['controller'].text,
-                              leadingIcon: form['icon'],
-                              controller: form['controller'],
-                              password: form.containsKey('password')
+                            SizedBox(
+                              child: Stack(
+                                children: [
+                                  Input.primary(
+                                    form['controller'].text,
+                                    leadingIcon: form['icon'],
+                                    controller: form['controller'],
+                                    password: form
+                                    .containsKey('password') && !showPassword
+                                  ),
+                                  if(security)
+                                  Positioned(
+                                    top: 18,
+                                    right: 16,
+                                    child: GestureDetector(
+                                      onTap: () {
+                                        setState(() {
+                                          showPassword = !showPassword;
+                                        });
+                                      },
+                                      child: Icon(!showPassword ? 
+                                        Icons.visibility_off : Icons.visibility,
+                                        size: 15,
+                                        color: !showPassword ? 
+                                        Colors.white24 : Colors.white,
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
                             ),
                           ],
                         );

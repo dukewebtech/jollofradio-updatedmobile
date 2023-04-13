@@ -16,6 +16,7 @@ import 'package:just_audio/just_audio.dart';
 
 class Player extends StatefulWidget {
   final Widget child;
+  static dynamic user;
   const Player({ Key? key, required this.child }) : super(key: key);
 
   @override
@@ -28,6 +29,7 @@ class _PlayerState extends State<Player> {
   bool isPlaying = false;
   bool isVisible = false;
   ProcessingState? state;
+  dynamic user;
   dynamic track;
   String title = "-";
   String subtitle = "-";
@@ -39,6 +41,7 @@ class _PlayerState extends State<Player> {
 
   @override
   void initState() {
+    user = Player.user;
     initPlayer ();
     super.initState();
   }
@@ -72,9 +75,16 @@ class _PlayerState extends State<Player> {
 
       player.seek(
         Duration(
-          milliseconds: track['position']
+          milliseconds: track['position'] //seeking
         )
       );
+
+      if(user != null 
+      && user.setting('autoplay')==true){
+
+        player.play();
+        
+      }
     });
 
     //fetch & store
