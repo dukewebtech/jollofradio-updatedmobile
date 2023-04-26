@@ -31,6 +31,17 @@ class _SplashScreenState extends State<SplashScreen> {
   }
 
   Future<dynamic> _boostrapApp() async {
+    await Storage.get('guest', bool).then((guest) async {
+
+      if(guest == true){
+
+        RouteGenerator.exit(PUBLIC);
+        return;
+
+      }
+
+    });
+
     var user = await Storage.get('user').then((user) async {
       var redirect = DASHBOARD;
       dynamic auth;
@@ -58,7 +69,6 @@ class _SplashScreenState extends State<SplashScreen> {
         }
 
         Player.user = auth; //prefmap
-
         RouteGenerator.exit(redirect);
 
       }

@@ -1,13 +1,10 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:jollofradio/config/models/Episode.dart';
-import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/routes/router.dart';
-import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
 import 'package:jollofradio/widget/Buttons.dart';
-import 'package:provider/provider.dart';
 
 class PodcastResult extends StatefulWidget {
   final List<Episode> podcasts;
@@ -19,14 +16,14 @@ class PodcastResult extends StatefulWidget {
 }
 
 class _PodcastResultState extends State<PodcastResult> {
-  late User user;
   var podcasts = [];
 
   @override
   void initState() {
+    /*
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
-
+    */
     podcasts = widget.podcasts;
     
     super.initState();

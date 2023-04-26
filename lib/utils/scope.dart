@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 
 ///
@@ -10,11 +9,12 @@ String routeScope(String scope, Map routes){
 }
 
 Future<bool> isCreator() async {
-  
-  //read user ohect
-  final user = json.decode(await Storage.get('user'));
+  //read user object
+  final user = await Storage.get('user', Map);
+  if(user == null)
+    return false;
 
-  //test for entity
-  return user['podcasts'] != null;
+  //check for entity
+  return (user['podcasts'] != null) == (true);
 
 }

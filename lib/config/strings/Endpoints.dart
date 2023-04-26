@@ -20,6 +20,9 @@ String endpoint(String url, [
 
 }
 
+//PUBLIC
+const PUBLIC_STREAM_ROUTE = '/services/streams';
+
 //USER
 const USER_SIGNIN_ROUTE = '/user/login';
 const USER_SIGNUP_ROUTE = '/user/register';
@@ -41,9 +44,13 @@ const CREATOR_TERMINATE_ROUTE = '/creator/terminate';
 const CREATOR_SERVICE_ROUTE = '/creator/service';
 const CREATOR_LOGOUT_ROUTE = '/creator/logout';
 const CREATOR_NOTIFICATION_ROUTE = '/creator/notification';
+const CREATOR_DASHBOARD_ROUTE = '/creator/dashboard';
+const CREATOR_ADVERT_ROUTE = '/creator/ads';
+const CREATOR_SUBSCRIBER_ROUTE = '/creator/subscribers';
 
 //SERVICE
 const SOCIAL_LOGIN_ROUTE = '/login';
+const FORGOT_ROUTE = '/forgot';
 const CREATOR_ROUTE = '/services/creators';
 const CATEGORY_ROUTE = '/services/category';
 const SEARCH_ROUTE = '/services/search';

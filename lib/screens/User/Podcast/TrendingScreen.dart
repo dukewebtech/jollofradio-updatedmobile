@@ -1,7 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:jollofradio/config/models/User.dart';
+// import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
@@ -19,7 +19,7 @@ class TrendingScreen extends StatefulWidget {
 }
 
 class _TrendingScreenState extends State<TrendingScreen> {
-  late User user;
+  late dynamic user;
   bool isLoading = false;
   List episodes = [];
 
@@ -29,7 +29,6 @@ class _TrendingScreenState extends State<TrendingScreen> {
     user = auth.user;
 
     episodes = widget.episodes;
-    
     super.initState();
   }
 
@@ -118,7 +117,8 @@ class _TrendingScreenState extends State<TrendingScreen> {
                                 onTap: () {
                                   RouteGenerator.goto(TRACK_PLAYER, {
                                     "track": episodes[index],
-                                    "channel": "podcast"
+                                    "channel": "podcast",
+                                    "playlist": episodes
                                   });
                                 },
                                 child: Container(

@@ -1,15 +1,10 @@
-import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:jollofradio/config/models/Category.dart';
-import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/services/controllers/CategoryController.dart';
-import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Category.dart';
 import 'package:jollofradio/widget/Buttons.dart';
-import 'package:provider/provider.dart';
 
 class CategoryScreen extends StatefulWidget {
   final List categories;
@@ -20,17 +15,12 @@ class CategoryScreen extends StatefulWidget {
 }
 
 class _CategoryScreenState extends State<CategoryScreen> {
-  late User user;
   bool isLoading = true;
   List categories = [];
 
   @override
   void initState() {
-    var auth = Provider.of<UserProvider>(context,listen: false);
-    user = auth.user;
-
     // categories = widget.categories;
-
     getCategory();
 
     super.initState();

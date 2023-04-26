@@ -3,15 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Category.dart';
 import 'package:jollofradio/config/models/Podcast.dart';
-import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/CategoryController.dart';
-import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Playlist.dart';
 import 'package:jollofradio/widget/Buttons.dart';
-import 'package:provider/provider.dart';
 
 class SelectionScreen extends StatefulWidget {
   final Category category;
@@ -22,15 +19,11 @@ class SelectionScreen extends StatefulWidget {
 }
 
 class _SelectionScreenState extends State<SelectionScreen> {
-  late User user;
   bool isLoading = true;
   List<Podcast> playlist = [];
 
   @override
   void initState() {
-    var auth = Provider.of<UserProvider>(context,listen: false);
-    user = auth.user;
-
     getCategory(
       widget.category
       .name
@@ -133,9 +126,11 @@ class _SelectionScreenState extends State<SelectionScreen> {
                         itemBuilder: (context, index){
                           return GestureDetector(
                             onTap: () {
+
                               RouteGenerator.goto(PODCAST, {
                                 "playlist": playlist[index]
                               });
+                              
                             },
                             child: AbsorbPointer(
                               child: PlaylistTemplate(playlist: playlist[index]),

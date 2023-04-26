@@ -1,4 +1,3 @@
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/core/NotificationService.dart';
 import 'package:flutter/material.dart';
@@ -131,7 +130,8 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
     Map data = {
       'oauth': 'google',
       'token': signIn.accessToken,
-      'device_id': token
+      'device_id': token,
+      'scope': userType.toUpperCase()
     };
 
     Toaster.info("Signing with Google account... please wait.");

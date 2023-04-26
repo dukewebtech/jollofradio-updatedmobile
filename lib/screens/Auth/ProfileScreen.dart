@@ -59,6 +59,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
         });
       }
     },
+    {
+      "label": "Help & Support",
+      "icon": Iconsax.message,
+      "action": (user){
+        RouteGenerator.goto(WEBVIEW, {
+          "title": "Live Chat",
+          "file": "assets/html/chat.html"
+        });
+      }
+    },
   ];
 
   @override

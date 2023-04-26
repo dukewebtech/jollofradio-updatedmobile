@@ -4,6 +4,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:jollofradio/config/services/controllers/User/StreamController.dart';
+import 'package:jollofradio/config/services/controllers/HomeController.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/models/Episode.dart';
@@ -11,6 +12,7 @@ import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/utils/helper.dart';
+import 'package:jollofradio/utils/scope.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
@@ -21,11 +23,13 @@ import 'package:just_audio/just_audio.dart';
 class PlayerScreen extends StatefulWidget {
   final Episode track;
   final String channel;
+  final List? playlist;
 
   const PlayerScreen({
     super.key,
     required this.track,
-    required this.channel
+    required this.channel,
+    this.playlist
   });
 
   @override
@@ -42,12 +46,17 @@ with SingleTickerProviderStateMixin {
   AudioServiceHandler player = AudioServiceHandler();
   late Episode track;
   late String channel;
+  late List? playlist;
+  int currentIndex = 0;
+  List<MediaItem> tracks = [];
   bool _fav = false;
+  bool consent = false;
 
   @override
   void initState() {
     channel = widget.channel;       ///////////////////////
     track = widget.track;
+    playlist = widget.playlist;
     _fav = track.liked;
 
     _controller = AnimationController(
@@ -103,7 +112,6 @@ with SingleTickerProviderStateMixin {
     if(user == null)
       return initializeAudio();
 
-
     if(explicitContent){
       bool enabled = user['settings']?['explicit_content'] 
       ?? false;
@@ -111,43 +119,89 @@ with SingleTickerProviderStateMixin {
       if(!enabled){
         if(player.currentTrack()?.title == (track.title)){
           return;
-          
         }
 
         return safetyDialog();
 
       }
     }
+    
     initializeAudio(); ////////////////////////////////////
 
   }
 
+  MediaItem setTrackItems(Episode track) {
+    return MediaItem(
+      id: track.id.toString(),
+      title: track.title,
+      album: track.podcast,
+      artist: track.creator?.username() ?? '', //null check
+      artUri: Uri.parse(track.logo),
+      duration: Duration(),
+      extras: {
+        "url": track.source,
+        "episode": track.toJson()
+      }
+    );
+  }
+
   Future initializeAudio() async {
     MediaItem? currentTrack = player.currentTrack(); //////
-    var podcast = "";
-    bool isPodcast = 
-    currentTrack?.extras?.containsKey('episode') ?? false ;
+    final playlist = player.getPlaylist() ;
 
-    if(isPodcast){
-      podcast = currentTrack?.extras?['episode']['podcast'];
+    //transforming
+    if(widget.playlist == null){
+      tracks.add(setTrackItems(track));
     }
-    final playlist = player.getPlaylist( ) ;
+    else{
+      var newTracks = widget.playlist!.map((dynamic item) {
+        return setTrackItems(
+          item
+        );
+      }).toList();
+
+      tracks = ( newTracks );
+    }
     
+    /*
     if(podcast != track.podcast || podcast == track.podcast 
     && playlist.length == 1 
-    && currentTrack?.title != track.title) {
-      //fire loading
+    && currentTrack?.title !=track.title) {
+    */
+    currentIndex = tracks.indexWhere( (i)=> // fetch index!
+    i.id == track.id.toString());
+
+    setState(() {
+      //
+    });
+      
+    bool onTrack = tracks.every((element) {
+      //
+      return playlist.any(
+        (e) => e.id == element.id) == true; // check tracks
+      //
+    });
+
+    if((!onTrack || onTrack == false)){
+      //fire loader UI
       /*
       setState(() => isLoading = true) ; // inform UI state
       */
 
-      //mount playlist      
+      //mount playlist
+      await player.setPlaylist(tracks);
+
+      await player.skipToQueueItem (    //skip to the track
+        currentIndex
+      );
+
+      /*
       await player.setPlaylist([
         MediaItem(
           id: track.id.toString(),
           title: track.title,
           album: track.podcast,
-          artist: track.creator.username(),
+          artist: track.creator?.username() ?? '', //: null
           artUri: Uri.parse(track.logo),
           duration: Duration(),
           extras: {
@@ -156,15 +210,28 @@ with SingleTickerProviderStateMixin {
           }
         )
       ]);
+      */
 
       player.play();
 
-      //track stream
-      StreamController.create ({ 'episode_id': track.id });
-      //
-    }
+      //tracking stream
+      if(!await isCreator())
+      await Storage.get('guest',bool).then((dynamic guest){
+        
+        if(guest == true){
+          
+          HomeController.stream({'episode_id':  track.id});
 
-    if(podcast == track.podcast) {
+        }
+        else{
+
+          StreamController.create({'episode_id': track.id});
+
+        }
+      });
+
+    }
+    else{
       if(currentTrack?.title != track.title){
         if(playlist.length > 1){
           int index = playlist.indexWhere(
@@ -186,12 +253,17 @@ with SingleTickerProviderStateMixin {
         setState(() {
           track = Episode.fromJson(
             currentTrack?.extras!['episode']
-          );     
+          );
+
+          currentIndex = tracks.indexOf(
+            currentTrack!
+          );
         });
       }
     });
     
     ///////////////////////////////////////////////////////
+    
   }
 
   Future skipTrack(mode) async {
@@ -204,6 +276,7 @@ with SingleTickerProviderStateMixin {
       media = player.previousTrack();
       player.skipToPrevious();
     }
+    
     if(mode == 'next'){
       if(!canSkip('next')) 
         return;
@@ -215,7 +288,8 @@ with SingleTickerProviderStateMixin {
     setState(() {
       track = Episode.fromJson(
         media.extras!['episode']
-      );     
+      );
+      currentIndex = tracks.indexOf(media);//set cur. index
     });
   }
 
@@ -229,10 +303,12 @@ with SingleTickerProviderStateMixin {
       if(!playlist.asMap(  ).containsKey(
         first
       ))
+
         return false;
 
-      return ( playlist[first] != player.currentTrack( ) );
-    } 
+      return currentIndex != 0; //checks if index not first
+    }
+    
     if(mode == 'next') {
       if(!playlist.asMap(  ).containsKey(
         last
@@ -241,6 +317,7 @@ with SingleTickerProviderStateMixin {
 
       return ( playlist[last ] != player.currentTrack( ) );
     }
+
     return false;
   }
 
@@ -629,60 +706,70 @@ with SingleTickerProviderStateMixin {
       barrierDismissible: false,
       context: context,
       builder: (context) {
-        return AlertDialog(
-          title: Text("Heads up!", style: /**/TextStyle(
-            color: Colors.red,
-            fontSize: 15,
-            fontWeight: FontWeight.bold
-          )),
-          content: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                "This podcast might contains explicit content, hard ${""
-                }language or unappeali${
-                    ""
-                  }ng materials.",
-                style: TextStyle(
-                  fontSize: 14,
+        return WillPopScope(
+          onWillPop: () async {
+            if(!consent){
+              Future((){
+                RouteGenerator.goBack(); // reject call to invoke playback
+              });
+            }
+            return true;
+          },
+          child: AlertDialog(
+            title: Text("Heads up!", style: /**/TextStyle(
+              color: Colors.red,
+              fontSize: 15,
+              fontWeight: FontWeight.bold
+            )),
+            content: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  "This podcast might contains explicit content, hard ${""
+                  }language or unappeali${
+                      ""
+                    }ng materials.",
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 20,
-              ),
-              Text("To turn off this warning - goto profile settings ${
-                  ""
-                }and enable 'Explicit Content'",
-                style: TextStyle(
-                  fontSize: 14,
+                SizedBox(
+                  height: 20,
                 ),
+                Text("To turn off this warning - goto your profile set${""
+                  }tings and enable 'Explicit Content'",
+                  style: TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+              ],
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent
+                ),
+                onPressed: () {
+                  consent = true;
+                  Navigator.pop(context);
+                  initializeAudio();
+                },
+                child: Text("Continue playback", style:/**/ TextStyle()),
               ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent
+                ),
+                onPressed: () {
+                  RouteGenerator.goBack(2);
+                },
+                child: Text(
+                  "Cancel", style: const TextStyle(color: Colors.black) ,
+                ),
+              )
             ],
           ),
-          actions: [
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent
-              ),
-              onPressed: () {
-                Navigator.pop(context);
-                initializeAudio();
-              },
-              child: Text("Continue playback", style:/**/ TextStyle()),
-            ),
-            TextButton(
-              style: TextButton.styleFrom(
-                backgroundColor: Colors.transparent
-              ),
-              onPressed: () {
-                RouteGenerator.goBack(2);
-              },
-              child: Text(
-                "Cancel", style: const TextStyle(color: Colors.black)
-              ),
-            )
-          ],
         );
       },
     );

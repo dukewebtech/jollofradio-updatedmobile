@@ -10,6 +10,7 @@ import 'package:jollofradio/config/services/controllers/User/StreamController.da
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
+import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/string.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
@@ -21,6 +22,7 @@ import 'package:share_plus/share_plus.dart';
 class PodcastTemplate extends StatefulWidget {
   final String type;
   final Episode episode;
+  final List? podcasts;
   final bool compact;
   final Playlist? playlist;
   final bool onPlaylist;
@@ -30,10 +32,11 @@ class PodcastTemplate extends StatefulWidget {
     super.key,
     required this.type,
     required this.episode,
+    this.podcasts,
     this.playlist,
     this.onPlaylist = false,
     this.compact = false,
-    this.callback
+    this.callback,
   });
 
   @override
@@ -41,8 +44,9 @@ class PodcastTemplate extends StatefulWidget {
 }
 
 class _PodcastTemplateState extends State<PodcastTemplate> {
-  late User user;
+  late dynamic user;
   late Episode episode;
+  List? podcasts;
   Playlist? playlist;
   bool _fav = false;
   bool isSaving = false;
@@ -51,9 +55,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
   dynamic _setState;
   String? selectedLabel;
   TextEditingController playlistName = TextEditingController();
-  List<String> dropdown = [
-    //
-  ];
+  List<String> dropdown = [];
 
   @override
   void initState() {
@@ -61,20 +63,26 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     user = auth.user;
 
     episode = widget.episode;
+    podcasts = widget.podcasts;
     _fav = episode.liked;
 
     if(widget
     .onPlaylist==true){
       playlist = widget.playlist;
     }
+    
+    if(user != null){
+      dropdown 
+      = (user as User).playlist.map<String>( (e) => e['name'] )
+      .toList();
+    }
 
-    dropdown 
-    = user.playlist.map<String>((e)=>e['name']).toList();
-
-    super.initState();
+    super.initState(); 
   }
 
   Future<void> _doSubscribe() async {
+    if(user == null) return ;
+    
     bool liked = !_fav;
     Map data = {
       'episode_id': episode.id
@@ -99,15 +107,13 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
       });
       return;
     // }
-    
   }
 
   Future<void> _share() async {
     await Share.share(
-      'Listen to: ${episode.title} on Jollof Radio', 
-      subject: 'Listen to: ${
-        episode.title
-      } on Jollof Radio for FREE'
+      shareLink(
+        type: 'podcast', data: episode //share-able link
+      )
     );
   }
 
@@ -153,13 +159,11 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
 
     Navigator.pop(context);
     await PlaylistController.remove(data).then((deleted){
-      
       if(deleted){
         cb(episode, {
           "deleted": true
         });
       }
-
     });
   }
 
@@ -321,7 +325,8 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
           onTap: () {
             RouteGenerator.goto(TRACK_PLAYER, {
               "track": episode,
-              "channel": "podcast"
+              "channel": "podcast",
+              "playlist": podcasts
             });
           },
           child: Column(
@@ -388,7 +393,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                 margin: EdgeInsets.only(bottom: 3)
               ),
               Text(
-               episode.creator.username(),
+               episode.creator?.username() ?? '-',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12
@@ -404,7 +409,8 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
       return GestureDetector(
         onTap: () => RouteGenerator.goto(TRACK_PLAYER, {
           "track": episode,
-          "channel": "podcast"
+          "channel": "podcast",
+          "playlist": podcasts
         }),
         child: Container(
           width: double.infinity,
@@ -467,7 +473,8 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  Text(episode.creator.username(), style: TextStyle(
+                                  Text(episode.creator?.username() ?? '', 
+                                  style: TextStyle(
                                     color: Color(0XFF9A9FA3),
                                     fontSize: 12
                                   ),
@@ -502,6 +509,13 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                     GestureDetector(
                                       onTap: () async {
                                         if(!widget.onPlaylist){
+                                          if(user == null) {
+                                            return Toaster.info(
+                                              "You need to be signed in to add ${
+                                                ""
+                                              } track to playlist"
+                                            );
+                                          }
                                           await playlistModal(  );
                                           return;
                                         }
@@ -517,7 +531,6 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                     PopupMenuButton(
                                       color: AppColor.primary,
                                       itemBuilder: (context) {
-
                                         return [
                                           PopupMenuItem(
                                             onTap: () {
@@ -646,14 +659,14 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(episode.creator.username(), style: TextStyle(
+                              Text(episode.creator?.username() ?? '', 
+                              style: TextStyle(
                                 fontSize: 12,
                                 color: Color(0XFF9A9FA3)
                               )),
                               PopupMenuButton(
                                 color: AppColor.primary,
                                 itemBuilder: (context) {
-
                                   return [
                                     PopupMenuItem(
                                       onTap: () {

@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Creator.dart';
 import 'package:jollofradio/config/models/Episode.dart';
-import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/services/controllers/CreatorController.dart';
 import 'package:jollofradio/config/services/controllers/User/SubscriptionController.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
@@ -26,7 +25,7 @@ class CreatorScreen extends StatefulWidget {
 }
 
 class _CreatorScreenState extends State<CreatorScreen> {
-  late User user;
+  late dynamic user;
   bool isLoading = true;
   bool isSyncing = true;
   late Creator creator;
@@ -63,7 +62,7 @@ class _CreatorScreenState extends State<CreatorScreen> {
     }
 
     subscribers = /* */ numberFormat(creator.followers!.length);
-    subscribed = creator.subscribed(user);
+    subscribed = user != null ? creator.subscribed(user) :false;
     
     if(creator.episodes != null ){
     for(var podcast in creator.episodes!){
@@ -72,6 +71,7 @@ class _CreatorScreenState extends State<CreatorScreen> {
           id: podcast['id'],
           creator: creator,
           title: podcast['title'],
+          slug: podcast['slug'],
           logo: podcast['logo'],
           description: podcast['description'],  ///////////////
           source: podcast['source'],
@@ -79,6 +79,7 @@ class _CreatorScreenState extends State<CreatorScreen> {
           streams: podcast['streams'],
           meta: podcast['meta'],
           podcast: podcast['podcast']['title'], ///////////////
+          podcastId: podcast['podcast_id'],
           liked: false,
           createdAt: podcast['created_at']
         )
@@ -149,7 +150,11 @@ class _CreatorScreenState extends State<CreatorScreen> {
 
       setState(() {
         subscribers = numberFormat(creator.followers!.length);
-        subscribed = creator.subscribed(user);
+        if(user != null)
+          subscribed = creator.subscribed(user);
+        else 
+          subscribed = false;
+        
       });
     });
     
@@ -257,6 +262,7 @@ class _CreatorScreenState extends State<CreatorScreen> {
                           ],
                         ),
                       ),
+                      if(user != null)
                       SizedBox(
                         width: 150,
                         height: 40,

@@ -18,7 +18,7 @@ import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
-import 'package:url_launcher/url_launcher_string.dart';
+// import 'package:url_launcher/url_launcher_string.dart';
 
 class StreamScreen extends StatefulWidget {
   final Station radio;
@@ -136,7 +136,7 @@ with SingleTickerProviderStateMixin {
     }
         
     if(!isRadio || station != radio.title) {
-      //fire loading
+      //fire loader UI
       /*
       setState(() => isLoading = true) ; // inform UI state
       */
@@ -306,9 +306,9 @@ with SingleTickerProviderStateMixin {
                                           value: 0,
                                           thumbColor: Colors.white,
                                           onChanged: (value) {
-                                            player.seek(
-                                              Duration(  milliseconds: value.round()  )
-                                            );
+                                            // player.seek(
+                                            //   Duration(milliseconds: value.round())
+                                            // );
                                           },  
                                         )
                                       ),
@@ -445,14 +445,14 @@ with SingleTickerProviderStateMixin {
                             stations.shuffle();
 
                             setState(() {
-                              radio = stations[0];
+                              radio = stations.first;
                               initializeRadio();
                             });
 
                           }
                         },
                         icon: Icon(
-                          Iconsax.rotate_right,
+                          Iconsax.radar_1,
                           color: Colors.white
                         ),
                       ),

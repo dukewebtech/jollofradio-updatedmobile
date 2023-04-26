@@ -7,6 +7,10 @@ import 'package:jollofradio/screens/Auth/ProfileScreen.dart';
 import 'package:jollofradio/screens/Auth/SettingScreen.dart';
 import 'package:jollofradio/screens/Auth/SiginInScreen.dart';
 import 'package:jollofradio/screens/Auth/SignUpScreen.dart';
+import 'package:jollofradio/screens/Auth/ForgotScreen.dart';
+import 'package:jollofradio/screens/Auth/ConfirmScreen.dart';
+import 'package:jollofradio/screens/Layouts/Public.dart';
+import 'package:jollofradio/screens/Auth/ResetScreen.dart';
 import 'package:jollofradio/screens/Layouts/User.dart';
 import 'package:jollofradio/screens/User/Category/CategoryScreen.dart';
 import 'package:jollofradio/screens/User/Category/SelectionScreen.dart';
@@ -30,7 +34,7 @@ import 'package:jollofradio/screens/User/Station/StreamScreen.dart';
 import 'package:jollofradio/screens/Welcome/SplashScreen.dart';
 import 'package:jollofradio/screens/Error/ErrorScreen.dart';
 import 'package:jollofradio/screens/Welcome/StartupScreen.dart';
-import 'package:jollofradio/screens/Layouts/WebViewURI.dart';
+import 'package:jollofradio/screens/Layouts/WebView.dart';
 
 
 class ScreenProvider {
@@ -55,6 +59,17 @@ class ScreenProvider {
         return MaterialPageRoute(builder: (context) => InterestScreen(
           token: data['token'],
         ));
+      case FORGOT:
+        return MaterialPageRoute(builder: (context) => ForgotScreen());
+
+      case VERIFY:
+        return MaterialPageRoute(builder: (context) => ConfirmScreen());
+
+      case RESET_PASSWORD:
+        return MaterialPageRoute(builder: (context) => ResetScreen(
+          otp: data['otp'],
+        ));
+
 
       case PROFILE:
         return MaterialPageRoute(builder: (context) => ProfileScreen(
@@ -67,6 +82,10 @@ class ScreenProvider {
           title: data['title'],
           mode: data['mode'],
         ));
+
+      // Public
+      case PUBLIC:
+        return MaterialPageRoute(builder: (context) => PublicLayout());
 
 
       // User
@@ -151,13 +170,14 @@ class ScreenProvider {
 
       case PODCAST:
         return MaterialPageRoute(builder: (context) => EpisodeScreen(
-          playlist: data['playlist']
+          podcast: data['podcast']
         ));
 
       case TRACK_PLAYER:
         return MaterialPageRoute(builder: (context) => PlayerScreen(
           track: data['track'],
           channel: data['channel'],
+          playlist: data['playlist'],
         ));
 
       case RADIO_PLAYER:

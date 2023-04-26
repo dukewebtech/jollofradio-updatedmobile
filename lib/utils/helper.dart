@@ -10,6 +10,32 @@ Map login(Map response) {
 
 }
 
+String shareLink({required type, required data}){
+  List platforms = [
+    'podcast',
+    'station'
+  ];
+
+  if(platforms.contains(type) == (false)){ // err
+    return '';
+  }
+
+  if(type == 'podcast'){
+
+    return 'Listen to: ${data.title} on Jollof Radio at https://app.jollofradio.com/podcast/${data.podcastId}?episode=${data.slug}';
+
+  }
+
+  if(type == 'station'){
+    
+    return 'Listen to: ${data.title} on Jollof Radio at https://app.jollofradio.com/home?station=${data.slug}';
+
+  }
+
+  return '';
+
+}
+
 String numberFormat(num amount){
 
   return NumberFormat.compact().format( amount );

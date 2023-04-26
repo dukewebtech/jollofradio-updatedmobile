@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat</title>
+    <script src="https://code.tidio.co/rbrrrx5kf8ux1vxqsjtbc8q65jcyjxyz.js" async></script>
+    <script>
+    (function() {
+        const onTidioChatApiReady = () => {
+            let preloader = document.getElementById('preloader')
+
+            setTimeout(() => {
+                tidioChatApi.open();
+                preloader.innerText = "";
+            }, 5000);
+        };
+        if (window.tidioChatApi) {
+            window.tidioChatApi.on('ready', onTidioChatApiReady)
+        } else {
+            document.addEventListener(
+                'tidioChat-ready', onTidioChatApiReady // loaded
+            );
+        }
+    })();
+    </script>
+    <style>
+        body {
+            background-color: #030F18;  /* reset background */
+        }
+        #preloader {
+            margin: auto;
+            text-align: center;
+            font-size: small;
+            color: #ffffff;
+            padding-top: 44vh;
+        }
+    </style>
+</head>
+<body>
+    <div id="preloader" data-label="indicator">Loading...</div>
+</body>
+</html>

@@ -1,5 +1,3 @@
-// ignore_for_file: use_build_context_synchronously
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/core/NotificationService.dart';
 import 'package:flutter/material.dart';
@@ -37,13 +35,11 @@ class _SiginInScreenState extends State<SiginInScreen> {
   void initState() {
     // email.text = 'smithjohn@gmail.com';
     // password.text = 'smith.com';
-
     Future(() async {
 
       token = await NotificationService.getToken(); // device ID
 
     });
-
     googleSignIn.init();
     super.initState();
   }
@@ -86,7 +82,8 @@ class _SiginInScreenState extends State<SiginInScreen> {
     Map data = {
       'oauth': 'google',
       'token': signIn.accessToken,
-      'device_id': token
+      'device_id': token,
+      'scope': userType.toUpperCase()
     };
 
     Toaster.info("Signing with Google account... please wait.");
@@ -112,8 +109,8 @@ class _SiginInScreenState extends State<SiginInScreen> {
       final Map auth = login(result)['user'];
       final String token = login(result)['token'];
       Storage.set('token', token);
+      Storage.delete('guest');
 
-      //Invoking providers
       final user = Provider
       .of<UserProvider   >(context, listen: false ); ////////////
 
@@ -157,10 +154,22 @@ class _SiginInScreenState extends State<SiginInScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Labels.primary(
-                "Sign In",
-                fontSize: 30,
-                fontWeight: FontWeight.bold
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Labels.primary(
+                    "Sign In",
+                    fontSize: 30,
+                    fontWeight: FontWeight.bold
+                  ),
+                  Labels.secondary(
+                    "Skip >",
+                    onTap: () {
+                      RouteGenerator.goto(PUBLIC);
+                      Storage.set('guest', true );
+                    }
+                  ),
+                ],
               ),
               SizedBox(height: 40),
               Labels.primary("Email Address, Username"),
@@ -256,7 +265,8 @@ class _SiginInScreenState extends State<SiginInScreen> {
                     onTap: () => RouteGenerator.goto(ONBOARDING),
                   ),
                   Labels.secondary(
-                    "Forgot Password"
+                    "Forgot Password",
+                    onTap: () => RouteGenerator.goto(FORGOT),
                   ),
                 ],
               ),

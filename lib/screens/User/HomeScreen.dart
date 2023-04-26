@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Category.dart';
@@ -50,7 +51,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     //cache manager
     (() async {
-      // /*
       await cacheManager.mount({
         'streams': {
           'data': () async {
@@ -69,7 +69,6 @@ class _HomeScreenState extends State<HomeScreen> {
       }, Duration(
         seconds: 20
       ));
-      // */
 
       fetchStreams() ;
 
@@ -147,7 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
       return categories;
     });
     */
-    
   }
 
   bool hasNotifications(){
@@ -248,14 +246,32 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: Container(
                         width: 40,
                         height: 40,
+                        padding: EdgeInsets.all(0),
                         decoration: BoxDecoration(
                           color: Color(0XFF0D1921),
                           borderRadius: BorderRadius.circular(100)
                         ),
-                        child: Icon(
-                          Iconsax.user,
-                          color: Color(0XFF828282),
-                          size: 16,
+                        clipBehavior: Clip.hardEdge,
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(100),
+                          child: CachedNetworkImage(
+                            imageUrl: user.photo,
+                            placeholder: (context, url) {
+                              return Center(
+                                child: SizedBox(
+                                  width: 15,
+                                  height: 15,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                  )
+                                )
+                              );
+                            },
+                            errorWidget: (context, url, error) => Icon(
+                              Icons.error
+                            ),
+                            fit: BoxFit.cover,
+                          ),
                         ),
                       ),
                     ),
@@ -410,6 +426,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     (episode) => /** */ PodcastTemplate (
                             type: 'grid',
                             episode: episode,
+                            podcasts: streams['trending'],
+
                           ))
                         ]
                       ],
@@ -477,7 +495,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          LibraryScreen.page = 'likes';
+                          LibraryScreen.page = 'Episodes';
                           widget.tabController!(1);
                         },
                         child: Labels.secondary(
@@ -533,6 +551,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                     (episode) => /** */ PodcastTemplate (
                             type: 'grid',
                             episode: episode,
+                            podcasts: streams['likes'],
+
                           ))
                         ]
                       ],

@@ -18,7 +18,7 @@ flutter_native_splash:
 
   # The image parameter allows you to specify an image used in the splash screen.  It must be a
   # png file and should be sized for 4x pixel density.
-  image: assets/images/splash/logo_dark.png
+  image: assets/images/splash/logo_light.png
 
   # The branding property allows you to specify an image used as branding in the splash screen.
   # It must be a png file. Currently, it is only supported for Android < v12 and iOS.
@@ -35,7 +35,7 @@ flutter_native_splash:
   # set.
   color_dark: "#030F18"
   # background_image_dark: "assets/dark-background.png"
-  image_dark: assets/images/splash/logo_white.png
+  image_dark: assets/images/splash/logo_dark.png
   #branding_dark: assets/dart_dark.png
 
   # The android, ios and web parameters can be used to disable generating a splash screen on a given

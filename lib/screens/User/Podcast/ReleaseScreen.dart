@@ -1,7 +1,7 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:jollofradio/config/models/User.dart';
+// import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Playlist.dart';
@@ -17,7 +17,7 @@ class ReleaseScreen extends StatefulWidget {
 }
 
 class _ReleaseScreenState extends State<ReleaseScreen> {
-  late User user;
+  late dynamic user;
   bool isLoading = false;
   List podcasts = [];
 

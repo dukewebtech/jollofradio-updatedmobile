@@ -11,6 +11,7 @@ class Creator {
   final String? address;
   final String? city;
   final String? about;
+  final bool? enrolled;
   final dynamic settings;
   final List? interests;
   final List? notifications;
@@ -33,6 +34,7 @@ class Creator {
     required this.address,
     required this.city,
     required this.about,
+    required this.enrolled,
     required this.settings,
     required this.interests,
     required this.notifications,
@@ -56,6 +58,7 @@ class Creator {
       address: json['address'] ?? '',
       city: json['city'] ?? '',
       about: json['about'] ?? '',
+      enrolled: json['ads_enroll'],
       settings: json['settings'],
       interests: json['interests'],
       notifications: json['notifications'],
@@ -79,6 +82,7 @@ class Creator {
     'address': address,
     'city': city,
     'about': about,
+    'ads_enroll': enrolled,
     'settings': settings,
     'interests': interests,
     'notifications': notifications,

@@ -18,7 +18,7 @@ class Date {
       format("HH")
     ));
 
-    if( getHourly >= 1  && getHourly <  12) return ('Morning');
+    if( getHourly >= 0  && getHourly <  12) return ('Morning');
     if( getHourly >= 12 && getHourly <  17) return ('Afternoon');
     if( getHourly >= 17 && getHourly <  19) return ('Evening');
     if( getHourly >= 19 && getHourly != 00) return ('Evening');

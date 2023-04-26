@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Podcast.dart';
+import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/User/PlaylistController.dart';
 import 'package:jollofradio/config/services/controllers/User/SubscriptionController.dart';
@@ -24,85 +25,104 @@ import 'package:just_audio/just_audio.dart';
 import 'package:share_plus/share_plus.dart';
 
 class EpisodeScreen extends StatefulWidget {
-  final Podcast playlist;
-  const EpisodeScreen({super.key, required this.playlist});
+  final Podcast podcast;
+  const EpisodeScreen({super.key, required this.podcast});
 
   @override
   State<EpisodeScreen> createState() => _EpisodeScreenState();
 }
 
 class _EpisodeScreenState extends State<EpisodeScreen> {
-  late Podcast playlist;
+  late Podcast podcast;
   late ConfettiController confettiController;
   AudioServiceHandler player = AudioServiceHandler();
   late PlaybackState playerState;
   bool isLoading = true;
   bool _fav = false;
+  List<MediaItem> tracks = [];
   MediaItem? currentTrack;
+  List<Episode> episodes = [];
 
   @override
   void initState() {
-    playlist = widget.playlist;
-    _fav = playlist.subscribed;
+    podcast = widget.podcast;
+    _fav = podcast.subscribed;
     confettiController = ConfettiController(duration: Duration(
       seconds: 1
     ));
 
     initPlayer ();
     getPlaylist();
-
     super.initState();
   }
 
   @override
   void dispose() {
     confettiController.dispose();
-
     super.dispose();
   }
 
   Future<void> initPlayer() async {
     audioHandler.playbackState.listen((PlaybackState state) {
-
       currentTrack = player.currentTrack(); // updating track
-
     });
   }
 
   Future<void> getPlaylist() async {
-    int id = playlist.id;
+    int id = podcast.id;
 
     await PlaylistController.show(id).then((playlist) async {
       if(playlist != null){
         setState(() {
-          this.playlist = playlist;
-          isLoading =  false;
+          podcast = playlist;
+          episodes = playlist.episodes!;
+          isLoading = false;
         });
+
+        /*
+        episodes = playlist.episodes!.map<Episode>((episode){
+          return episode;
+        }).toList();
+        */
       }
     });
   }
 
   Future<void> playPodcast() async {
-    if(playlist.episodes!.isEmpty) 
+    if(podcast.episodes!.isEmpty) 
       return;
     
+    /*
+    @deprecated
     var podcast = currentTrack?.extras?['episode']?['podcast'];
     if(podcast != playlist.title){
-      await player.setPlaylist(playlist.episodes!.map((item) {
+    */
+    final playlist = player.getPlaylist() ;
 
-        return MediaItem(
-          id: item.id.toString(),
-          title: item.title,
-          album: item.podcast,
-          artist: item.creator.username(),
-          artUri: Uri.parse(item.logo),
-          extras: {
-            "url": item.source,
-            "episode": item.toJson()
-          }
-        );
+    podcast.episodes!.map( (dynamic item) {
+      item = MediaItem(
+        id: item.id.toString(),
+        title: item.title,
+        album: item.podcast,
+        artist: item.creator?.username() ?? '', //null check
+        artUri: Uri.parse(item.logo),
+        extras: {
+          "url": item.source,
+          "episode": item.toJson()
+        }
+      );
+      tracks.add(item);
+    }).toList();
 
-      }).toList());
+    bool onTrack = tracks.every((element) {
+      //
+      return playlist.any(
+        (e) => e.id == element.id) == true; // check tracks
+      //
+    });
+
+    if((!onTrack || onTrack == false)){
+      await player.setPlaylist(tracks);
 
       player.play();
     }
@@ -112,14 +132,13 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
       
       else 
         player.pause();
-
     }
   }
 
   Future<void> _doSubscribe() async {
     bool subscribing = !_fav;
     Map data = {
-      'podcast_id': playlist.id
+      'podcast_id': podcast.id
     };
 
     setState(() {
@@ -134,7 +153,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
           return;
         }
         Toaster.info(
-          "You've subscribed to podcast: ${ playlist.title }"
+          "You've subscribed to podcast: ${ podcast.title }"
         );
       });
     }
@@ -179,7 +198,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: CachedNetworkImage(
-                  imageUrl: playlist.logo,
+                  imageUrl: podcast.logo,
                   placeholder: (context, url) {
                     return Center(
                       child: SizedBox(
@@ -213,7 +232,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                   SizedBox(
                     width: double.infinity,
                     child: Text(
-                      playlist.description ?? "No description currently ${
+                      podcast.description  ?? "No description currently ${
                         ""
                       }available on this podcast at the moment.", ////////
                       style: TextStyle(
@@ -225,7 +244,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                     ),
                   ),
                   if(textOverflow(
-                    playlist.description ?? '',
+                    podcast.description ?? '',
                     TextStyle(
                       fontSize: 14
                     ),
@@ -238,13 +257,13 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                         context: context, 
                         builder: (context) {
                           return AlertDialog(
-                            title: Text(playlist.title, style: TextStyle(
+                            title: Text(podcast.title, style: TextStyle(
                               color: AppColor.primary,
                               fontSize: 15,
                               fontWeight: FontWeight.bold
                             )),
                             content: Text(
-                              playlist.description ?? '',
+                              podcast.description ?? '',
                               style: TextStyle(fontSize: 14),
                             ),
                           );
@@ -267,7 +286,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Text(
-                            playlist.title, style: TextStyle(
+                            podcast.title, style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.bold,
                               color: Color(0XFFFFFFFF)
@@ -279,7 +298,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                               text: "by ",
                               children: <InlineSpan>[
                                 TextSpan(
-                                  text: playlist.creator.username(),
+                                  text: podcast.creator.username(),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     color: AppColor.secondary.withOpacity(
@@ -290,7 +309,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                   TapGestureRecognizer()
                                   ..onTap = (){
                                     RouteGenerator.goto(CREATOR_PROFILE, {
-                                      "creator": playlist.creator,
+                                      "creator": podcast.creator,
                                     }); 
                                   },
                                 )
@@ -342,7 +361,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                             height: 40,
                             alignment: Alignment.center,
                             decoration: BoxDecoration(
-                              color: playlist.episodes!.isEmpty==true ? 
+                              color: podcast.episodes!.isEmpty==true ? 
                               Color(0XFF0D1921) : AppColor.secondary,
                               borderRadius: BorderRadius.circular(100)
                             ),
@@ -355,7 +374,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
 
                                 if(
                                   playing == true && currentTrack?.extras?
-                                  ['episode']?['podcast'] != playlist.title) {
+                                  ['episode']?['podcast'] != podcast.title) {
                                     playing = false;
                                     processingState = ProcessingState.ready;
                                 }
@@ -373,7 +392,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                       height: 15,
                                       child: CircularProgressIndicator(
                                         strokeWidth: 2,
-                                        color: playlist.episodes!.isEmpty ? 
+                                        color: podcast.episodes!.isEmpty ? 
                                         AppColor.secondary : AppColor.primary
                                       )
                                     ),
@@ -386,7 +405,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                   onPressed:()=> playPodcast(),
                                   icon: Icon(
                                     !playing ? Icons.play_arrow : Icons.pause,
-                                    color: playlist.episodes!
+                                    color: podcast.episodes!
                                     .isEmpty ? Colors.white : Colors.black,
                                     size: 20,
                                   ),
@@ -400,9 +419,9 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                           GestureDetector(
                             onTap: () async{
                               await Share.share(
-                                'Listen to: ${playlist.title} on Jollof Radio', 
+                                'Listen to: ${podcast.title} on Jollof Radio', 
                                 subject: 'Listen to: ${
-                                  playlist.title
+                                  podcast.title
                                 } on Jollof Radio for FREE');
                             },
                             child: Icon(
@@ -430,7 +449,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                   Spacer(),
                   if(!isLoading)
                   Labels.secondary(
-                    "${playlist.episodes!.length} Episode(s)",
+                    "${podcast.episodes!.length} Episode(s)",
                     margin: EdgeInsets.zero
                   )
                 ],
@@ -445,7 +464,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                       )
                     ]
                     else
-                    if(playlist.episodes!.isEmpty)
+                    if(podcast.episodes!.isEmpty)
                       FadeIn(
                         child: Container(
                           width: double.infinity,
@@ -478,11 +497,12 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                         FadeInUp(
                           child: Column(
                             children: [
-                              ...playlist
+                              ...podcast
                                 .episodes!.map((episode) => PodcastTemplate(
                                 key: UniqueKey(),
                                 type: 'list',
                                 episode: episode,
+                                podcasts: episodes
                               ))
                             ],
                           ),

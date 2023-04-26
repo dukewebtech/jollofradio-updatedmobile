@@ -76,7 +76,6 @@ class AuthController {
     String telephone = data['telephone'];
     String password = data['password'];
     String confirmPassword = data['confirmPassword'];
-
     data['firstname'] = firstname;
     data['lastname'] = lastname;
 
@@ -259,6 +258,51 @@ class AuthController {
     }
 
     return {};
+  }
+
+  static Future forgot(Map data) async {
+    var request = await api().post(endpoint(FORGOT_ROUTE), 
+      data
+    ).then(
+      (data){
+
+      return response(data['status'], 
+        message: data['message'],
+        data: data['data'], ///////////////////////////////
+      );
+    });
+
+    return request;
+  }
+
+  static Future verify(Map data) async {
+    var request = await api().post(endpoint(FORGOT_ROUTE+ '/verify'), 
+      data
+    ).then(
+      (data){
+
+      return response(data['status'], 
+        message: data['message'],
+        data: data['data'], ///////////////////////////////
+      );
+    });
+
+    return request;
+  }
+
+  static Future reset(Map data) async {
+    var request = await api().post(endpoint(FORGOT_ROUTE+ '/complete'), 
+      data
+    ).then(
+      (data){
+
+      return response(data['status'], 
+        message: data['message'],
+        data: data['data'], ///////////////////////////////
+      );
+    });
+
+    return request;
   }
 
   static Future<void> logout() async {

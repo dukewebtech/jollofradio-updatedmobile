@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/SearchController.dart';
 import 'package:jollofradio/config/services/controllers/User/PlaylistController.dart';
-import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Creator.dart';
@@ -14,7 +12,6 @@ import 'package:jollofradio/utils/helpers/Factory.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Input.dart';
 import 'package:jollofradio/widget/Labels.dart';
-import 'package:provider/provider.dart';
 
 class ResultScreen extends StatefulWidget {
   final String query;
@@ -25,7 +22,6 @@ class ResultScreen extends StatefulWidget {
 }
 
 class _ResultScreenState extends State<ResultScreen> {
-  late User user;
   bool isLoading = true;
 
   TextEditingController search = TextEditingController();
@@ -37,8 +33,10 @@ class _ResultScreenState extends State<ResultScreen> {
 
   @override
   void initState() {
+    /*
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
+    */
 
     search.text = widget.query;
 
@@ -108,6 +106,7 @@ class _ResultScreenState extends State<ResultScreen> {
                     onSubmit: (value){
                       
                       if(value.isNotEmpty) _doSearch(value);
+                      
                     }
                   ),
                   Positioned(
@@ -116,6 +115,7 @@ class _ResultScreenState extends State<ResultScreen> {
                       splashColor: Colors.transparent,
                       highlightColor: Colors.transparent,
                       onPressed: () {
+                        
                         if(search.text.isNotEmpty)
                         _doSearch(search.text);
                         

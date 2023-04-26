@@ -33,9 +33,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
     }
 
-    setState(() {
-      //
-    });
+    setState(() { });
+    
   }
 
   @override
@@ -104,6 +103,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
                       ...playlist.collection.map((ep) => PodcastTemplate(
                         type: 'list',
                         episode: ep,
+                        podcasts: playlist.collection,
                         playlist: playlist,
                         onPlaylist: true,
                         callback: callback

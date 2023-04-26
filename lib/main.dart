@@ -28,7 +28,7 @@ Future main() async {
   .then((_) async {
     AudioServiceHandler.init({
       'userAgent': "Jollofradio/1.0 (Linux;Android 12) - v2.0 player",
-      'channelId': "com.jollofradio.com",
+      'channelId': "com.jollofradio.app",
       'channelName': "Audio Service App",
     });
     NotificationService.initialize(

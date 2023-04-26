@@ -1,22 +1,87 @@
+import 'dart:convert';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jollofradio/config/models/Station.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
+import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/toaster.dart';
+import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-class RadioTemplate extends StatelessWidget {
+class RadioTemplate extends StatefulWidget {
   final Station station;
+  final dynamic callback;
 
   const RadioTemplate({
     super.key,
-    required this.station
+    required this.station,
+    this.callback
   });
+
+  @override
+  State<RadioTemplate> createState() => _RadioTemplateState();
+}
+
+class _RadioTemplateState extends State<RadioTemplate> {
+  bool _fav = false;
+  late Station station;
+
+  @override
+  void initState() {
+    station = widget.station;
+    getFavorites();
+
+    super.initState();
+  }
+
+  Future<dynamic> addToFavorites() async {
+    await Storage.get('favRadio',Map).then((stations)  {
+      stations = stations ?? [];
+
+      if(!_fav){
+        stations.add(station.toJson());
+      }
+      else{
+        stations.removeWhere((item){
+          return item['title'] == station.title; //select
+        });
+
+        if(widget.callback != (null)) {
+          widget.callback!(station, {
+            "station": true
+          });
+        }
+      }
+
+      Storage.set(
+        'favRadio', jsonEncode(stations)
+      );
+
+      setState(() {
+        _fav = !_fav;
+      });
+    });
+  }
+
+  Future<dynamic> getFavorites() async {    
+    await Storage.get('favRadio',Map).then((stations)  {
+      if(stations == null)
+        return;
+
+      _fav = stations.any((item){
+        return item['title'] == station.title;
+      });
+
+      setState(() { });
+      
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -109,19 +174,30 @@ class RadioTemplate extends StatelessWidget {
                             ),
                             Spacer(),
                             Container(
-                              width: 60,
+                              width: 85,
                               margin: EdgeInsets.only(left: 10),
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: <Widget>[
                                   GestureDetector(
+                                    onTap: () => addToFavorites(),
+                                    child: !_fav ? Icon(
+                                      Iconsax.heart, 
+                                      color: Color(0XFF575C5F),
+                                      size: 18,
+                                    ) : Icon(
+                                      Iconsax.heart5, 
+                                      color: AppColor.secondary,
+                                      size: 18,
+                                    ),
+                                  ),
+                                  GestureDetector(
                                     onTap: () async {
 
                                       await Share.share(
-                                        'Listen to: ${station.title} on Jollof Radio', 
-                                        subject: 'Listen to: ${
-                                          station.title
-                                        } on Jollof Radio for FREE'
+                                        shareLink(
+                                          type: 'station', data: station
+                                        )
                                       );
                                       
                                     },
@@ -133,7 +209,6 @@ class RadioTemplate extends StatelessWidget {
                                   ),
                                   GestureDetector(
                                     onTap: () async {
-
                                       Map? social = station.handles; //fetch handles
                                       if( social != null
                                       && social.containsKey('twitter')){
@@ -141,7 +216,6 @@ class RadioTemplate extends StatelessWidget {
                                         String url = station. handles! [
                                           'twitter'
                                         ];
-
                                         await launchUrl(Uri.parse(url)); //redirects
                                         return;
 
@@ -150,7 +224,6 @@ class RadioTemplate extends StatelessWidget {
                                       return Toaster.info(
                                         "No Twitter handle available at the moment."
                                       );
-                                      
                                     },
                                     child: Icon(
                                       FontAwesomeIcons.twitter, 

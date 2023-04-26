@@ -100,7 +100,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
         }
 
         RouteGenerator.goto(PODCAST, {
-          "playlist": widget.playlist
+          "podcast": widget.playlist
         });
 
       },

@@ -1,11 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
-import 'package:jollofradio/config/models/User.dart';
-import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Radio.dart';
 import 'package:jollofradio/widget/Buttons.dart';
-import 'package:provider/provider.dart';
 
 class StationScreen extends StatefulWidget {
   final String title;
@@ -22,16 +19,11 @@ class StationScreen extends StatefulWidget {
 }
 
 class _StationScreenState extends State<StationScreen> {
-  late User user;
   late List stations;
   
   @override
   void initState() {
-    var auth = Provider.of<UserProvider>(context,listen: false);
-    user = auth.user;
-
     stations = widget.stations;
-    
     super.initState();
   }
 
@@ -55,7 +47,6 @@ class _StationScreenState extends State<StationScreen> {
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-
               if(stations.isEmpty) ...[
                 Container(
                   height: 300,
@@ -90,7 +81,6 @@ class _StationScreenState extends State<StationScreen> {
                   station: radio,
                 ))
               ]
-              
             ],
           ),
         ),

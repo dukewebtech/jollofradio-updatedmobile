@@ -175,7 +175,7 @@ class AudioServiceHandler
     super.stop();
   }
 
-  List getPlaylist() => audioHandler.queue.value; //queue list
+  List<MediaItem> getPlaylist() => audioHandler.queue.value  ;
   
   Future<void> setPlaylist(List<MediaItem> mediaItems) async {
     // Stop Streaming
@@ -198,7 +198,7 @@ class AudioServiceHandler
       ]
     );
 
-    player.setAudioSource(
+    await player.setAudioSource(
       //
       playlist, initialIndex: 0,initialPosition: Duration.zero
       //

@@ -57,12 +57,12 @@ class AudioSessionHandler {
         switch (event.type) {
           case AudioInterruptionType.duck:
             // The interruption has ended and we should unduck
-            await player.play();
+            // await player.play();
             break;
 
           case AudioInterruptionType.pause:
             // The interruption ended and we should resume api
-            await player.play();
+            // await player.play();
             break;
 
           case AudioInterruptionType.unknown:

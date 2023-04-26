@@ -2,6 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 
+
+bool _running = false;
+
 class CacheStream {
   Map _streams = {};
   Timer? _timer;
@@ -18,8 +21,16 @@ class CacheStream {
 
     //mount listeners
     if(refresh != null){
-    _timer?.cancel();
-    _timer = Timer.periodic(refresh, (tick) => _store());
+      List keys = streams.keys.toList(); //get only keys
+
+      if((await timer(keys, refresh))){
+        if(_running)
+          return;
+      }
+
+      _running = true ;
+      _timer?.cancel();
+      _timer = Timer.periodic(refresh, (_) => _store());
     }
   }
 
@@ -49,7 +60,46 @@ class CacheStream {
     print(garbage.toString()+' successfully unmounted!');
 
     mounted = false;
+    Storage.delete( '_timer' );
     _timer?.cancel();
+  }
+
+  Future<dynamic> timer(
+    List keys, Duration interval) async {
+    
+    bool active = false;
+    Map? timer = await Storage.get('_timer', Map) ?? { };
+
+    if(timer!.isEmpty){
+      timer = {'timer': <String, dynamic>{}};
+
+      keys.map
+      ((e) => timer!['timer'][e] = interval.toString( ) )
+      .toList();
+
+      //store new time
+      Storage.set('_timer', timer);  //mounting reference
+
+    }
+    else {
+      //check all keys
+      bool isSet = keys.every((stream){
+        var sync = interval.toString();
+
+        bool exist = timer!['timer']?[stream] == (sync) ;
+        if(!exist){
+          timer['timer']?[stream] = sync;
+        }
+
+        return exist;
+      });
+
+      Storage.set('_timer', timer);  //mounting reference
+
+      active = isSet;
+    }
+
+    return active; 
   }
 
   Future<void> _store([String? cache]) async {
@@ -83,7 +133,7 @@ class CacheStream {
 
       } catch(e) {
 
-        print( e.toString() );
+        print(e.toString());
 
       }
     });
@@ -105,7 +155,7 @@ class CacheStream {
       data = (getStream);
 
       if(callback != null){
-        print("Initiating callback on stream: $stream.");
+        print("initiating callback on stream: $stream.");
 
         data = await callback( // transforms the response
           data

@@ -11,6 +11,7 @@ class Input {
     TextEditingController? controller, IconData? leadingIcon, 
     IconData? trailingIcon,
     bool password = false,
+    TextAlign textAlign = TextAlign.left,
     Function(String value)? onChanged,
     Function(String value)? onSubmit,
   }){
@@ -31,6 +32,7 @@ class Input {
         color: Colors.white24,
         size: Input.iconSize,
       ) : null,
+      align: textAlign,
       password: password,
       onChanged: onChanged,
       onSubmitted: onSubmit,
@@ -42,6 +44,7 @@ class Input {
     TextEditingController? controller, IconData? leadingIcon, 
     IconData? trailingIcon,
     bool password = false,
+    TextAlign textAlign = TextAlign.left,
     Function(String value)? onChanged,
     Function(String value)? onSubmit,
   }){
@@ -53,14 +56,15 @@ class Input {
       borderRadius: 7,
       icon: leadingIcon != null ? /*show*/ Icon( ////////////
         leadingIcon, 
-        color: Colors.white24,
+        color: Colors.black,
         size: Input.iconSize,
       ) : null,
       trailingIcon: trailingIcon != null ? Icon( ////////////
         trailingIcon, 
-        color: Colors.white24,
+        color: Colors.black,
         size: Input.iconSize,
       ) : null,
+      align: textAlign,
       password: password,
       onChanged: onChanged,
       onSubmitted: onSubmit,

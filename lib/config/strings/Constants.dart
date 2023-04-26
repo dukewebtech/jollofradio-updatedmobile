@@ -3,14 +3,21 @@
 const String SPLASH = '/';
 const String ONBOARDING = '/onboarding';
 
+
 // Auth
 const SIGNIN = '/signin';
 const SIGNUP = '/signup';
 const SIGNUP_ONBOARD = '/signup/onboard';
+const FORGOT = '/forgot';
+const VERIFY = '/forgot/verify';
+const RESET_PASSWORD = '/reset';
 const PROFILE = '/profile';
 const PROFILE_EDIT = '/profile/edit';
 
-// User
+//PUBLIC
+const PUBLIC = '/public/home';
+
+//USER
 const DASHBOARD = '/user/dashboard';
 const HOME = '/user/home';
 const LIBRARY = '/user/library';
@@ -34,7 +41,7 @@ const RADIO_PLAYER = '/radio/player/:id';
 const SETTINGS = '/user/setting';
 const NOTIFICATION = '/user/notifications';
 
-// Creator
+//CREATOR
 const CREATOR_DASHBOARD = '/creator/dashboard';
 
 const WEBVIEW = '/webview';

@@ -76,7 +76,7 @@ class TextInput extends StatelessWidget {
           hintText: label,
           hintStyle: TextStyle(
             fontSize: fontSize,
-            color: color
+            color: Colors.white24
           ),
 
           border: OutlineInputBorder(

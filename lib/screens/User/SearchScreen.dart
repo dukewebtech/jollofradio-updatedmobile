@@ -36,7 +36,7 @@ class _SearchScreenState extends State<SearchScreen> {
     //cache manager
     (() async {
       await cacheManager.mount({
-        'categories': {
+        'category': {
           'data': () async {
             return await CategoryController.index();
           },
@@ -53,7 +53,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
   Future<void> getCategory() async {
     final category = await cacheManager.stream( ///////////////
-      'categories', 
+      'category', 
       fallback: () async {
         return CategoryController.index();
       },

@@ -2,19 +2,25 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/User.dart';
+import 'package:jollofradio/config/models/Station.dart';
 import 'package:jollofradio/config/services/controllers/User/StreamController.dart';
 import 'package:jollofradio/config/services/controllers/User/SubscriptionController.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Playlist.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
+import 'package:jollofradio/screens/Layouts/Templates/Radio.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
+import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:provider/provider.dart';
 
 class LibraryScreen extends StatefulWidget {
   static String? page;
+  final List? playlist;
   final Function(int page)? tabController;
-  const LibraryScreen(this.tabController, {super.key});
+  const LibraryScreen(
+    this.tabController, {this.playlist, super.key}
+  );
 
   @override
   State<LibraryScreen> createState() => _LibraryScreenState();
@@ -26,12 +32,15 @@ class _LibraryScreenState extends State<LibraryScreen>
   late TabController tabController;
   CacheStream cacheManager = CacheStream();
   late String? page;
+  late List? playlist;
   Map tabs = {
-    "subscribed": 0,
-    "likes": 1
+    "Podcasts": 0,
+    "Episodes": 1,
+    "Stations": 2,
   };
   bool isLoading = true;
   late Map subscriptions;
+  List stations = [];
 
   @override
   void initState() {
@@ -40,10 +49,11 @@ class _LibraryScreenState extends State<LibraryScreen>
 
     tabController = TabController(
       initialIndex: 0,
-      length: 2, 
+      length: 3, 
       vsync: this
     );
     page = LibraryScreen.page;
+    playlist = widget.playlist;
 
     if(page != null){
       tabController.animateTo(tabs[page]);
@@ -72,10 +82,24 @@ class _LibraryScreenState extends State<LibraryScreen>
       }, null);
 
       getSubscription();
+      getFavorites();
 
     }());
 
     super.initState();
+  }
+
+  Future<dynamic> getFavorites() async {
+    await Storage.get('favRadio',Map).then((stations)  async  {
+      if(stations == null)
+        return;
+
+      setState(() { 
+        this.stations = stations.map((dynamic station) /* */  {
+          return Station.fromJson(station);
+        }).toList();
+      });
+    });
   }
 
   Future<void> getSubscription() async {
@@ -98,6 +122,7 @@ class _LibraryScreenState extends State<LibraryScreen>
     this.subscriptions['likes'] = ( streams['likes'] as List );
 
     setState(() {
+      playlist =  ( playlist ?? this.subscriptions ['likes'] );
       isLoading = false;
     });
   }
@@ -106,18 +131,20 @@ class _LibraryScreenState extends State<LibraryScreen>
     data = data ?? {};
     getSubscription();
 
-    if(data.containsKey ('unliked')){
-      subscriptions
-      ['likes']   .removeWhere((e) => e.id == ( resource.id ));
-    }
-
     if(data.containsKey ('deleted')){
       subscriptions
       ['podcasts'].removeWhere((e) => e.id == ( resource.id ));
     }
 
+    if(data.containsKey ('unliked')){
+      subscriptions
+      ['likes']   .removeWhere((e) => e.id == ( resource.id ));
+    }
+
+    if(data.containsKey ('station')){
+      stations    .removeWhere((e) => e.id == ( resource.id ));
+    }
     setState(() {});
-    
   }
 
   @override
@@ -154,12 +181,9 @@ class _LibraryScreenState extends State<LibraryScreen>
                 labelColor: Colors.white,
                 unselectedLabelColor: Color(0XFF575C5F),
                 tabs: [
-                  Tab(
-                    child: /**/const Text("Subscribed"),
-                  ),
-                  Tab(
-                    child: /**/const Text("Liked" + ""),
-                  ),
+                  ...tabs.entries.map<Tab>((tab) {
+                    return Tab(child: Text(tab.key));
+                  })
                 ],
               ),
             ),
@@ -280,7 +304,63 @@ class _LibraryScreenState extends State<LibraryScreen>
                                   key: UniqueKey(),
                                   type: 'list',
                                   episode: ep,
+                                  podcasts: playlist,
                                   callback: callback
+                                ))
+                              ],
+                            ),
+                          )
+                        ]
+                      ],
+                    ),
+                  ),
+                  SingleChildScrollView(
+                    child: Column(
+                      children: [
+                        if(isLoading || stations.isEmpty) ...[
+                          Container(
+                            margin: EdgeInsets.only(
+                              top: MediaQuery.of(context).size.height / 3.3
+                            ),
+                            padding: EdgeInsets.fromLTRB(40, 20, 40, 10),
+                            child: Column(
+                              children: <Widget>[
+                                if(isLoading)
+                                  Center(
+                                    child: const CircularProgressIndicator(),
+                                  )
+                                else
+                                Column(
+                                  children: <Widget>[
+                                    Icon(
+                                      Iconsax.heart,
+                                      size: 40,
+                                      color: Color(0XFF9A9FA3),
+                                    ),
+                                    SizedBox(
+                                      height: 10,
+                                    ),
+                                    Text(
+                                      Message.no_activity,
+                                      style: TextStyle(color: Color(0XFF9A9FA3),
+                                        fontSize: 14
+                                      ),
+                                      textAlign: TextAlign.center,
+                                    )
+                                  ],
+                                )
+                              ],
+                            ),
+                          )
+                        ]
+                        else ...[
+                          FadeIn(
+                            child: Column(
+                              children: <Widget>[
+                                ...stations.map((dynamic station) => RadioTemplate(
+                                  key: UniqueKey(),
+                                  station: station,
+                                  callback: callback,
                                 ))
                               ],
                             ),
