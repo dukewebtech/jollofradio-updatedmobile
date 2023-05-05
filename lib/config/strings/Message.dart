@@ -14,5 +14,27 @@ class Message {
   static String launch = "We're developing an amazing product that will change your podcast game.";
   static String launch_message = "Earn amazing prices or get paid instantly to advertise on your podcasts, for companies worldwide via the JollofRadio monetization program";
   static String enrolled = "Nice! You've been enrolled to the monetization beta program. You'll be preinformed before the launch.";
+  static String share_podcast = "Listen to: #title on Jollof Radio at https://app.jollofradio.com/podcast/#podcast";
+  static String share_episode = "Listen to: #title on Jollof Radio at https://app.jollofradio.com/podcast/#podcast?episode=#episode";
+  static String share_station = "Listen to: #title on Jollof Radio at https://app.jollofradio.com/home?station=#station";
+
+
+
+
+
+  static String build(String message, [Map? data]) {
+    if(data != null){
+      for (var entry in data.entries) {
+
+        message = message.replaceFirst(
+          RegExp('#'+entry.key), entry.value.toString()
+        );
+        
+      }
+    }
+    
+    return message;
+
+  }
 
 }

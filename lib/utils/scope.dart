@@ -8,13 +8,23 @@ String routeScope(String scope, Map routes){
 
 }
 
-Future<bool> isCreator() async {
+Future<dynamic> auth() async {
+  
   //read user object
   final user = await Storage.get('user', Map);
   if(user == null)
     return false;
 
+  return user;
+
+}
+
+Future<bool> isCreator() async {
+  final prof = await auth(); //get logged user
+  if(prof == null)
+    return false;
+
   //check for entity
-  return (user['podcasts'] != null) == (true);
+  return (prof['podcasts'] != null) == (true);
 
 }

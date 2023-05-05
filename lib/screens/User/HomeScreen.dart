@@ -146,6 +146,7 @@ class _HomeScreenState extends State<HomeScreen> {
       return categories;
     });
     */
+    
   }
 
   bool hasNotifications(){
@@ -321,6 +322,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                     (episode) => /** */ PodcastTemplate (
                             type: 'play',
                             episode: episode,
+                            podcasts: streams['recent'],
                             callback: callback,
                           ))
                         ]
@@ -427,7 +429,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             type: 'grid',
                             episode: episode,
                             podcasts: streams['trending'],
-
                           ))
                         ]
                       ],
@@ -495,7 +496,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          LibraryScreen.page = 'Episodes';
+                          LibraryScreen.page = 'Liked';
                           widget.tabController!(1);
                         },
                         child: Labels.secondary(
@@ -552,7 +553,6 @@ class _HomeScreenState extends State<HomeScreen> {
                             type: 'grid',
                             episode: episode,
                             podcasts: streams['likes'],
-
                           ))
                         ]
                       ],

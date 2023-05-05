@@ -5,6 +5,7 @@ import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
 import 'package:jollofradio/widget/Buttons.dart';
+import 'package:jollofradio/widget/Player.dart';
 
 class PodcastResult extends StatefulWidget {
   final List<Episode> podcasts;
@@ -25,7 +26,6 @@ class _PodcastResultState extends State<PodcastResult> {
     user = auth.user;
     */
     podcasts = widget.podcasts;
-    
     super.initState();
   }
 
@@ -42,56 +42,68 @@ class _PodcastResultState extends State<PodcastResult> {
           height: double.infinity,
           margin: EdgeInsets.only(
             top: 0,
-            left: 20, 
-            right: 20
           ),
-          child: SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Column(
-                  children: [
-                    FadeIn(
-                      child: GridView.builder(
-                        shrinkWrap: true,
-                        padding: EdgeInsets.zero,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          childAspectRatio: 100 / 125,
-                          crossAxisCount: 2,
-                          crossAxisSpacing: 10,
-                        ),
-                        physics: 
-                        ScrollPhysics(parent: NeverScrollableScrollPhysics(  )),
-                        itemCount: podcasts.length,
-                        itemBuilder: (context, index){
-                          return GestureDetector(
-                            onTap: () {
-                              RouteGenerator.goto(TRACK_PLAYER, {
-                                "track": podcasts[index],
-                                "channel": "podcast"
-                              });
-                            },
-                            child: Container(
-                              margin: EdgeInsets.only(
-                                bottom: 10
-                              ),
-                              child: AbsorbPointer(
-                                child: PodcastTemplate(
-                                  type: 'grid',
-                                  compact: true,
-                                  episode: podcasts[index] ///////////////////////
+          child: Column(
+            children: [
+              Expanded(
+                child: Container(
+                  margin: EdgeInsets.only(
+                    left: 20, 
+                    right: 20
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Column(
+                          children: [
+                            FadeIn(
+                              child: GridView.builder(
+                                shrinkWrap: true,
+                                padding: EdgeInsets.zero,
+                                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                                  childAspectRatio: 100 / 125,
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 10,
                                 ),
+                                physics: 
+                                ScrollPhysics(parent: NeverScrollableScrollPhysics(  )),
+                                itemCount: podcasts.length,
+                                itemBuilder: (context, index){
+                                  return GestureDetector(
+                                    onTap: () {
+                                      RouteGenerator.goto(TRACK_PLAYER, {
+                                        "track": podcasts[index],
+                                        "channel": "podcast",
+                                        "playlist": podcasts
+                                      });
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.only(
+                                        bottom: 10
+                                      ),
+                                      child: AbsorbPointer(
+                                        child: PodcastTemplate(
+                                          type: 'grid',
+                                          compact: true,
+                                          episode: podcasts[index], ////////////////////
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                }
                               ),
                             ),
-                          );
-                        }
-                      ),
+                          ],
+                        ),
+                      ]
                     ),
-                  ],
+                  ),
                 ),
-              ]
-            ),
+              ),
+              Player()
+            ],
           ),
         ),
       ),

@@ -216,7 +216,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 Column(
                   children: <Widget>[
-                    
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: <Widget>[
@@ -386,6 +385,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ...statistics!['top_episode'].map((episode) {
                       return EpisodeTemplate(
                         episode: episode,
+                        podcasts: statistics!['top_episode']
                       );
                     })
                   ],

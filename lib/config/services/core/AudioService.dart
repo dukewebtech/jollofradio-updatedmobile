@@ -179,7 +179,7 @@ class AudioServiceHandler
   
   Future<void> setPlaylist(List<MediaItem> mediaItems) async {
     // Stop Streaming
-    stop();
+    await stop();
     
     // Audio Services
     // /*
@@ -244,10 +244,15 @@ class AudioServiceHandler
   MediaItem? currentTrack() {
     int? index = player.currentIndex;
     if(index != null){
+      if(player.shuffleModeEnabled) {
+        index = player.shuffleIndices!.indexOf( /////////////
+          index
+        );
+      }
+
       final MediaItem track = audioHandler.queue.value[index];
       return track;
     }
-    
     return null;
   }
 
@@ -259,9 +264,7 @@ class AudioServiceHandler
       int seek = index + 1;
 
       if((playlist.asMap().containsKey(seek) == true)==true){
-
         track = playlist[seek];
-        
       }
     }
     return track;
@@ -275,9 +278,7 @@ class AudioServiceHandler
       int seek = index - 1;
 
       if((playlist.asMap().containsKey(seek) == true)==true){
-
         track = playlist[seek];
-
       }
     }
     return track;
@@ -376,9 +377,9 @@ class AudioServiceHandler
   Future<void> setShuffleMode(
                   AudioServiceShuffleMode shuffleMode) async {
     bool enabled = shuffleMode == AudioServiceShuffleMode.all;
-    if(enabled) 
+    if(enabled) {
       await ( player.shuffle() ); ////////////////////////////
-
+    }
     player.setShuffleModeEnabled( ////////////////////////////
       enabled
     );
@@ -396,5 +397,4 @@ class AudioServiceHandler
 
     player.setLoopMode(loopMode); ////////////////////////////
   }
-
 }

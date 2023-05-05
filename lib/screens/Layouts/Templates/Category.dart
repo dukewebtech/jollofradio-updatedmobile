@@ -9,11 +9,13 @@ import 'package:jollofradio/utils/colors.dart';
 class CategoryTemplate extends StatelessWidget {
   final Category category;
   final bool compact;
+  final bool expand;
 
   const CategoryTemplate({
     super.key, 
     required this.category,
-    this.compact = false
+    this.compact = false,
+    this.expand = false,
   });
 
   @override
@@ -26,7 +28,7 @@ class CategoryTemplate extends StatelessWidget {
         });
       },
       child: Container(
-        width: 140,
+        width: !expand ? 140 : 145,
         height: 140,
         margin: EdgeInsets.only(right: compact ? 0 : 10),
         alignment: Alignment.topCenter,
@@ -105,6 +107,5 @@ class CategoryTemplate extends StatelessWidget {
         ),
       ),
     );
-    
   }
 }

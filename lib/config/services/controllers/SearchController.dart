@@ -1,3 +1,4 @@
+import 'package:jollofradio/config/models/Category.dart';
 import 'package:jollofradio/config/models/Creator.dart';
 import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/models/Podcast.dart';
@@ -16,6 +17,7 @@ class SearchController {
       'playlist': <Podcast>[],
       'podcasts': <Episode>[],
       'creators': <Creator>[],
+      'category': <Category>[],
     };
 
     if (request.containsKey('data')){
@@ -24,6 +26,7 @@ class SearchController {
       List podcasts = data['podcasts'];
       List episodes = data['episodes'];
       List creators = data['creators'];
+      List category = data['category'];
 
       for(var podcast in podcasts){
         
@@ -40,6 +43,12 @@ class SearchController {
       for(var creator in creators){
         
         results['creators'].add(Creator.fromJson(creator));
+         
+      }
+
+      for(var catItem in category){
+        
+        results['category'].add(Category.fromJson(catItem));
          
       }
     }

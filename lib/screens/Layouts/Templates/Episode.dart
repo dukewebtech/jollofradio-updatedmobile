@@ -10,10 +10,12 @@ import 'package:share_plus/share_plus.dart';
 
 class EpisodeTemplate extends StatefulWidget {
   final Map episode;
+  final List? podcasts;
 
   const EpisodeTemplate({
     super.key,
     required this.episode,
+    this.podcasts
   });
 
   @override
@@ -22,6 +24,7 @@ class EpisodeTemplate extends StatefulWidget {
 
 class _EpisodeTemplateState extends State<EpisodeTemplate> {
   late Episode episode;
+  List? podcasts;
 
   @override
   void initState() {
@@ -30,8 +33,15 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
     user = auth.user;
     */
     var data = (widget.episode);
+    
+    episode = toEpisode( data );
+    podcasts = widget.podcasts;
 
-    episode = Episode.fromJson({
+    super.initState(); 
+  }
+
+  Episode toEpisode(Map data) { ///////////////////////////////
+    return Episode.fromJson({
       "id": data['id'],
       "creator": null,
       "title": data['title'],
@@ -43,18 +53,17 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
       "streams": data['streams'],
       "meta": data['meta'],
       "podcast": data['podcast']['title'],
-      "podcastId": data['podcast']['podcastId'],
+      "podcast_id": data['podcast']['id'],
       "liked": false,
       "created_at": data['created_at'],
     });
-
-    super.initState(); 
+    
   }
 
   Future<void> _share() async {
     await Share.share(
       shareLink(
-        type: 'podcast', data: episode
+        type: 'episode', data: episode
       )
     );
   }
@@ -67,7 +76,8 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
     return GestureDetector(
       onTap: () => RouteGenerator.goto(TRACK_PLAYER, {
         "track": episode,
-        "channel": "podcast"
+        "channel": "podcast",
+        "playlist": podcasts?.map((e) => toEpisode(e)).toList()
       }),
       child: Container(
         width: double.infinity,

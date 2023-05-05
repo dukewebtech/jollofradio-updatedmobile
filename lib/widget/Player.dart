@@ -9,15 +9,17 @@ import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
-import 'package:jollofradio/utils/colors.dart';
+// import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:just_audio/just_audio.dart';
 
+bool firstrun = false;
+
 class Player extends StatefulWidget {
-  final Widget child;
+  final Widget? child;
   static dynamic user;
-  const Player({ Key? key, required this.child }) : super(key: key);
+  const Player({ Key? key, this.child }) : super(key: key);
 
   @override
   State<Player> createState() => _PlayerState();
@@ -28,11 +30,13 @@ class _PlayerState extends State<Player> {
   final AudioServiceHandler player = AudioServiceHandler();
   bool isPlaying = false;
   bool isVisible = false;
-  ProcessingState? state;
+  bool onClicked = false;
+  dynamic playState;
   dynamic user;
   dynamic track;
   String title = "-";
   String subtitle = "-";
+  List playlist = [];
   Map route = {
     "name": TRACK_PLAYER,
     "track": null,
@@ -43,6 +47,7 @@ class _PlayerState extends State<Player> {
   void initState() {
     user = Player.user;
     initPlayer ();
+    
     super.initState();
   }
 
@@ -51,53 +56,87 @@ class _PlayerState extends State<Player> {
     super.dispose();
   }
 
-  void initPlayer() {
-    //get last track
+  void initPlayer() async {
+    //playlist
+    await Future(() async {
+      var getTracks = await Storage.get('podcasts');
+      if(getTracks != null){
+        playlist = jsonDecode(getTracks);
+      }
+    });
+
+    //last track
     Storage.get('lastTrack',Map).then((item)async {
-      if(item == null || item == false)
+      if(item == null||firstrun||playlist.isEmpty)
         return;
 
+      firstrun = true;
+      
       final track = item['track'];
-      bool isPodcast = track.containsKey('episode');
+      bool isPodcast = track['extras'].containsKey(
+        'episode'
+      ) ?? false;
+      Duration duration = Duration();
 
-      await player.setPlaylist([MediaItem(
-        id: track['id'],
-        title: track['title'],
-        album: track['album'],
-        artist: track['artist'],
-        artUri: Uri.parse(track['artUri']),
-        duration: Duration(
-          milliseconds: isPodcast 
-          ? track['duration']:0
-        ),
-        extras: track['extras'],
-      )]);
-
-      player.seek(
-        Duration(
-          milliseconds: track['position'] //seeking
-        )
-      );
-
-      if(user != null 
-      && user.setting('autoplay')==true){
-
-        player.play();
-        
+      if(!isPodcast){
+        await player.setPlaylist([/** */ MediaItem(
+          id: track['id'],
+          title: track['title'],
+          album: track['album'],
+          artist: track['artist'],
+          artUri: Uri.parse(track['artUri']),
+          extras: track['extras'],
+        )]);
       }
+      else{
+        await player.setPlaylist(playlist.map( ////
+          (item){
+          Episode episode = Episode.fromJson(item);          
+          if(item['id']==track['id']){
+            duration = Duration(
+              milliseconds: track['duration']  ////
+            );
+          }
+          return MediaItem(
+            id: episode.id.toString(),
+            title: episode.title,
+            album: episode.podcast,
+            artist: episode.creator?.username()??'',
+            artUri: Uri.parse(
+              episode.logo
+            ),
+            duration: duration,
+            extras: {
+              "url": episode.source,
+              "episode": episode.toJson()
+            }
+          );
+        }).toList());
+
+        ///////////////////////////////////////////
+        int index = player.getPlaylist().indexWhere
+        ((e) => e.id == track['id'] ); ////////////
+
+        player.skipToQueueItem(index); //skip track
+        player.seek(
+          Duration(milliseconds: track['position'])
+        );
+      }
+        if(user!=null && user.setting('autoplay')){
+          player.play();
+        }
     });
 
     //fetch & store
     player.streams().listen((dynamic event) async {
       final playState = event['playState'];
-      state = playState.processingState;
+      final currState = playState.processingState;
 
       final currentTrack = (player.currentTrack( ));
       dynamic track = "";
       bool isPodcast = 
       currentTrack?.extras?.containsKey ('episode') 
       ?? false ;
-
       if(isPodcast){
         track = Episode.fromJson(
           currentTrack?.extras? ['episode'] // cast
@@ -124,22 +163,28 @@ class _PlayerState extends State<Player> {
 
       //color effect
       if(this.track?.title != currentTrack?.title){
-        // print('color effect executed!');
-
         trackColor = AppColor.primary;
+        /*
         Colorly().from('network').get(track?.logo)
         .then((color){
           trackColor = 
-          color?['primary'] ?? AppColor.primary;
+          color?['primary']  ?? (AppColor.primary);
+        });
+        */
+      }
+
+      if(playState != this.playState 
+      || track?.id != this.track?.id){//state check
+        if(!mounted) return;
+        print('state rebuild fired!');
+        setState(() {
+          this.track = track;
+          this.playState = playState;
+          isVisible = 
+                 currState != ProcessingState.idle;
+          isPlaying = playState.playing;
         });
       }
-            
-      if(mounted)
-      setState(() {
-        isVisible = state != ProcessingState.idle;
-        isPlaying = playState.playing;
-        this.track = track;
-      });
 
       //track stream
       Map media = <String, Map>{
@@ -157,14 +202,25 @@ class _PlayerState extends State<Player> {
         }
       };
       
-      Timer(Duration(seconds: 1), () =>{
-        // print('storage api executed!'),
-        
+      Timer(Duration(seconds: 1), () =>{        
         if(isPlaying)
         Storage.set(
           'lastTrack', jsonEncode(media) // saving...
         )
       });
+    });
+  }
+
+  Future openTrackPlayer() async {
+    var playlist = await Storage.get('podcasts'); //tracks
+    if(playlist != null){
+      playlist = jsonDecode(playlist);
+    }
+    RouteGenerator.goto(route['name'], <String, dynamic> {
+      ...route,
+      "playlist": playlist?.map<Episode>((dynamic track) {
+        return Episode.fromJson(track);
+      }).toList()
     });
   }
 
@@ -175,32 +231,26 @@ class _PlayerState extends State<Player> {
       children: <Widget>[
         Visibility(
           visible: isVisible,
-          child: GestureDetector(
-            onTap: () {
-              RouteGenerator.goto(route['name'], <String, dynamic> {
-                ...route
-              });
+          child: Dismissible(
+            key: UniqueKey(),
+            confirmDismiss: (direction) async {
+              await player.stop();
+              await Storage.delete('lastTrack');
+              return true;
             },
-            child: Dismissible(
-              key: UniqueKey(),
-              confirmDismiss: (direction) async {
-                await player.stop();
-                await Storage.delete('lastTrack');
-                return true;
-              },
-              onDismissed: (DismissDirection direction) {
-                // do nothing!
-              },
+            onDismissed: (DismissDirection direction) {},
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              height: 60,
+              color: trackColor,
               child: Container(
-                width: MediaQuery.of(context).size.width,
-                height: 60,
-                color: trackColor,
-                child: Container(
-                  color: Colors.black.withAlpha(50),
-                  padding: EdgeInsets.fromLTRB(22,5,20,5),
-                  child: Row(
-                    children: <Widget>[
-                      Container(
+                color: Colors.black.withAlpha(50),
+                padding: EdgeInsets.fromLTRB(22,5,20,5),
+                child: Row(
+                  children: <Widget>[
+                    GestureDetector(
+                      onTap: () async => await openTrackPlayer(),
+                      child: Container(
                         width: 60,
                         height: 50,
                         color: Color(0XFF0D1921),
@@ -224,7 +274,10 @@ class _PlayerState extends State<Player> {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      Expanded(
+                    ),
+                    Expanded(
+                      child: GestureDetector(
+                        onTap: () async => await openTrackPlayer(),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -252,47 +305,63 @@ class _PlayerState extends State<Player> {
                           ],
                         ),
                       ),
-                      Container(
-                        width: 35,
-                        height: 35,
-                        margin: EdgeInsets.only(left: 10),
-                        decoration: BoxDecoration(
-                          color: AppColor.secondary,
-                          borderRadius: BorderRadius.circular (100)
-                        ),
-                        child: state != ProcessingState.ready 
-                            && state != ProcessingState.completed ? 
-                        Center(
-                          child: SizedBox(
-                            width: 15,
-                            height: 15,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              color: AppColor.primary,
-                            )
-                          ),
-                        ) :
-                        IconButton(
-                          onPressed: () {
-                            if(state == ( ProcessingState.buffering ) )
-                              return;
-
-                            !isPlaying ? player.play() : player.pause();
-                          },
-                          icon: Icon(!isPlaying 
-                            ? Icons.play_arrow : Icons.pause, size: 18,
-                          )
-                        ),
-                      )
-                    ],
-                  ),
+                    ),
+                    GestureDetector(
+                      onTap: () {
+                        /*
+                        if(state == ( ProcessingState.buffering ) )
+                          return;
+                        !isPlaying ? player.play() : player.pause();
+                        */
+                        if(!isPlaying){
+                          player.play();
+                          onClicked = true;
+                        }
+                        else{
+                          player.pause();
+                          onClicked = false;
+                        }
+                        setState(() => isPlaying  =  (!isPlaying));
+                      },
+                      child: Builder(
+                        builder: (context) {
+                          final state = playState.processingState;
+                          return Container(
+                            width: 35,
+                            height: 35,
+                            margin: EdgeInsets.only(left: 10),
+                            decoration: BoxDecoration(
+                              color: AppColor.secondary,
+                              borderRadius: BorderRadius.circular (100)
+                            ),
+                            child: state != ProcessingState.ready 
+                                && state != ProcessingState.completed ? 
+                            Center(
+                              child: SizedBox(
+                                width: 15,
+                                height: 15,
+                                child: /* */ CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: AppColor.primary,
+                                )
+                              ),
+                            ) :
+                            Icon(
+                              !isPlaying ? 
+                              Icons.play_arrow : Icons.pause, size: 20,
+                            ),
+                          );
+                        }
+                      ),
+                    )
+                  ],
                 ),
               ),
             ),
           ),
         ),
-
-        widget.child
+        
+        widget.child ?? SizedBox()
 
       ],
     );

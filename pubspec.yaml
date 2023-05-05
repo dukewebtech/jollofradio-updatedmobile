@@ -67,6 +67,7 @@ dependencies:
   rxdart: ^0.27.7
   audio_session: ^0.1.13
   google_sign_in: ^6.1.0
+  dismissible_page: ^1.0.2
 
 dev_dependencies:
   flutter_test:
@@ -100,13 +101,7 @@ flutter:
     - assets/images/icons/svg/
     - assets/images/illustration/
     - assets/uploads/
-
-    # DEVELOPMENT 
     - assets/uploads/creators/
-    - assets/uploads/podcasts/
-    - assets/uploads/category/
-    - assets/uploads/stations/
-
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

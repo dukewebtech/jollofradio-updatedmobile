@@ -99,7 +99,7 @@ class Stylesheet {
       ),
 
       bottomSheetTheme: BottomSheetThemeData(
-        backgroundColor: Color(0XFF223337)
+        backgroundColor: Colors.transparent
       ),
 
       /*

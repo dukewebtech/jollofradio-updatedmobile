@@ -414,7 +414,7 @@
       "isoCode": "064"
   },
   {
-      "name": "Bolivia (Plurinational State of)",
+      "name": "Bolivia",
       "code": "BO",
       "capital": "Sucre",
       "region": "SA",
@@ -504,7 +504,7 @@
       "isoCode": "086"
   },
   {
-      "name": "Virgin Islands (British)",
+      "name": "Virgin Islands",
       "code": "VG",
       "capital": "Road Town",
       "region": "NA",
@@ -522,7 +522,7 @@
       "isoCode": "092"
   },
   {
-      "name": "Virgin Islands (U.S.)",
+      "name": "Virgin Islands",
       "code": "VI",
       "capital": "Charlotte Amalie",
       "region": "NA",
@@ -833,7 +833,7 @@
       "isoCode": "178"
   },
   {
-      "name": "Congo (Democratic Republic of the)",
+      "name": "Congo",
       "code": "CD",
       "capital": "Kinshasa",
       "region": "AF",
@@ -1177,7 +1177,7 @@
       "isoCode": "231"
   },
   {
-      "name": "Falkland Islands (Malvinas)",
+      "name": "Falkland Islands",
       "code": "FK",
       "capital": "Stanley",
       "region": "SA",
@@ -1738,7 +1738,7 @@
       "isoCode": "384"
   },
   {
-      "name": "Iran (Islamic Republic of)",
+      "name": "Iran",
       "code": "IR",
       "capital": "Tehran",
       "region": "AS",
@@ -2152,7 +2152,7 @@
       "isoCode": "446"
   },
   {
-      "name": "Macedonia (the former Yugoslav Republic of)",
+      "name": "Macedonia",
       "code": "MK",
       "capital": "Skopje",
       "region": "EU",
@@ -2386,7 +2386,7 @@
       "isoCode": "484"
   },
   {
-      "name": "Micronesia (Federated States of)",
+      "name": "Micronesia",
       "code": "FM",
       "capital": "Palikir",
       "region": "OC",
@@ -2404,7 +2404,7 @@
       "isoCode": "583"
   },
   {
-      "name": "Moldova (Republic of)",
+      "name": "Moldova",
       "code": "MD",
       "capital": "Chișinău",
       "region": "EU",
@@ -2746,7 +2746,7 @@
       "isoCode": "574"
   },
   {
-      "name": "Korea (Democratic People's Republic of)",
+      "name": "Korea",
       "code": "KP",
       "capital": "Pyongyang",
       "region": "AS",
@@ -3196,7 +3196,7 @@
       "isoCode": "662"
   },
   {
-      "name": "Saint Martin (French part)",
+      "name": "Saint Martin",
       "code": "MF",
       "capital": "Marigot",
       "region": "NA",
@@ -3522,7 +3522,7 @@
       "isoCode": "710"
   },
   {
-      "name": "Korea (Republic of)",
+      "name": "Korea",
       "code": "KR",
       "capital": "Seoul",
       "region": "AS",
@@ -3992,7 +3992,7 @@
       "isoCode": "784"
   },
   {
-      "name": "United Kingdom of Great Britain and Northern Ireland",
+      "name": "United Kingdom",
       "code": "GB",
       "capital": "London",
       "region": "EU",
@@ -4084,7 +4084,7 @@
       "isoCode": "548"
   },
   {
-      "name": "Venezuela (Bolivarian Republic of)",
+      "name": "Venezuela",
       "code": "VE",
       "capital": "Caracas",
       "region": "SA",

@@ -16,7 +16,7 @@ class ProfileScreen extends StatefulWidget {
   
   const ProfileScreen({ 
     Key? key, 
-    required this.user 
+    required this.user
   }) : super(key: key);
 
   @override

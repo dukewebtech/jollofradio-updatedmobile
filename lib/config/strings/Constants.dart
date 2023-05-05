@@ -43,5 +43,6 @@ const NOTIFICATION = '/user/notifications';
 
 //CREATOR
 const CREATOR_DASHBOARD = '/creator/dashboard';
+const CREATOR_PODCAST = '/creator/podcasts/:id';
 
 const WEBVIEW = '/webview';

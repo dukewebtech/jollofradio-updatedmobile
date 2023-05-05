@@ -1,6 +1,7 @@
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:jollofradio/config/strings/Message.dart';
 
 Map login(Map response) {
   return {
@@ -11,8 +12,10 @@ Map login(Map response) {
 }
 
 String shareLink({required type, required data}){
+  String text = '-';
   List platforms = [
     'podcast',
+    'episode',
     'station'
   ];
 
@@ -21,18 +24,28 @@ String shareLink({required type, required data}){
   }
 
   if(type == 'podcast'){
+    text = Message.build(Message.share_podcast, {
+      "title": data.title,
+      "podcast": data.slug,
+    });
+  }
 
-    return 'Listen to: ${data.title} on Jollof Radio at https://app.jollofradio.com/podcast/${data.podcastId}?episode=${data.slug}';
-
+  if(type == 'episode'){
+    text = Message.build(Message.share_episode, {
+      "title": data.title,
+      "podcast": data.podcastId,
+      "episode": data.slug,
+    });
   }
 
   if(type == 'station'){
-    
-    return 'Listen to: ${data.title} on Jollof Radio at https://app.jollofradio.com/home?station=${data.slug}';
-
+    text = Message.build(Message.share_station, {
+      "title": data.title,
+      "station": data.slug,
+    });
   }
 
-  return '';
+  return text;
 
 }
 
@@ -54,6 +67,7 @@ bool textOverflow(String text, TextStyle style, {
   double maxWidth = double.infinity, 
   int maxLines = 2
 }) {
+  
   final TextPainter textPainter = TextPainter(
     text: TextSpan(text: text, style: style),
     maxLines: maxLines,

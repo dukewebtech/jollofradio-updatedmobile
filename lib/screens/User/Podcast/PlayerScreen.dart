@@ -1,8 +1,11 @@
 import 'dart:async';
+import 'dart:convert';
 import 'dart:math';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
+import 'package:jollofradio/config/services/controllers/User/PlaylistController.dart';
 import 'package:jollofradio/config/services/controllers/User/StreamController.dart';
 import 'package:jollofradio/config/services/controllers/HomeController.dart';
 import 'package:iconsax/iconsax.dart';
@@ -17,8 +20,10 @@ import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:jollofradio/widget/Shared.dart';
 import 'package:jollofradio/widget/Slider.dart';
 import 'package:just_audio/just_audio.dart';
+import 'package:share_plus/share_plus.dart';
 
 class PlayerScreen extends StatefulWidget {
   final Episode track;
@@ -44,6 +49,8 @@ with SingleTickerProviderStateMixin {
   Color defaultColor = AppColor.primary;
 
   AudioServiceHandler player = AudioServiceHandler();
+  dynamic user;
+  late bool loggedIn = false;
   late Episode track;
   late String channel;
   late List? playlist;
@@ -52,12 +59,31 @@ with SingleTickerProviderStateMixin {
   bool _fav = false;
   bool consent = false;
 
+  TextEditingController controller = TextEditingController();
+  bool isSaving = false;
+  bool showCreate = false;
+  dynamic _setState;
+  String? selectedLabel;
+  List<String> dropdown = [];
+
   @override
   void initState() {
     channel = widget.channel;       ///////////////////////
     track = widget.track;
     playlist = widget.playlist;
     _fav = track.liked;
+
+    (() async {
+      user = await auth();
+      if(await auth() != null && await isCreator()==false){
+        loggedIn = true;
+        List playlist = user[
+          'playlist'
+        ] as List;
+        dropdown = playlist.map<String>( (e) => e['name'] )
+        .toList();
+      }
+    })();
 
     _controller = AnimationController(
       duration: Duration(seconds: 2),
@@ -120,12 +146,10 @@ with SingleTickerProviderStateMixin {
         if(player.currentTrack()?.title == (track.title)){
           return;
         }
-
         return safetyDialog();
-
       }
     }
-    
+
     initializeAudio(); ////////////////////////////////////
 
   }
@@ -149,6 +173,15 @@ with SingleTickerProviderStateMixin {
     MediaItem? currentTrack = player.currentTrack(); //////
     final playlist = player.getPlaylist() ;
 
+    //set playlist
+    // /*
+    if(widget.playlist != null){
+      Storage.set(
+        'podcasts',jsonEncode(widget.playlist ?? <int>[])
+      );
+    }
+    // */
+
     //transforming
     if(widget.playlist == null){
       tracks.add(setTrackItems(track));
@@ -159,7 +192,6 @@ with SingleTickerProviderStateMixin {
           item
         );
       }).toList();
-
       tracks = ( newTracks );
     }
     
@@ -189,6 +221,7 @@ with SingleTickerProviderStateMixin {
       */
 
       //mount playlist
+      await player.stop();
       await player.setPlaylist(tracks);
 
       await player.skipToQueueItem (    //skip to the track
@@ -212,28 +245,23 @@ with SingleTickerProviderStateMixin {
       ]);
       */
 
-      player.play();
-
       //tracking stream
       if(!await isCreator())
       await Storage.get('guest',bool).then((dynamic guest){
         
         if(guest == true){
-          
           HomeController.stream({'episode_id':  track.id});
 
         }
         else{
-
           StreamController.create({'episode_id': track.id});
 
         }
       });
-
     }
     else{
       if(currentTrack?.title != track.title){
-        if(playlist.length > 1){
+        if(playlist.length > 1){ //!
           int index = playlist.indexWhere(
             (media) => media.id == track.id.toString (   ) 
           );
@@ -243,7 +271,7 @@ with SingleTickerProviderStateMixin {
               index
             );
           }
-        }
+        } //!
       }
     }
 
@@ -263,7 +291,6 @@ with SingleTickerProviderStateMixin {
     });
     
     ///////////////////////////////////////////////////////
-    
   }
 
   Future skipTrack(mode) async {
@@ -303,7 +330,6 @@ with SingleTickerProviderStateMixin {
       if(!playlist.asMap(  ).containsKey(
         first
       ))
-
         return false;
 
       return currentIndex != 0; //checks if index not first
@@ -317,9 +343,17 @@ with SingleTickerProviderStateMixin {
 
       return ( playlist[last ] != player.currentTrack( ) );
     }
-
     return false;
   }
+
+  void callback(Map args /* ={} */) {
+    _setState = args['state'];
+
+    if(args['label'] != null) {
+      selectedLabel = args['label'];
+    }
+  }
+
 
   Future<void> _doSubscribe() async {
     bool liked = !_fav;
@@ -338,6 +372,40 @@ with SingleTickerProviderStateMixin {
     });    
   }
 
+  Future<void> _savePlaylist() async {
+    if(isSaving) return;
+    setState(() {
+      isSaving = true;
+    });
+
+    final name = selectedLabel ?? controller.text.trim();
+    Map data = {
+      'playlist_name': name,
+      'episode_id': track.id
+    };
+
+    if(selectedLabel == null 
+    && name.isEmpty){
+      setState(() => isSaving = false);
+      Toaster.error("You have not selected a playlist");
+      return;
+    }
+
+    await PlaylistController.create(data).then((created) 
+    async{
+      setState(() => isSaving = false);
+      if(!created){
+        Toaster.error(
+          "Oops! while saving playlist, please try again"
+        );
+      }
+      Toaster.success("Episode added to playlist: $name");
+
+      controller.clear();
+      Navigator.pop(context);
+    });
+  }
+
   @override
   void dispose() {
     _controller.dispose();
@@ -346,358 +414,472 @@ with SingleTickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    return AnimatedBuilder(
-      animation: _controller,
-      builder: (context, snapshot) {
-        return Scaffold(
-          backgroundColor: _colorTweenAnimation == (null) ? 
-          defaultColor
-          : _colorTweenAnimation!.value,
-          appBar: AppBar(
-            leading: Buttons.back(),
-          ),
-          body: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter, 
-                end: Alignment.bottomCenter, 
-                colors: [
-                  Colors.transparent, 
-                  Color.fromRGBO(0, 0, 0, .1), 
-                  Color.fromRGBO(0, 0, 0, .5)
-                ], 
-                stops: [0.0, 0.1, 0.8]
-              ),
+    return DismissiblePage(
+      onDismissed: () => Navigator.of(context).pop(),
+      minRadius: 0,
+      maxRadius: 0,
+      dragSensitivity: 1.0,
+      maxTransformValue: .8,
+      direction: DismissiblePageDismissDirection.down,
+      backgroundColor: _colorTweenAnimation == (null) 
+        ? defaultColor : _colorTweenAnimation!.value!,
+      
+      // dismissThresholds: {
+      //   DismissiblePageDismissDirection.down: .2,
+      // },
+
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, snapshot) {
+          return Scaffold(
+            backgroundColor: _colorTweenAnimation == (null) ? 
+            defaultColor
+            : _colorTweenAnimation!.value,
+            appBar: AppBar(
+              leading: Buttons.back(),
+              actions: [
+                SizedBox(
+                  width: 60,
+                  child: IconButton(
+                    onPressed: () async => showMoreOptions(), 
+                    icon: Icon(Iconsax.more)
+                  ),
+                )
+              ],
             ),
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              height: double.infinity,
-              margin: EdgeInsets.only(
-                top: 00,
-                left: 20, 
-                right: 20
+            body: Container(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter, 
+                  end: Alignment.bottomCenter, 
+                  colors: [
+                    Colors.transparent, 
+                    Color.fromRGBO(0, 0, 0, .1), 
+                    Color.fromRGBO(0, 0, 0, .5)
+                  ], 
+                  stops: [0.0, 0.1, 0.8]
+                ),
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(height: 20),
-                        Container(
-                          width: MediaQuery.of(context).size.width,
-                          height: 320,
-                          decoration: BoxDecoration(
-                            color: Color(0XFF0D1921),
-                          ),
-                          child: Stack(
-                            fit: StackFit.expand,
-                            alignment: Alignment.center,
-                            children: [
-                              CachedNetworkImage(
-                                imageUrl: track.logo,
-                                placeholder: (context, url) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 50,
-                                      height: 50,
-                                      child: CircularProgressIndicator()
-                                    )
-                                  );
-                                },
-                                errorWidget: (context, url, error) => Icon(
-                                  Icons.error
+              child: Container(
+                width: MediaQuery.of(context).size.width,
+                height: double.infinity,
+                margin: EdgeInsets.only(
+                  top: 00,
+                  left: 20, 
+                  right: 20
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        children: <Widget>[
+                          SizedBox(height: 10),
+                          Container(
+                            width: MediaQuery.of(context).size.width,
+                            height: 320,
+                            decoration: BoxDecoration(
+                              color: Color(0XFF0D1921),
+                            ),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              alignment: Alignment.center,
+                              children: [
+                                CachedNetworkImage(
+                                  imageUrl: track.logo,
+                                  placeholder: (context, url) {
+                                    return Center(
+                                      child: SizedBox(
+                                        width: 50,
+                                        height: 50,
+                                        child: CircularProgressIndicator()
+                                      )
+                                    );
+                                  },
+                                  errorWidget: (context, url, error) => Icon(
+                                    Icons.error
+                                  ),
+                                  fit: BoxFit.cover,
                                 ),
-                                fit: BoxFit.cover,
-                              ),
-                            ],
+                              ],
+                            ),
                           ),
-                        ),
-                        SizedBox(height: 30),
-                        SizedBox(
-                          width: double.infinity,
-                          child: StreamBuilder<Map>(
-                            stream: player.streams(),
-                            builder: (context, snapshot) {
-                              final streams = snapshot.data ?? <String, Duration>{
-                                'duration': Duration(milliseconds: 1000),
-                                'position': Duration(),
-                              };
-                              return Column(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  SizedBox(
-                                    height: 90,
-                                    child: Column(
-                                      crossAxisAlignment: CrossAxisAlignment.start,
-                                      children: <Widget>[
-                                        Container(
-                                          constraints: BoxConstraints(
-                                            maxHeight: 60
+                          SizedBox(height: 30),
+                          SizedBox(
+                            width: double.infinity,
+                            child: StreamBuilder<Map>(
+                              stream: player.streams(),
+                              builder: (context, snapshot) {
+                                final streams = snapshot.data ?? <String, Duration>{
+                                  'duration': Duration(milliseconds: 1000),
+                                  'position': Duration(),
+                                };
+                                return Column(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      height: 90,
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: <Widget>[
+                                          Container(
+                                            constraints: BoxConstraints(
+                                              maxHeight: 60
+                                            ),
+                                            child: Labels.primary(
+                                              track.title,
+                                              fontSize: 20,
+                                              fontWeight: FontWeight.bold,
+                                              maxLines: 2
+                                            ),
                                           ),
-                                          child: Labels.primary(
-                                            track.title,
-                                            fontSize: 20,
-                                            fontWeight: FontWeight.bold,
-                                            maxLines: 2
+                                          Labels.secondary(
+                                            track.podcast
                                           ),
-                                        ),
-                                        Labels.secondary(
-                                          track.podcast
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(height: 20),
+                                    Stack(
+                                      fit: StackFit.loose,
+                                      children: [
+                                        SliderTheme(
+                                          data: SliderTheme.of(context).copyWith(
+                                            trackHeight: 2,
+                                            overlayShape: SliderComponentShape.noOverlay,
+                                            trackShape: CustomTrackShape(),
+                                            activeTrackColor: AppColor.secondary,
+                                            inactiveTrackColor: Colors.white24,
+                                          ),
+                                          child: Slider(  
+                                            min: 0,  
+                                            max: 
+                                            streams['duration'].inMilliseconds.toDouble(),  
+                                            value: min(
+                                              streams[
+                                                'position'
+                                              ].inMilliseconds.toDouble(), 
+                                              streams[
+                                                'duration'
+                                              ].inMilliseconds.toDouble()
+                                            ),
+                                            thumbColor: Colors.white,
+                                            onChanged: (value) async {
+                                              await player.seek(
+                                                Duration(  milliseconds: value.round()  )
+                                              ); 
+                                              player.play();
+                                            },  
+                                          )
                                         ),
                                       ],
                                     ),
-                                  ),
-                                  SizedBox(height: 20),
-                                  Stack(
-                                    fit: StackFit.loose,
-                                    children: [
-                                      SliderTheme(
-                                        data: SliderTheme.of(context).copyWith(
-                                          trackHeight: 2,
-                                          overlayShape: SliderComponentShape.noOverlay,
-                                          trackShape: CustomTrackShape(),
-                                          activeTrackColor: AppColor.secondary,
-                                          inactiveTrackColor: Colors.white24,
+                                    SizedBox(height: 10),
+                                    Row(
+                                      mainAxisAlignment: 
+                                         MainAxisAlignment.spaceBetween,
+                                      children: <Widget>[
+                                        Text(
+                                          formatTime(
+                                            streams['position']
+                                          ), 
+                                          style: TextStyle(fontSize: 12)
                                         ),
-                                        child: Slider(  
-                                          min: 0,  
-                                          max: 
-                                          streams['duration'].inMilliseconds.toDouble(),  
-                                          value: min(
-                                            streams[
-                                              'position'
-                                            ].inMilliseconds.toDouble(), 
-                                            streams[
-                                              'duration'
-                                            ].inMilliseconds.toDouble()
-                                          ),
-                                          thumbColor: Colors.white,
-                                          onChanged: (value) async {
-                                            await player.seek(
-                                              Duration(  milliseconds: value.round()  )
-                                            ); 
-                                            player.play();
-                                          },  
-                                        )
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 10),
-                                  Row(
-                                    mainAxisAlignment: 
-                                       MainAxisAlignment.spaceBetween,
-                                    children: <Widget>[
-                                      Text(
-                                        formatTime(
-                                          streams['position']
-                                        ), 
-                                        style: TextStyle(fontSize: 12)
-                                      ),
-                                      Text(
-                                        formatTime(
-                                          streams['duration']
-                                        ), 
-                                        style: TextStyle(fontSize: 12)
-                                      ),
-                                    ],
-                                  ),
-                                  SizedBox(height: 50),
-                                ],
-                              );
-                            }
-                          ),
-                        )
-                      ],
+                                        Text(
+                                          formatTime(
+                                            streams['duration']
+                                          ), 
+                                          style: TextStyle(fontSize: 12)
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 50),
+                                  ],
+                                );
+                              }
+                            ),
+                          )
+                        ],
+                      ),
                     ),
-                  ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      StreamBuilder<Map>(
-                        stream: player.streams(),
-                        builder: (context, snapshot) {
-                          final stream = snapshot.data?['loopMode'] 
-                          ?? LoopMode.off;
-
-                          final repeatMode = {
-                            LoopMode.off: {
-                              "task" : AudioServiceRepeatMode.all,
-                              "label": "Repeat All"
-                            },
-                            LoopMode.all: {
-                              "task" : AudioServiceRepeatMode.one,
-                              "label": "Repeat One"
-                            },
-                            LoopMode.one: {
-                              "task" : AudioServiceRepeatMode.none,
-                              "label": "Repeat Off"
-                            },
-                          };
-
-                          final repeatIcon = {
-                            LoopMode.all: Icon(
-                              Iconsax.repeat, color: Colors.white
-                            ),
-                            LoopMode.one: Icon(
-                              Icons.repeat_one, color: Colors.white
-                            ),
-                            LoopMode.off: Icon(
-                              Iconsax.repeat, color: Colors.white54
-                            ),
-                          }[stream]!;
-
-                          return IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(), //edge patch
-                            tooltip: "Repeat",
-                            onPressed: () {
-                              player.setRepeatMode(
-                                repeatMode[stream]!['task']! 
-                                as AudioServiceRepeatMode 
-                              );
-                              Toaster.info(
-                                repeatMode[stream]!['label'].toString()
-                              );
-                            },
-                            icon: repeatIcon,
-                          );
-                        }
-                      ),
-                      StreamBuilder<Map>(
-                        stream: player.streams(),
-                        builder: (context, snapshot) {
-                          return IconButton(
-                            tooltip: "Previous Track",
-                            onPressed: () async => await skipTrack('prev'),
-                            icon: Icon(
-                              Iconsax.backward,
-                              color: 
-                              canSkip('prev') ? Colors.white : Colors.grey,
-                            ),
-                          );
-                        }
-                      ),
-                      Container(
-                        width: 50,
-                        height: 50,
-                        decoration: BoxDecoration(
-                          color: AppColor.secondary,
-                          borderRadius: /* */ BorderRadius.circular(100)
-                        ),
-                        child: StreamBuilder<Map>(
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        StreamBuilder<Map>(
                           stream: player.streams(),
                           builder: (context, snapshot) {
-                            final state = snapshot.data?['playState'];
-                            final playing = state?.playing ?? false;
-                            final processingState = state?.processingState 
-                            ?? ProcessingState.loading;
+                            final stream = snapshot.data?['loopMode'] 
+                            ?? LoopMode.off;
 
-                            List loading = [
-                              ProcessingState.loading,
-                              ProcessingState.buffering,
-                            ];
+                            final repeatMode = {
+                              LoopMode.off: {
+                                "task" : AudioServiceRepeatMode.all,
+                                "label": "Repeat All"
+                              },
+                              LoopMode.all: {
+                                "task" : AudioServiceRepeatMode.one,
+                                "label": "Repeat One"
+                              },
+                              LoopMode.one: {
+                                "task" : AudioServiceRepeatMode.none,
+                                "label": "Repeat Off"
+                              },
+                            };
 
-                            if(loading.contains(processingState) == true){
-                              return Center(
-                                child: SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 3,
-                                    color: AppColor.primary,
-                                  )
-                                ),
-                              );
-                            }
+                            final repeatIcon = {
+                              LoopMode.all: Icon(
+                                Iconsax.repeat, color: Colors.white
+                              ),
+                              LoopMode.one: Icon(
+                                Icons.repeat_one, color: Colors.white
+                              ),
+                              LoopMode.off: Icon(
+                                Iconsax.repeat, color: Colors.white54
+                              ),
+                            }[stream]!;
 
                             return IconButton(
-                              tooltip: playing == false ? 'Play' : 'Pause',
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(), //edge patch
+                              tooltip: "Repeat",
                               onPressed: () {
-                                setState(() {
-                                  if( !playing ){
-                                    player.play ();
-                                  }
-                                  else{
-                                    player.pause();
-                                  }                                  
-                                });
+                                player.setRepeatMode(
+                                  repeatMode[stream]!['task']! 
+                                  as AudioServiceRepeatMode 
+                                );
+                                Toaster.info(
+                                  repeatMode[stream]!['label'].toString()
+                                );
                               },
+                              icon: repeatIcon,
+                            );
+                          }
+                        ),
+                        StreamBuilder<Map>(
+                          stream: player.streams(),
+                          builder: (context, snapshot) {
+                            return IconButton(
+                              tooltip: "Previous Track",
+                              onPressed: () async => await skipTrack('prev'),
                               icon: Icon(
-                                !playing ? Icons.play_arrow : Icons.pause,
-                                color: Colors.black,
+                                Iconsax.backward,
+                                color: 
+                                canSkip('prev') ? Colors.white : Colors.grey,
                               ),
                             );
-                          },
+                          }
                         ),
-                      ),
-                      StreamBuilder<Map>(
-                        stream: player.streams(),
-                        builder: (context, snapshot) {
-                          return IconButton(
-                            tooltip: "Forward Track",
-                            onPressed: () async => await skipTrack('next'),
-                            icon: Icon(
-                              Iconsax.forward,
-                              color: 
-                              canSkip('next') ? Colors.white : Colors.grey,
-                            ),
-                          );
-                        }
-                      ),
-                      StreamBuilder<Map>(
-                        stream: player.streams(),
-                        builder: (context, snapshot) {
-                          final stream = snapshot.data?['shuffleMode'] 
-                          ?? false;
+                        Container(
+                          width: 50,
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: AppColor.secondary,
+                            borderRadius: /* */ BorderRadius.circular(100)
+                          ),
+                          child: StreamBuilder<Map>(
+                            stream: player.streams(),
+                            builder: (context, snapshot) {
+                              final state = snapshot.data?['playState'];
+                              final playing = state?.playing ?? false;
+                              final processingState = state?.processingState 
+                              ?? ProcessingState.loading;
 
-                          final shuffleMode = {
-                            true: {
-                              "task" : AudioServiceShuffleMode.none,
-                              "label": "Shuffle Off"
-                            },
-                            false: {
-                              "task" : AudioServiceShuffleMode.all ,
-                              "label": "Shuffle On"
-                            },
-                          };
+                              List loading = [
+                                ProcessingState.loading,
+                                ProcessingState.buffering,
+                              ];
 
-                          final shuffleIcon = {
-                            true: Icon(
-                              Iconsax.shuffle, color: (Colors.white)
-                            ),
-                            false: Icon(
-                              Iconsax.shuffle, color: (Colors.grey )
-                            ),
-                          }[stream]!;
+                              if(loading.contains(processingState) == true){
+                                return Center(
+                                  child: SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 3,
+                                      color: AppColor.primary,
+                                    )
+                                  ),
+                                );
+                              }
 
-                          return IconButton(
-                            padding: EdgeInsets.zero,
-                            constraints: BoxConstraints(), //edge patch
-                            tooltip: "Shuffle",
-                            onPressed: () {
-                              player.setShuffleMode(
-                                shuffleMode[stream]!['task']! 
-                                as AudioServiceShuffleMode 
-                              );
-                              Toaster.info(
-                                shuffleMode[stream]!['label'].toString()
+                              return IconButton(
+                                tooltip: playing == false ? 'Play' : 'Pause',
+                                onPressed: () {
+                                  setState(() {
+                                    if( !playing ){
+                                      player.play ();
+                                    }
+                                    else{
+                                      player.pause();
+                                    }                                  
+                                  });
+                                },
+                                icon: Icon(
+                                  !playing ? Icons.play_arrow : Icons.pause,
+                                  color: Colors.black,
+                                ),
                               );
                             },
-                            icon: shuffleIcon,
-                          );
-                        }
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                ],
+                          ),
+                        ),
+                        StreamBuilder<Map>(
+                          stream: player.streams(),
+                          builder: (context, snapshot) {
+                            return IconButton(
+                              tooltip: "Forward Track",
+                              onPressed: () async => await skipTrack('next'),
+                              icon: Icon(
+                                Iconsax.forward,
+                                color: 
+                                canSkip('next') ? Colors.white : Colors.grey,
+                              ),
+                            );
+                          }
+                        ),
+                        StreamBuilder<Map>(
+                          stream: player.streams(),
+                          builder: (context, snapshot) {
+                            final stream = snapshot.data?['shuffleMode'] 
+                            ?? false;
+
+                            final shuffleMode = {
+                              true: {
+                                "task" : AudioServiceShuffleMode.none,
+                                "label": "Shuffle Off"
+                              },
+                              false: {
+                                "task" : AudioServiceShuffleMode.all ,
+                                "label": "Shuffle On"
+                              },
+                            };
+
+                            final shuffleIcon = {
+                              true: Icon(
+                                Iconsax.shuffle, color: (Colors.white)
+                              ),
+                              false: Icon(
+                                Iconsax.shuffle, color: (Colors.grey )
+                              ),
+                            }[stream]!;
+
+                            return IconButton(
+                              padding: EdgeInsets.zero,
+                              constraints: BoxConstraints(), //edge patch
+                              tooltip: "Shuffle",
+                              onPressed: () {
+                                player.setShuffleMode(
+                                  shuffleMode[stream]!['task']! 
+                                  as AudioServiceShuffleMode 
+                                );
+                                Toaster.info(
+                                  shuffleMode[stream]!['label'].toString()
+                                );
+                              },
+                              icon: shuffleIcon,
+                            );
+                          }
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 20),
+                  ],
+                ),
               ),
             ),
+          );
+        }
+      ),
+    );
+  }
+
+  Future showMoreOptions() async {
+    return showModalBottomSheet(
+      context: context,
+        builder: (context) {
+        return Container(
+          constraints: BoxConstraints(
+            maxHeight: 200
+          ),
+          margin: EdgeInsets.all(20),
+          padding: EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: Colors.white, 
+            borderRadius: BorderRadius.circular(20)
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              if(loggedIn)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                minLeadingWidth: 10,
+                leading: Icon(
+                  !_fav ? 
+                  Iconsax.heart : Iconsax.heart5,
+                  size: 14,
+                  color: !_fav 
+                         ? Colors.grey : AppColor.secondary,  //////////////
+                ),
+                title: Text(
+                  !_fav ? "Like" : "Unlike",
+                  style: TextStyle(
+                    fontSize: 14
+                  ),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await _doSubscribe();
+                },
+              ),
+              if(loggedIn)
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                minLeadingWidth: 10,
+                leading: const Icon(Iconsax.music, size: 14), //////////////
+                title: Text(
+                  "Add to Playlist",
+                  style: TextStyle(
+                    fontSize: 14
+                  ),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  playlistModal(
+                    context: context,
+                    label: selectedLabel,
+                    playlist: dropdown,
+                    controller: controller,
+                    fn: _savePlaylist,
+                    callback: callback
+                  );
+
+                }
+              ),
+              ListTile(
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                minLeadingWidth: 10,
+                leading: const Icon(Icons.share, size: 14),   //////////////
+                title: Text(
+                  "Share",
+                  style: TextStyle(
+                    fontSize: 14
+                  ),
+                ),
+                onTap: () async {
+                  Navigator.pop(context);
+                  await Share.share(
+                    shareLink(type: 'episode', data: track)  //////////////
+                  );
+                },
+              ),
+            ],
           ),
         );
-      }
+      },
     );
   }
 

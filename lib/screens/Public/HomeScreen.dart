@@ -98,8 +98,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
     this.streams = streams;
 
-    streams['likes'].shuffle();
-
     setState(() {
       isLoading = false;
       refresh = false;

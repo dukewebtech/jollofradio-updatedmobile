@@ -85,7 +85,7 @@ class _RadioTemplateState extends State<RadioTemplate> {
 
   @override
   Widget build(BuildContext context) {
-    // double width = MediaQuery.of(context).size.width;
+    double width = MediaQuery.of(context).size.width;
       
     return Container(
       width: double.infinity,
@@ -132,14 +132,13 @@ class _RadioTemplateState extends State<RadioTemplate> {
             ),
             SizedBox(width: 10),
             SizedBox(
-              width: MediaQuery.of(context).size.width - 150,
+              width: MediaQuery.of(context).size.width - 145,
               height: 70,
               child: Row(
                 children: <Widget>[
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      
                       children: <Widget>[
                         SizedBox(
                           height: 40,
@@ -153,31 +152,34 @@ class _RadioTemplateState extends State<RadioTemplate> {
                         ),
                         Row(
                           children: [
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  station.state+", "+station.country, 
-                                style: TextStyle(
-                                  color: Color(0XFF9A9FA3),
-                                  fontSize: 12,
-                                ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                                Text(
-                                  station.frequency.toString(), style: TextStyle(
-                                  color: Color(0XFF9A9FA3),
-                                  fontSize: 10
-                                )),
-                              ],
+                            SizedBox(
+                              width: width - 240,
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    station.state+", "+station.country, 
+                                  style: TextStyle(
+                                    color: Color(0XFF9A9FA3),
+                                    fontSize: 12,
+                                  ),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                  Text(
+                                    station.frequency.toString(), style: TextStyle(
+                                    color: Color(0XFF9A9FA3),
+                                    fontSize: 10
+                                  )),
+                                ],
+                              ),
                             ),
                             Spacer(),
                             Container(
-                              width: 85,
-                              margin: EdgeInsets.only(left: 10),
+                              width: 80,
+                              // margin: EdgeInsets.only(left: 10),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: <Widget>[
                                   GestureDetector(
                                     onTap: () => addToFavorites(),
@@ -212,13 +214,11 @@ class _RadioTemplateState extends State<RadioTemplate> {
                                       Map? social = station.handles; //fetch handles
                                       if( social != null
                                       && social.containsKey('twitter')){
-
                                         String url = station. handles! [
                                           'twitter'
                                         ];
                                         await launchUrl(Uri.parse(url)); //redirects
                                         return;
-
                                       }
                                       
                                       return Toaster.info(

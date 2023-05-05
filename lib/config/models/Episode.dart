@@ -64,7 +64,7 @@ class Episode {
     'streams': streams,
     'meta': meta,
     'podcast': podcast,
-    'podcastId': podcastId,
+    'podcast_id': podcastId,
     'liked': liked,
     'created_at': createdAt,
   };

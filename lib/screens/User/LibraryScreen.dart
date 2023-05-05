@@ -34,8 +34,8 @@ class _LibraryScreenState extends State<LibraryScreen>
   late String? page;
   late List? playlist;
   Map tabs = {
-    "Podcasts": 0,
-    "Episodes": 1,
+    "Subscribed": 0,
+    "Liked": 1,
     "Stations": 2,
   };
   bool isLoading = true;
@@ -81,8 +81,8 @@ class _LibraryScreenState extends State<LibraryScreen>
         }
       }, null);
 
-      getSubscription();
       getFavorites();
+      getSubscription();
 
     }());
 

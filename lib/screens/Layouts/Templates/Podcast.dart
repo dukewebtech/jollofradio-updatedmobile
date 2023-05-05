@@ -13,9 +13,8 @@ import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/string.dart';
 import 'package:jollofradio/utils/toaster.dart';
-import 'package:jollofradio/widget/Buttons.dart';
-import 'package:jollofradio/widget/Input.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:jollofradio/widget/Shared.dart';
 import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -26,6 +25,7 @@ class PodcastTemplate extends StatefulWidget {
   final bool compact;
   final Playlist? playlist;
   final bool onPlaylist;
+  final bool playing;
   final dynamic callback;
 
   const PodcastTemplate({
@@ -37,6 +37,7 @@ class PodcastTemplate extends StatefulWidget {
     this.onPlaylist = false,
     this.compact = false,
     this.callback,
+    this.playing = false,
   });
 
   @override
@@ -54,7 +55,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
   bool isVisible = true;
   dynamic _setState;
   String? selectedLabel;
-  TextEditingController playlistName = TextEditingController();
+  TextEditingController controller = TextEditingController();
   List<String> dropdown = [];
 
   @override
@@ -70,7 +71,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     .onPlaylist==true){
       playlist = widget.playlist;
     }
-    
+
     if(user != null){
       dropdown 
       = (user as User).playlist.map<String>( (e) => e['name'] )
@@ -78,6 +79,14 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     }
 
     super.initState(); 
+  }
+
+  void callback(Map args /* ={} */) {
+    _setState = args['state'];
+
+    if(args['label'] != null) {
+      selectedLabel = args['label'];
+    }
   }
 
   Future<void> _doSubscribe() async {
@@ -112,33 +121,33 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
   Future<void> _share() async {
     await Share.share(
       shareLink(
-        type: 'podcast', data: episode //share-able link
+        type: 'episode', data: episode //share-able link
       )
     );
   }
 
   Future<void> _savePlaylist() async {
     if(isSaving) return;
-    _setState(() {
+    setState(() {
       isSaving = true;
     });
 
-    final name = ( selectedLabel ?? playlistName.text );
+    final name = selectedLabel ?? controller.text.trim();
     Map data = {
       'playlist_name': name,
-      'episode_id': widget.episode.id
+      'episode_id': episode.id
     };
 
     if(selectedLabel == null 
     && name.isEmpty){
-      _setState(() => isSaving = false);
+      setState(() => isSaving = false);
       Toaster.error("You have not selected a playlist");
       return;
     }
 
     await PlaylistController.create(data).then((created) 
     async{
-      _setState(() => isSaving = false);
+      setState(() => isSaving = false);
       if(!created){
         Toaster.error(
           "Oops! while saving playlist, please try again"
@@ -146,9 +155,15 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
       }
       Toaster.success("Episode added to playlist: $name");
 
-      playlistName.clear(  );
+      controller.clear();
       Navigator.pop(context);
     });
+  }
+
+  Future<void> _deleteCall(  ) async {
+
+    _deleteItem(widget.callback);
+
   }
 
   Future<void> _deleteItem(cb) async {
@@ -165,138 +180,6 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
         });
       }
     });
-  }
-
-  Future<void> playlistModal() async {
-    return showDialog(
-      context: context, 
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {     
-            _setState = setState;
-            return AlertDialog(
-              backgroundColor: AppColor.primary,
-              title: Row(
-                children: [
-                  Icon(Iconsax.music, color: Colors.white),
-                  SizedBox(width: 10),
-                  Text("Add to Playlist", style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold
-                  )),
-                  Spacer(),
-                  SizedBox(
-                    width: 25,
-                    child: IconButton(
-                      padding: EdgeInsets.zero,
-                      tooltip: "Create New Playlist",
-                      onPressed: () {
-                        _setState((){
-                          showCreate = !showCreate;
-                        });
-                      },
-                      icon: Icon(
-                        Iconsax.add, color: Colors.white
-                      ),
-                    ),
-                  )
-                ],
-              ),
-              content: SizedBox(
-                width: 300,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: <Widget>[
-                    if(!showCreate) ...[
-                      SizedBox(height: 20),
-                      select("Select a Playlist", dropdown),
-                    ]
-                    else ...[
-                      SizedBox(height: 20),
-                      Labels.secondary("Create a Playlist"),
-                      Input.primary(
-                        "Playlist Name",
-                        leadingIcon: Icons.edit,
-                        controller: playlistName,
-                      ),
-                    ],
-                    SizedBox(height: 10),
-                    Buttons.primary(
-                      label: 
-                      !isSaving ? "Add to Playlist" : "Saving...",
-                      onTap: () => _savePlaylist(),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-        );
-      },
-    );
-  }
-
-  Future<void> deleteModal() async {
-    return showDialog(
-      context: context, 
-      builder: (context) {
-        return StatefulBuilder(
-          builder: (context, setState) {     
-            _setState = setState;
-            return AlertDialog(
-              backgroundColor: AppColor.primary,
-              title: Row(
-                children: [
-                  Icon(Icons.delete, color: Colors.white),
-                  SizedBox(width: 10),
-                  Text("Warning", style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold
-                  )),
-                ],
-              ),
-              content: Text(
-                "Are you sure you want to delete item from ${""
-                }your playlist?",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 14
-                ),
-              ),
-              actions: [
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent
-                  ),
-                  onPressed: () {
-                    
-                    _deleteItem(widget.callback);
-                  
-                  }, 
-                  child: Text("Yes", style: TextStyle(
-                    color: Colors.red
-                  ),)
-                ),
-                TextButton(
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.transparent
-                  ),
-                  onPressed: () {
-                    //
-                    Navigator.pop(context);
-                    //                    
-                  }, 
-                  child: Text("No", style: TextStyle())
-                ),
-              ],
-            );
-          }
-        );
-      },
-    );
   }
 
   @override
@@ -364,22 +247,25 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                     Positioned(
                       left: 5,
                       bottom: 5,
-                      child: Container(
-                        height: 15,
-                        constraints: const BoxConstraints(
-                          minWidth: 30
-                        ),
-                        alignment: Alignment.centerLeft,
-                        padding: EdgeInsets.only(left: 4, right: 4),
-                        decoration: BoxDecoration(
-                          color: Colors.black.withAlpha(95),
-                          borderRadius: BorderRadius.circular(50)
-                        ),
-                        child: Text(episode.duration, style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold
-                        ),
-                          textAlign: TextAlign.center
+                      child: Visibility(
+                        visible: false,
+                        child: Container(
+                          height: 15,
+                          constraints: const BoxConstraints(
+                            minWidth: 30
+                          ),
+                          alignment: Alignment.centerLeft,
+                          padding: EdgeInsets.only(left: 4, right: 4),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withAlpha(95),
+                            borderRadius: BorderRadius.circular(50)
+                          ),
+                          child: Text(episode.duration, style: TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold
+                          ),
+                            textAlign: TextAlign.center
+                          ),
                         ),
                       ),
                     )
@@ -418,7 +304,8 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
           padding: EdgeInsets.all(5),
           margin: EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
-            color: Color(0XFF12222D),
+            color: !widget.playing ? Color(0XFF12222D) : 
+            Color(0XFF12222D).withAlpha(50),
             borderRadius: BorderRadius.circular(5)
           ),
           child: Row(
@@ -450,7 +337,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
               ),
               SizedBox(width: 10),
               SizedBox(
-                width: MediaQuery.of(context).size.width - 150,
+                width: MediaQuery.of(context).size.width - 145,
                 height: 70,
                 child: Row(
                   children: <Widget>[
@@ -460,7 +347,13 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                         children: <Widget>[
                           SizedBox(
                             height: 40,
-                            child: Labels.primary(
+                            child: !widget.playing ? Labels.primary(
+                              episode.title,
+                              maxLines: 2,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 14,
+                              margin: EdgeInsets.only(bottom: 5)
+                            ) : Labels.secondary(
                               episode.title,
                               maxLines: 2,
                               fontWeight: FontWeight.bold,
@@ -470,32 +363,49 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                           ),
                           Row(
                             children: [
-                              Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(episode.creator?.username() ?? '', 
-                                  style: TextStyle(
-                                    color: Color(0XFF9A9FA3),
-                                    fontSize: 12
-                                  ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                  ),
-                                  Text(episode.duration, style: TextStyle(
-                                    color: Color(0XFF9A9FA3),
-                                    fontSize: 10
-                                  )),
-                                ],
+                              SizedBox(
+                                width: width - 240,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(episode.podcast, style: TextStyle(
+                                      color: Color(0XFF9A9FA3),
+                                      fontSize: 12,
+                                    ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(episode.creator?.username() ?? '', 
+                                    style: TextStyle(
+                                      color: Color(0XFF9A9FA3),
+                                      fontSize: 10
+                                    ),
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                  ],
+                                ),
                               ),
                               Spacer(),
                               Container(
-                                width: 85,
-                                margin: EdgeInsets.only(left: 10),
+                                width: 80,
+                                // margin: EdgeInsets.only(left: 10),
                                 child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
                                     GestureDetector(
-                                      onTap: () => _doSubscribe(),
+                                      onTap: () async {
+                                        if(user == null) {
+                                          return Toaster.info(
+                                            "You need to be signed in to like ${
+                                              ""
+                                            }this podcast"
+                                          );
+                                        }
+                                        
+                                        await _doSubscribe();
+
+                                      },
                                       child: !_fav ? Icon(
                                         Iconsax.heart, 
                                         color: Color(0XFF575C5F),
@@ -513,13 +423,25 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                             return Toaster.info(
                                               "You need to be signed in to add ${
                                                 ""
-                                              } track to playlist"
+                                              }track to playlist"
                                             );
                                           }
-                                          await playlistModal(  );
-                                          return;
+                                          
+                                          return playlistModal(
+                                            context: context,
+                                            label: selectedLabel,
+                                            playlist: dropdown,
+                                            fn: _savePlaylist,
+                                            callback: callback,
+                                            controller: controller,
+                                          );
                                         }
-                                        deleteModal();
+                                        
+                                        return deleteModal(
+                                          context: context,
+                                          state: _setState,
+                                          callback: _deleteCall
+                                        );
                                       },
                                       child: Icon(
                                         !widget.onPlaylist 
@@ -600,7 +522,8 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
       return GestureDetector(
         onTap: () => RouteGenerator.goto(TRACK_PLAYER, {
           "track": episode,
-          "channel": "podcast"
+          "channel": "podcast",
+          "playlist": podcasts
         }),
         child: Visibility(
           visible: isVisible,
@@ -714,44 +637,4 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
       return Container();
       
   }
-
-  Widget select(String name, List<String> items /** = [...i] **/ ) {
-    return SizedBox(
-      width: double.infinity,
-      child: ButtonTheme(
-        // colorScheme: ColorScheme.fromSeed(seedColor: Colors .red),
-        padding: EdgeInsets.only(left: 50),
-        child: DropdownButton(
-          dropdownColor: AppColor.primary,
-          underline: Container(
-            height: 0.5,
-            color: AppColor.secondary
-          ),
-          isExpanded: true,
-          icon: Icon(
-            Icons.keyboard_arrow_down,
-            color: AppColor.secondary,
-          ),
-          value: selectedLabel,
-          hint: Labels.secondary(name),
-          items: items.map<DropdownMenuItem>((val)=> DropdownMenuItem
-          <String>(
-            value: val,
-            child: Text(
-              val, style: TextStyle(
-                color: Colors.white,
-                fontSize: 13
-              )
-            ),
-          )).toList(),
-          onChanged: (value) {
-            _setState(() {
-              selectedLabel = value;
-            });
-          },
-        ),
-      ),
-    );
-  }
-
 }

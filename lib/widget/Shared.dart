@@ -2,7 +2,10 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
+import 'package:jollofradio/widget/Buttons.dart';
+import 'package:jollofradio/widget/Input.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:jollofradio/utils/Helpers/Country.dart';
 
@@ -143,16 +146,16 @@ class _SummaryState extends State<Summary> {
 
     final int totalPlays = widget.statistics['plays'];
     int summary = widget.statistics['summary'].length;
-
+    
     percentage = widget.data.value 
-    / summary;
+    / totalPlays;
 
     Timer(Duration(milliseconds: 200), (){ ///////////
       setState(() {
-         progress = percentage * width;
+        var value = widget.data.value;
+        progress = ((value / totalPlays) * width);
       });
     });
-
     super.initState();
   }
 
@@ -229,5 +232,242 @@ class _SummaryState extends State<Summary> {
       ),
     );
   }
+}
 
+class Select extends StatefulWidget {
+  final String label;
+  final String? selectedLabel;
+  final dynamic state;
+  final List<String> items;
+  final dynamic callback;
+
+  const Select({ 
+    Key? key,
+    required this.label,
+    required this.selectedLabel,
+    required this.state,
+    required this.items,
+    required this.callback,
+  }) : super(key: key);
+
+  @override
+  State<Select> createState() => _SelectState();
+}
+
+class _SelectState extends State<Select> {
+  late String label;
+  late String? selectedLabel;
+  late dynamic state;
+  late List<String> items;
+  late dynamic callback;
+
+  @override
+  void initState() {
+    label = widget.label;
+    selectedLabel = widget.selectedLabel;
+    state = widget.state;
+    items = widget.items;
+    callback = widget.callback;
+
+    super.initState();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: double.infinity,
+      child: ButtonTheme(
+        // colorScheme: 
+        // ColorScheme.fromSeed(seedColor: Colors.red),
+        padding: EdgeInsets.only(left: 50),
+        child: DropdownButton(
+          dropdownColor: AppColor.primary,
+          underline: Container(
+            height: 0.5,
+            color: AppColor.secondary
+          ),
+          isExpanded: true,
+          icon: Icon(
+            Icons.keyboard_arrow_down,
+            color: AppColor.secondary,
+          ),
+          value: selectedLabel,
+          hint: Labels.secondary(label),
+          items: items.map<DropdownMenuItem>( (val) => 
+          DropdownMenuItem<String>(
+            value: val,
+            child: Text(
+              val, style: TextStyle(
+                color: Colors.white,
+                fontSize: 13
+              )
+            ),
+          )).toList(),
+          onChanged: (value) {
+            state(() {
+              selectedLabel = value;
+              callback({
+                'state': state, 'label': selectedLabel
+              });
+            });
+          },
+        ),
+      ),
+    );
+  }
+}
+
+Future<void> playlistModal({
+  required BuildContext context,
+  // required bool loading,
+  required String? label,
+  required List<String> playlist,
+  required TextEditingController controller,
+  required dynamic fn,
+  required dynamic callback,
+}) async {
+  bool loading = false;
+  bool createModal = false;
+  dynamic state;
+
+  return showDialog(
+    context: context, 
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {     
+          state = setState;
+          callback({'state': state}); //fire parent logic
+          // cb = callback;
+          return AlertDialog(
+            backgroundColor: AppColor.primary,
+            title: Row(
+              children: [
+                Icon(Iconsax.music, color: Colors.white),
+                SizedBox(width: 10),
+                Text("Add to Playlist", style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold
+                )),
+                Spacer(),
+                SizedBox(
+                  width: 25,
+                  child: IconButton(
+                    padding: EdgeInsets.zero,
+                    tooltip: "Create New Playlist",
+                    onPressed: () {
+                      state((){
+                        createModal = !createModal;
+                      });
+                    },
+                    icon: Icon(
+                      Iconsax.add, color: Colors.white
+                    ),
+                  ),
+                )
+              ],
+            ),
+            content: SizedBox(
+              width: 300,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: <Widget>[
+                  if(!createModal) ...[
+                    SizedBox(height: 20),
+                    Select(
+                      label: "Select a Playlist",
+                      selectedLabel: label,
+                      items: playlist,
+                      state: state,
+                      callback: callback
+                    )
+                  ]
+                  else ...[
+                    SizedBox(height: 20),
+                    Labels.secondary("Create a Playlist"),
+                    Input.primary(
+                      "Playlist Name",
+                      leadingIcon: Icons.edit,
+                      controller: controller,
+                    ),
+                  ],
+                  SizedBox(height: 10),
+                  Buttons.primary(
+                    label: 
+                    !loading ? "Add to Playlist" : "Saving...",
+                    onTap: () async {
+                      state(() => loading = !loading); //update
+
+                      await fn();
+                      state(() => loading = !loading); //update
+                    },
+                  ),
+                ],
+              ),
+            ),
+          );
+        }
+      );
+    },
+  );
+}
+
+Future<void> deleteModal({
+  required BuildContext context,
+  required dynamic state,
+  required dynamic callback
+}) async {
+  return showDialog(
+    context: context, 
+    builder: (context) {
+      return StatefulBuilder(
+        builder: (context, setState) {     
+          state = setState;
+          return AlertDialog(
+            backgroundColor: AppColor.primary,
+            title: Row(
+              children: [
+                Icon(Icons.delete, color: Colors.white),
+                SizedBox(width: 10),
+                Text("Warning", style: TextStyle(
+                  color: Colors.white,
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold
+                )),
+              ],
+            ),
+            content: Text(
+              "Are you sure you want to delete item from ${""
+              }your playlist?",
+              style: TextStyle(
+                color: Colors.white,
+                fontSize: 14
+              ),
+            ),
+            actions: [
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent
+                ),
+                onPressed: () => callback(),
+                child: Text("Yes", style: const TextStyle(
+                  color: Colors.red
+                ))
+              ),
+              TextButton(
+                style: TextButton.styleFrom(
+                  backgroundColor: Colors.transparent
+                ),
+                onPressed: () {
+                  Navigator.pop(context);
+                }, 
+                child: Text("No", style: const TextStyle())
+              ),
+            ],
+          );
+        }
+      );
+    },
+  );
 }
