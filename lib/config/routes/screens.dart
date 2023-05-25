@@ -1,7 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
-import 'package:jollofradio/screens/Auth/AccountScreen.dart';
+
+import 'package:jollofradio/screens/Layouts/Public.dart';
+import 'package:jollofradio/screens/Layouts/User.dart';
 import 'package:jollofradio/screens/Layouts/Creator.dart';
+import 'package:jollofradio/screens/Layouts/WebView.dart';
+
+import 'package:jollofradio/screens/Auth/AccountScreen.dart';
 import 'package:jollofradio/screens/Auth/InterestScreen.dart';
 import 'package:jollofradio/screens/Auth/ProfileScreen.dart';
 import 'package:jollofradio/screens/Auth/SettingScreen.dart';
@@ -9,9 +14,15 @@ import 'package:jollofradio/screens/Auth/SiginInScreen.dart';
 import 'package:jollofradio/screens/Auth/SignUpScreen.dart';
 import 'package:jollofradio/screens/Auth/ForgotScreen.dart';
 import 'package:jollofradio/screens/Auth/ConfirmScreen.dart';
-import 'package:jollofradio/screens/Layouts/Public.dart';
 import 'package:jollofradio/screens/Auth/ResetScreen.dart';
-import 'package:jollofradio/screens/Layouts/User.dart';
+import 'package:jollofradio/screens/Auth/VerifyScreen.dart';
+
+import 'package:jollofradio/screens/Creator/Podcast/PodcastScreen.dart';
+import 'package:jollofradio/screens/Creator/Episode/CreateScreen.dart';
+import 'package:jollofradio/screens/Creator/Episode/DetailScreen.dart';
+import 'package:jollofradio/screens/Creator/Podcast/ManageScreen.dart';
+import 'package:jollofradio/screens/Creator/Podcast/UploadScreen.dart';
+
 import 'package:jollofradio/screens/User/Category/CategoryScreen.dart';
 import 'package:jollofradio/screens/User/Category/SelectionScreen.dart';
 import 'package:jollofradio/screens/User/HomeScreen.dart';
@@ -34,7 +45,6 @@ import 'package:jollofradio/screens/User/Station/StreamScreen.dart';
 import 'package:jollofradio/screens/Welcome/SplashScreen.dart';
 import 'package:jollofradio/screens/Error/ErrorScreen.dart';
 import 'package:jollofradio/screens/Welcome/StartupScreen.dart';
-import 'package:jollofradio/screens/Layouts/WebView.dart';
 
 
 class ScreenProvider {
@@ -48,7 +58,9 @@ class ScreenProvider {
         return MaterialPageRoute(builder: (context) => StartupScreen());
 
       case SIGNIN:
-        return MaterialPageRoute(builder: (context) => SiginInScreen());
+        return MaterialPageRoute(builder: (context) => SiginInScreen(
+          email: data['email'],
+        ));
 
       case SIGNUP:
         return MaterialPageRoute(builder: (context) => SiginUpScreen(
@@ -57,8 +69,12 @@ class ScreenProvider {
 
       case SIGNUP_ONBOARD:
         return MaterialPageRoute(builder: (context) => InterestScreen(
+          type: data['type'],
           token: data['token'],
+          email: data['email'],
+          social: data['social']
         ));
+
       case FORGOT:
         return MaterialPageRoute(builder: (context) => ForgotScreen());
 
@@ -70,6 +86,10 @@ class ScreenProvider {
           otp: data['otp'],
         ));
 
+      case VERIFY_ACCOUNT:
+        return MaterialPageRoute(builder: (context) => VerifyScreen(
+          email: data['email'],
+        ));
 
       case PROFILE:
         return MaterialPageRoute(builder: (context) => ProfileScreen(
@@ -86,7 +106,6 @@ class ScreenProvider {
       // Public
       case PUBLIC:
         return MaterialPageRoute(builder: (context) => PublicLayout());
-
 
       // User
       case DASHBOARD:
@@ -196,10 +215,41 @@ class ScreenProvider {
           user: data['user'],
         ));
 
-
       // Creators
       case CREATOR_DASHBOARD:
         return MaterialPageRoute(builder: (context) => CreatorLayout());
+
+      case CREATOR_PODCAST:
+        return MaterialPageRoute(builder: (context) => PodcastScreen(
+          title: data['title'],
+          podcasts: data['podcasts'],
+        ));
+
+      case CREATOR_PODCAST_NEW:
+        return MaterialPageRoute(builder: (context) => UploadScreen(
+          type: data['type'],
+          callback: data['callback'],
+          podcast: data['podcast'],
+        ));
+
+      case CREATOR_PODCAST_ID:
+        return MaterialPageRoute(builder: (context) => ManageScreen(
+          podcast: data['podcast'],
+        ));
+
+      case CREATOR_EPISODE:
+        return MaterialPageRoute(builder: (context) => DetailScreen(
+          episode: data['track'],
+          callback: data['callback'],
+        ));
+
+      case CREATOR_EPISODE_NEW:
+        return MaterialPageRoute(builder: (context) => CreateScreen(
+          type: data['type'],
+          podcast: data['podcast'],
+          episode: data['episode'],
+          callback: data['callback'],
+        ));
 
       case WEBVIEW:
         return MaterialPageRoute(builder: (context) => WebViewScreen(

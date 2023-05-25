@@ -18,7 +18,7 @@ class Countries {
         return element['name'] == country 
         || element['code'] == country; //check for match 
 
-      });
+      }, orElse: () => null);
 
     }
 

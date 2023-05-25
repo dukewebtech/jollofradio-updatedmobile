@@ -13,6 +13,7 @@ const VERIFY = '/forgot/verify';
 const RESET_PASSWORD = '/reset';
 const PROFILE = '/profile';
 const PROFILE_EDIT = '/profile/edit';
+const VERIFY_ACCOUNT = '/verify';
 
 //PUBLIC
 const PUBLIC = '/public/home';
@@ -43,6 +44,10 @@ const NOTIFICATION = '/user/notifications';
 
 //CREATOR
 const CREATOR_DASHBOARD = '/creator/dashboard';
-const CREATOR_PODCAST = '/creator/podcasts/:id';
+const CREATOR_PODCAST = '/creator/podcasts';
+const CREATOR_PODCAST_NEW = '/creator/upload';
+const CREATOR_PODCAST_ID = '/creator/podcasts/:id';
+const CREATOR_EPISODE = '/creator/ep/:id';
+const CREATOR_EPISODE_NEW = '/creator/ep/:id/edit';
 
 const WEBVIEW = '/webview';

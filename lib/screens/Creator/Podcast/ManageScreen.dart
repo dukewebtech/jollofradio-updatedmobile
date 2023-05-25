@@ -1,17 +1,13 @@
-import 'dart:convert';
 import 'package:animate_do/animate_do.dart';
 import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:confetti/confetti.dart';
-import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Podcast.dart';
 import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/routes/router.dart';
+import 'package:jollofradio/config/services/controllers/Creator/PodcastController.dart';
 import 'package:jollofradio/config/services/controllers/User/PlaylistController.dart';
-import 'package:jollofradio/config/services/controllers/User/SubscriptionController.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
@@ -19,50 +15,49 @@ import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/screens/Layouts/Shimmers/Podcast.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
 import 'package:jollofradio/utils/helper.dart';
-import 'package:jollofradio/utils/helpers/Storage.dart';
+import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:jollofradio/widget/Player.dart';
-import 'package:just_audio/just_audio.dart';
+import 'package:jollofradio/widget/Shared.dart';
 import 'package:share_plus/share_plus.dart';
 
-class EpisodeScreen extends StatefulWidget {
+class ManageScreen extends StatefulWidget {
   final Podcast podcast;
-  const EpisodeScreen({super.key, required this.podcast});
+  const ManageScreen({super.key, required this.podcast});
 
   @override
-  State<EpisodeScreen> createState() => _EpisodeScreenState();
+  State<ManageScreen> createState() => _ManageScreenState();
 }
 
-class _EpisodeScreenState extends State<EpisodeScreen> {
+class _ManageScreenState extends State<ManageScreen> {
   late Podcast podcast;
-  late ConfettiController confettiController;
   AudioServiceHandler player = AudioServiceHandler();
   late PlaybackState playerState;
   bool isLoading = true;
-  bool _fav = false;
   List<MediaItem> tracks = [];
   MediaItem? currentTrack;
   List<Episode> episodes = [];
+  Map<bool, dynamic> status = {
+    true: {
+      "label": 'Approved',
+      "color": Colors.green
+    },
+    false: {
+      "label": 'Unapproved',
+      "color": Color(0XFF12222D)
+    }
+  };
 
   @override
   void initState() {
     podcast = widget.podcast;
-    _fav = podcast.subscribed;
-    confettiController = ConfettiController(duration: Duration(
-      seconds: 1
-    ));
-
+    
     initPlayer ();
     getPlaylist();
-    super.initState();
-  }
 
-  @override
-  void dispose() {
-    confettiController.dispose();
-    super.dispose();
+    super.initState();
   }
 
   Future<void> initPlayer() async {
@@ -89,14 +84,18 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
 
   Future<void> getPlaylist() async {
     int id = podcast.id;
+    setState(() {
+      isLoading = true;
+    });
 
     await PlaylistController.show(id).then((playlist) async {
-      if(playlist != null){
+      if(playlist != null){        
         setState(() {
           podcast = playlist;
           episodes = playlist.episodes!;
           isLoading = false;
         });
+        
         /*
         episodes = playlist.episodes!.map<Episode>((episode){
           return episode;
@@ -106,89 +105,68 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
     });
   }
 
-  Future<void> playPodcast() async {
-    if(podcast.episodes!.isEmpty) 
-      return;
-    
-    /*
-    @deprecated
-    var podcast = currentTrack?.extras?['episode']?['podcast'];
-    if(podcast != playlist.title){
-    */
-    final playlist = player.getPlaylist() ;
+  Future _action(String type) async {
+    await Future((){});
 
-    podcast.episodes!.map( (dynamic item) {
-      item = MediaItem(
-        id: item.id.toString(),
-        title: item.title,
-        album: item.podcast,
-        artist: item.creator?.username() ?? '', //null check
-        artUri: Uri.parse(item.logo),
-        extras: {
-          "url": item.source,
-          "episode": item.toJson()
-        }
-      );
-      tracks.add(item);
-    }).toList();
-
-    bool onTrack = tracks.every((element) {
-      //
-      return playlist.any(
-        (e) => e.id == element.id) == true; // check tracks
-      //
-    });
-
-    if((!onTrack || onTrack == false)){
-      Storage.set(
-        'podcasts',jsonEncode(podcast.episodes ?? < int >[])
-      );
-
-      await player.stop();
-      await player.setPlaylist(tracks);
-      player.play();
-    }
-    else{
-      if(!player.isPlaying())
-        player.play();
-      
-      else 
-        player.pause();
-
-        ////////////////////////////////////////////////////
-    }
-  }
-
-  Future<void> _doSubscribe() async {
-    bool subscribing = !_fav;
-    Map data = {
-      'podcast_id': podcast.id
-    };
-
-    setState(() {
-      _fav = !_fav;
-    });
-
-    if(subscribing){
-      confettiController.play();
-      await SubscriptionController.create(data).then((status){
-        if(!status){
-          setState(() => _fav = !_fav);
-          return;
-        }
-        Toaster.info(
-          "You've subscribed to podcast: ${ podcast.title }"
-        );
+    if(type == 'edit'){
+      RouteGenerator.goto(CREATOR_PODCAST_NEW, { //redirect...
+        "type": "edit",
+        "podcast": podcast,
+        "callback": getPlaylist
       });
     }
-    if(!subscribing){    
-      await SubscriptionController.delete(data).then((status){
-      });
+
+    if(type == 'share'){
+      return await Share.share(
+        shareLink(
+          type: 'podcast', data: podcast
+        )
+      );
+    }
+
+    if(type == 'delete'){
+      int id = podcast.id;
+
+      void mountStream(){
+        CacheStream().mount({
+          '_podcasts': {
+            'data': () async {
+              return await PodcastController.index(); //////
+            },
+            'rules': (data){
+              return data.isNotEmpty;
+            },
+          },
+        }, null);
+      }
+
+      return deleteModal(
+        context: context,
+        title: Message.build(Message.delete_item, /* * */  {
+          "item": "podcast",
+          "source": "account"
+        }),
+        state: null,
+        callback: () async {
+          Navigator.pop(context);
+          Toaster.info("Deleting podcast... please wait.") ;
+
+          await PodcastController.delete(id).then((status) {
+
+            mountStream();
+            RouteGenerator.goBack();
+
+          });
+        }
+      );
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unnecessary_cast
+    double width = MediaQuery.of(context).size.width as double;
+
     return Scaffold(
       appBar: AppBar(
         leading: Buttons.back()
@@ -215,7 +193,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                       Container(
                         width: double.infinity,
                         height: 200,
-                        margin: EdgeInsets.only(bottom: 20),
+                        margin: EdgeInsets.only(bottom: 10),
                         decoration: BoxDecoration(
                           color: Color(0XFF0D1921),
                           borderRadius: BorderRadius.circular(6),
@@ -252,10 +230,33 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      Labels.primary(
-                        "About",
-                        fontSize: 18,
-                        margin: EdgeInsets.only(bottom: 5)
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Labels.primary(
+                            "About",
+                            fontSize: 18,
+                            margin: EdgeInsets.only(bottom: 5)
+                          ),
+                          if(!isLoading)
+                          FadeIn(
+                            child: Container(
+                              width: 80,
+                              height: 15,
+                              decoration: BoxDecoration(
+                                color: status[podcast.approved]['color'],
+                                borderRadius: BorderRadius.circular(50)
+                              ),
+                              alignment: Alignment.center,
+                              child: Text(
+                                status[podcast.approved]['label'], 
+                                style: TextStyle(
+                                  fontSize: 10
+                                ),
+                              ),
+                            ),
+                          )
+                        ],
                       ),
                       Wrap(
                         children: [
@@ -320,148 +321,125 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                       color: Color(0XFFFFFFFF)
                                     ),
                                   ),
-                                  SizedBox(height: 10),
-                                  Text.rich(
-                                    TextSpan(
-                                      text: "by ",
-                                      children: <InlineSpan>[
-                                        TextSpan(
-                                          text: podcast.creator.username(),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColor.secondary.withOpacity(
-                                              0.8
-                                            )
-                                          ),
-                                          recognizer: 
-                                          TapGestureRecognizer()
-                                          ..onTap = (){
-                                            RouteGenerator.goto(CREATOR_PROFILE, {
-                                              "creator": podcast.creator,
-                                            }); 
-                                          },
-                                        )
-                                      ],
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0XFFBBBBBB)
-                                      ),
-                                    )
-                                  )
                                 ],
                               ),
                             ),
                             SizedBox(
-                              width: 95,
-                              height: 40,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                                children: <Widget>[
-                                  GestureDetector(
-                                    onTap: () => _doSubscribe(),
-                                    child: !_fav ? Icon(
-                                      Iconsax.notification, 
-                                      color: Color(0XFF575C5F),
-                                      size: 18,
-                                    ) : Icon(
-                                      Iconsax.notification5,
-                                      color: AppColor.secondary,
-                                      size: 18,
-                                    ),
-                                  ),
-                                  SizedBox(
-                                    width: 3,
-                                    child: ConfettiWidget(
-                                      confettiController: confettiController,
-                                      shouldLoop: false,
-                                      blastDirectionality: BlastDirectionality.explosive,
-                                      maximumSize: Size(5, 5),
-                                      minimumSize: Size(5, 5),
-                                      maxBlastForce: 5,
-                                      minBlastForce: 1,
-                                      emissionFrequency: 0.02,
-                                      numberOfParticles: 10,                            
-                                      gravity: 1,
-                                    ),
-                                  ),
-                                  Container(
-                                    width: 40,
-                                    height: 40,
-                                    alignment: Alignment.center,
-                                    decoration: BoxDecoration(
-                                      color: podcast.episodes!.isEmpty==true ? 
-                                      Color(0XFF0D1921) : AppColor.secondary,
-                                      borderRadius: BorderRadius.circular(100)
-                                    ),
-                                    child: StreamBuilder<Map>(
-                                      stream: player.streams(),
-                                      builder: (context, snapshot) {
-                                        final state = snapshot.data?['playState'];
-                                        bool playing = state?.playing ?? false;
-                                        var processingState = state?.processingState;
-                                        if(
-                                          playing == true && currentTrack?.extras?
-                                          ['episode']?['podcast'] != podcast.title) {
-                                            playing = false;
-                                            processingState = ProcessingState.ready;
-                                        }
-
-                                        List loading = [
-                                          ProcessingState.loading,
-                                          ProcessingState.buffering,
-                                        ];
-
-                                        if(loading.contains(processingState) == true 
-                                        || isLoading){
-                                          return Center(
-                                            child: SizedBox(
-                                              width: 15,
-                                              height: 15,
-                                              child: CircularProgressIndicator(
-                                                strokeWidth: 2,
-                                                color: podcast.episodes!.isEmpty ? 
-                                                AppColor.secondary : AppColor.primary
-                                              )
-                                            ),
-                                          );
-                                        }
-
-                                        return IconButton(
-                                          padding: EdgeInsets.all(2.5),
-                                          tooltip: playing == false ? 'Play' : 'Pause',
-                                          onPressed:()=> playPodcast(),
-                                          icon: Icon(
-                                            !playing ? Icons.play_arrow : Icons.pause,
-                                            color: podcast.episodes!
-                                            .isEmpty ? Colors.white : Colors.black,
-                                            size: 20,
-                                          ),
-                                        );
-                                      }
-                                    )
-                                  ),
-                                  SizedBox(
-                                    width: 3,
-                                  ),
-                                  GestureDetector(
-                                    onTap: () async{
-                                      await Share.share(
-                                        shareLink(
-                                          type: 'podcast', data: podcast
-                                        )
-                                      );
+                              width: 30,
+                              child: PopupMenuButton(
+                                color: AppColor.primary,
+                                itemBuilder: (context) {
+                                  List<Map> popupActions = [
+                                    {
+                                      "id": "edit",
+                                      "label": "Edit Podcast",
+                                      "icon": Iconsax.edit_2, //////////////
+                                      "color": Colors.white
                                     },
-                                    child: Icon(
-                                      FontAwesomeIcons.share, 
-                                      color: Color(0XFF575C5F),
-                                      size: 18,
-                                    ),
-                                  ),
-                                ],
+                                    {
+                                      "id": "share",
+                                      "label": "Share",
+                                      "icon": Iconsax.share, //////////////
+                                      "color": Colors.white
+                                    },
+                                    {
+                                      "id": "delete",
+                                      "label": "Delete",
+                                      "icon": Iconsax.trash,  //////////////
+                                      "color": Colors.red
+                                    },
+                                  ];
+
+                                  return popupActions.map<PopupMenuItem>((e){
+                                    return PopupMenuItem(
+                                      value: e['id'],
+                                      onTap: () {
+                                        _action(e['id']);
+                                      },
+                                      child: Row(
+                                        children: [
+                                          Icon(
+                                            e['icon'], 
+                                            size: 14, color: /**/ e['color'],
+                                          ),
+                                          SizedBox(width: 20),
+                                          Text(
+                                            e['label'], 
+                                            style: TextStyle(
+                                              color: e['color'],
+                                              fontSize: 14
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    );
+                                  }).toList();
+                                  
+                                },
+                                child: Icon(
+                                  Icons.more_horiz, color: Color(0XFF9A9FA3)
+                                )
                               ),
                             )
                           ],
                         ),
+                      ),
+                      SizedBox(height: 10),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          SizedBox(
+                            width: (width - 40) / 2.1,
+                            height: 40,
+                            child: ElevatedButton.icon(
+                              onPressed: () {
+                                RouteGenerator.goto(
+                                  CREATOR_EPISODE_NEW, {
+                                    "type": "create",
+                                    "podcast": podcast,
+                                    "callback": getPlaylist
+                                  }
+                                );
+                              }, 
+                              icon: Icon(
+                                Iconsax.add, color: Colors.black
+                              ), 
+                              label: Text(
+                                "Add Episode", style: const TextStyle(
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold
+                              ))
+                            ),
+                          ),
+                          // SizedBox(
+                          //   width: 20,
+                          // ),
+                          SizedBox(
+                            width: (width - 40) / 2.1,
+                            height: 40,
+                            child: ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: Colors.redAccent
+                              ),
+                              onPressed: () {
+                                Toaster.info("Service coming soon..");
+                              },
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Text('Go live', style: TextStyle()),
+                                  SizedBox(
+                                    width: 5,
+                                  ),
+                                  Icon(
+                                    Iconsax.microphone_2,
+                                    size: 18,
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
                       ),
                       SizedBox(height: 40),
                       Row(
@@ -521,7 +499,6 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                               )
                             else
                               ...[
-                                
                                 FadeInUp(
                                   child: Column(
                                     children: [
@@ -532,12 +509,13 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                         playing: onTrack(episode),
                                         episode: episode,
                                         podcasts: episodes,
+                                        creator: true,
+                                        callback: getPlaylist,
                                       ))
                                     ],
                                   ),
                                 )
                               ]
-
                           ],
                         ),
                       ),

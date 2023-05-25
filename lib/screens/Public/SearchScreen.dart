@@ -111,7 +111,7 @@ class _SearchScreenState extends State<SearchScreen> {
                     icon: Icon(
                       Iconsax.arrow_right_1,
                       size: 18,
-                      color: Colors.white54,
+                      color: Colors.white30,
                     )
                   ),
                 )

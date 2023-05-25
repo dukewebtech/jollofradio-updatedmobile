@@ -135,7 +135,7 @@ class _ResultScreenState extends State<ResultScreen> {
                               icon: Icon(
                                 Iconsax.arrow_right_1,
                                 size: 18,
-                                color: Colors.white54,
+                                color: Colors.white30,
                               )
                             ),
                           )

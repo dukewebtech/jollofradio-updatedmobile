@@ -364,7 +364,7 @@ class AudioServiceHandler
       index = player.shuffleIndices!.indexOf(index);//////////
 
     await player.seek(Duration.zero , index: index);//////////
-    await player.play();
+    // await player.play();
   }
 
   @override

@@ -12,6 +12,7 @@ class User {
   final String? about;
   final List interests;
   final List notifications;
+  final Map? verification;
   final List playlist;
   final dynamic settings;
   final List subscriptions;
@@ -30,6 +31,7 @@ class User {
     required this.about,
     required this.interests,
     required this.notifications,
+    required this.verification,
     required this.playlist,
     required this.settings,
     required this.subscriptions,
@@ -49,6 +51,7 @@ class User {
       about: json['about'] ?? '',
       interests: json['interests'],
       notifications: json['notifications'],
+      verification: json['verification'],
       playlist: json['playlist'],
       settings: json['settings'],
       subscriptions: json['subscriptions'],

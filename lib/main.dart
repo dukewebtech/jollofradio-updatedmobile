@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:jollofradio/config/services/core/NotificationService.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
@@ -54,13 +55,35 @@ class MyApp extends StatefulWidget {
   State<MyApp> createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   void initState(){
 
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     Timer(Duration(milliseconds: 1000),() => FlutterNativeSplash.remove());
     
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) /*listener*/ {
+    switch (state) {
+      case AppLifecycleState.paused:
+      case AppLifecycleState.inactive:
+      case AppLifecycleState.resumed:
+        break;
+
+      case AppLifecycleState.detached:
+        audioHandler.stop();
+        exit(0);
+        // break;
+    }
   }
 
   @override
@@ -76,10 +99,12 @@ class _MyAppState extends State<MyApp> {
         final scaleSize = MediaQuery.of(context).textScaleFactor.clamp    (
           0.5, 1.0
         );
+
         return MediaQuery(
           data: MediaQuery.of(context).copyWith(textScaleFactor: scaleSize),
           child: child!,
         );
+        
       },
     );
   }

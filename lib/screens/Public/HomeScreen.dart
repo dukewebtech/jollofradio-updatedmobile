@@ -5,6 +5,7 @@ import 'package:jollofradio/config/models/Test/PodcastFactory.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/CategoryController.dart';
 import 'package:jollofradio/config/services/controllers/HomeController.dart';
+import 'package:jollofradio/config/services/controllers/StationController.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/config/strings/Message.dart';
@@ -13,6 +14,7 @@ import 'package:jollofradio/screens/Layouts/Shimmers/Podcast.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Category.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Playlist.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
+import 'package:jollofradio/screens/Layouts/Templates/Radio.dart';
 import 'package:jollofradio/utils/date.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/utils/helpers/Factory.dart';
@@ -31,6 +33,7 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   // late User user;
   late Map streams;
+  late List stations;
   bool isLoading = true;
   bool refresh = false;
 
@@ -57,6 +60,14 @@ class _HomeScreenState extends State<HomeScreen> {
             return data['trending'].isNotEmpty;
           },
         },
+        'stations': {
+          'data':  () async {
+            return await StationController.index();  // stations
+          },
+          'rules': (data){
+            return data['local'].isNotEmpty;
+          },
+        },
         'category': {
           'data': () async {
             return await CategoryController.index(); // fetching
@@ -68,6 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
       ));
 
       fetchStreams() ;
+      fetchStation() ;
 
     }());
 
@@ -104,6 +116,30 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
+  Future<void> fetchStation() async {
+    // setState(() {
+    //   isLoading = true;
+    // });
+
+    final stations = await cacheManager.stream( ///////////////
+      'stations', 
+      fallback: () async {
+        return StationController.index();
+      },
+      callback: StationController.construct
+    );
+
+    this.stations = [
+      ...stations['local'],
+      ...stations['international']
+    ];
+    this.stations.shuffle();
+
+    // setState(() {
+    //   isLoading = false;
+    // });
+  }
+
   Future<List<Category>> category() async {
     final category = await cacheManager.stream( ///////////////
       'category', 
@@ -116,7 +152,6 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     );
-    
     return category;
   }
 
@@ -407,6 +442,77 @@ class _HomeScreenState extends State<HomeScreen> {
                                     (podcast) => /** */ PlaylistTemplate (
                             playlist: podcast,
                             compact: true
+                          ))
+                        ]
+                      ],
+                    )
+                  )
+                ),
+                SizedBox(height: 40),
+                SizedBox(
+                  height: 35,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Labels.primary(
+                        "Radio Stations",
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          widget.tabController!(3);
+                        },
+                        child: Labels.secondary(
+                          "See All"
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  child: Center(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        if(isLoading) ... [
+                          PodcastShimmer(
+                            type: 'list',
+                            length: 3
+                          )
+                        ]
+                        else
+                        if(stations.isEmpty) ... [
+                          Container(
+                            alignment: Alignment.center,
+                            width: width - 40,
+                            padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
+                            child: Column(
+                              children: <Widget>[
+                                Icon(
+                                  Iconsax.radar5,
+                                  size: 40,
+                                  color: Color(0XFF9A9FA3),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  Message.no_data,
+                                  style: TextStyle(
+                                    color: Color(0XFF9A9FA3),
+                                    fontSize: 14
+                                  ),
+                                  textAlign: TextAlign.center,
+                                )
+                              ],
+                            ),
+                          )
+                        ]
+                        else ...[
+                          ...Factory(stations)
+                          .get(0, 5).map((radio) => /** */ RadioTemplate(
+                            station: radio,
                           ))
                         ]
                       ],

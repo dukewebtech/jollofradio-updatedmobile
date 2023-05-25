@@ -29,11 +29,10 @@ class _FollowerTemplateState extends State<FollowerTemplate> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => RouteGenerator.goto('/subscribers/:id', {
+      onTap: () {
+        /* RouteGenerator.goto('/subscribers/:id', { <> }); */
         
-        //
-
-      }),
+      },
       child: Container(
         width: double.infinity,
         height: 70,

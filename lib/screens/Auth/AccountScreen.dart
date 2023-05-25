@@ -9,6 +9,7 @@ import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/AuthController.dart';
 import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
+import 'package:jollofradio/utils/helpers/Country.dart';
 import 'package:jollofradio/utils/scope.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
@@ -53,6 +54,7 @@ class _AccountScreenState extends State<AccountScreen> {
   bool uploading = false;
   List<Map> forms = [];
   late String mode;
+  List countries = [];
 
   @override
   void initState() {
@@ -61,6 +63,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
     (() async {
       creator = ( await isCreator() );
+      countries = await Countries.get();
     }());
 
     forms = [
@@ -252,7 +255,6 @@ class _AccountScreenState extends State<AccountScreen> {
       Future.delayed(Duration(seconds: 1), () { /////////////
         RouteGenerator.goBack();
       });
-      
     });
   }
 
@@ -381,6 +383,14 @@ class _AccountScreenState extends State<AccountScreen> {
                         || mode != 'security' &&  security)
                           return SizedBox();
 
+                        Widget input = Input.primary(
+                          form['controller'].text,
+                          leadingIcon: form['icon'],
+                          controller: form['controller'],
+                          password: form
+                          .containsKey('password') && !showPassword
+                        );
+
                         return Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
@@ -389,13 +399,16 @@ class _AccountScreenState extends State<AccountScreen> {
                             SizedBox(
                               child: Stack(
                                 children: [
-                                  Input.primary(
-                                    form['controller'].text,
-                                    leadingIcon: form['icon'],
-                                    controller: form['controller'],
-                                    password: form
-                                    .containsKey('password') && !showPassword
-                                  ),
+                                  if(form['label'] == 'Country')
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showCountryDialog();
+                                    },
+                                    child: AbsorbPointer(child: input),
+                                  )
+                                  else
+                                  input, //////////////////////////////
+
                                   if(security)
                                   Positioned(
                                     top: 18,
@@ -410,7 +423,7 @@ class _AccountScreenState extends State<AccountScreen> {
                                         Icons.visibility_off : Icons.visibility,
                                         size: 15,
                                         color: !showPassword ? 
-                                        Colors.white24 : Colors.white,
+                                        Colors.white30 : Colors.white,
                                       ),
                                     ),
                                   )
@@ -435,6 +448,93 @@ class _AccountScreenState extends State<AccountScreen> {
           ]
         )
       )
+    );
+  }
+
+  Future _showCountryDialog() async {
+    return showDialog(
+      context: context, 
+      builder: (context) {
+
+        return Center(
+          child: Container(
+            width: 300,
+            height: 300,
+            decoration: BoxDecoration(
+              color: Colors.red
+            ),
+            child: Scaffold(
+              body: Column(
+                mainAxisSize: MainAxisSize.min,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: <Widget>[
+                  Expanded(
+                    child: Container(
+                      padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
+                      child: Column(
+                        children: <Widget>[
+                          Container(
+                            height: 40,
+                            width: double.infinity,
+                            decoration: BoxDecoration(
+                              border: Border(
+                                bottom: BorderSide(color: Colors.white24)
+                              )
+                            ),
+                            child: Row(
+                              mainAxisAlignment: 
+                              MainAxisAlignment.spaceBetween,
+                              children: [
+                                Labels.primary(
+                                  "Select Country",
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold
+                                ),
+                              ],
+                            ),
+                          ),
+                          Expanded(
+                            child: ListView.builder(
+                              key: const PageStorageKey<String>('country'),
+                              shrinkWrap: true,
+                              itemCount: countries.length,
+                              itemBuilder: (context, index) {
+                                Map data = countries[index] as Map;
+                                return ListTile(
+                                  dense: true,
+                                  contentPadding: EdgeInsets.zero,
+                                  minLeadingWidth: 30,
+                                  leading: Container(
+                                    width: 30,
+                                    height: 20,
+                                    color: Color(0XFF0D1921),
+                                    child: Image.network(
+                                      data['flag'],
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                  title: Text(data['name'], style: TextStyle(
+                                    color: Colors.white
+                                  )),
+                                  onTap: () {
+                                    RouteGenerator.goBack();
+                                    country.text = data[ 'name' ].toString( );
+                                  },
+                                );
+                              },
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  )
+                ],
+              ),
+            ),
+          ),
+        );
+
+      },
     );
   }
 }

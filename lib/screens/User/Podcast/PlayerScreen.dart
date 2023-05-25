@@ -227,6 +227,7 @@ with SingleTickerProviderStateMixin {
       await player.skipToQueueItem (    //skip to the track
         currentIndex
       );
+      player.play();
 
       /*
       await player.setPlaylist([
@@ -267,9 +268,10 @@ with SingleTickerProviderStateMixin {
           );
 
           if(index >= 0){
-            player.skipToQueueItem(
+            await player.skipToQueueItem(
               index
             );
+            player.play();
           }
         } //!
       }
@@ -353,7 +355,6 @@ with SingleTickerProviderStateMixin {
       selectedLabel = args['label'];
     }
   }
-
 
   Future<void> _doSubscribe() async {
     bool liked = !_fav;

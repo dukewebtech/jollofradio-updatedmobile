@@ -1,3 +1,4 @@
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/core/NotificationService.dart';
 import 'package:flutter/material.dart';
@@ -8,6 +9,7 @@ import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/utils/helper.dart';
+import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
@@ -16,7 +18,8 @@ import 'package:jollofradio/widget/Labels.dart';
 import 'package:provider/provider.dart';
 
 class SiginInScreen extends StatefulWidget {
-  const SiginInScreen({super.key});
+  final String? email;
+  const SiginInScreen({super.key, this.email});
 
   @override
   State<SiginInScreen> createState() => _SiginInScreenState();
@@ -33,8 +36,8 @@ class _SiginInScreenState extends State<SiginInScreen> {
 
   @override
   void initState() {
-    // email.text = 'smithjohn@gmail.com';
-    // password.text = 'smith.com';
+    email.text = widget.email ?? '';
+
     Future(() async {
 
       token = await NotificationService.getToken(); // device ID
@@ -105,11 +108,38 @@ class _SiginInScreenState extends State<SiginInScreen> {
         result['message']
       );
     }
-    else{     
-      final Map auth = login(result)['user'];
-      final String token = login(result)['token'];
+    else{
+      final Map auth = login(result)['user']; ///////////////////
+      final String token = login(result)['token']; //////////////
+      final Map? verification = auth['verification']; ///////////
+
+      //verificationing
+      if(verification == null
+      || verification
+      ['data']['email']['status'] == 'unverified') { ////////////
+        RouteGenerator.goto(
+          VERIFY_ACCOUNT, {
+            "email": email.text
+          }
+        );
+        return;
+      }
+
       Storage.set('token', token);
       Storage.delete('guest');
+
+      //unmount caching
+      CacheStream().unmount({
+        'streams',
+        'stations',
+        'category',
+        'subscriptions',
+        'playlist',
+
+        'statistics',
+        '_podcasts',
+        'subscribers',
+      });
 
       final user = Provider
       .of<UserProvider   >(context, listen: false ); ////////////
@@ -125,7 +155,6 @@ class _SiginInScreenState extends State<SiginInScreen> {
       
       creator.login(auth);
       RouteGenerator.goto(CREATOR_DASHBOARD);
-
       ///////////////////////////////////////////////////////////
     }
   }
@@ -145,7 +174,6 @@ class _SiginInScreenState extends State<SiginInScreen> {
         child: Container(
           // width: MediaQuery.of(context).size.width,
           // height: double.infinity,
-          
           margin: EdgeInsets.only(
             top: AppBar().preferredSize.height + 20,
             left: 30, 
@@ -200,7 +228,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
                           Icons.visibility_off : Icons.visibility,
                           size: 15,
                           color: !showPassword ? 
-                          Colors.white24 : Colors.white,
+                          Colors.white30 : Colors.white,
                         ),
                       ),
                     )
@@ -275,18 +303,19 @@ class _SiginInScreenState extends State<SiginInScreen> {
                 label: !isLoading ? "Sign in" : "Signing in... ",
                 onTap: () async => await _doSignin(),
               ),
-              SizedBox(height: 20),
+              SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
                 child: Column(
                   children: <Widget>[
                     Labels.primary("Or"),
-                    SizedBox(height: 30),
+                    SizedBox(height: 20),
                     SizedBox(
-                      width: 120,
+                      // width: 120,
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: <Widget>[
+                          /*
                           GestureDetector(
                             onTap: () => _googleSignin(),
                             child: Image.asset(
@@ -305,6 +334,37 @@ class _SiginInScreenState extends State<SiginInScreen> {
                               "assets/images/icons/apple.png"
                             ),
                           ),
+                          */
+                          SizedBox(
+                            width: MediaQuery.of(context).size.width - 60,
+                            height: 50,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                 borderRadius: BorderRadius.circular(9),
+                                 border: Border.all(
+                                  color: Color(0XFF414132)
+                                 ),
+                              ),
+                              clipBehavior: Clip.hardEdge,
+                              child: ElevatedButton.icon(
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppColor.primary,
+                                  shape: RoundedRectangleBorder(
+                                    borderRadius: BorderRadius.circular(9),
+                                  )
+                                ),
+                                onPressed: () => _googleSignin(), 
+                                icon: Icon(
+                                  FontAwesomeIcons.google,
+                                  size: 18,
+                                ), 
+                                label: Text(
+                                  "Signin with Google", style: TextStyle(
+                                  ),
+                                )
+                              ),
+                            ),
+                          )
                         ],
                       ),
                     )

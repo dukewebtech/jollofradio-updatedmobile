@@ -148,7 +148,8 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
                                 ),
-                                Text(episode.duration, style: TextStyle(
+                                Text("${episode.streams['stats']} devices", 
+                                style: TextStyle(
                                   color: Color(0XFF9A9FA3),
                                   fontSize: 10
                                 )),

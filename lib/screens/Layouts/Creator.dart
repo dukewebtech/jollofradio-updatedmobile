@@ -36,7 +36,7 @@ class _CreatorLayoutState extends State<CreatorLayout>
   late List<Widget> screens = [
     HomeScreen(),
     PodcastScreen(),
-    EpisodeScreen(),
+    // EpisodeScreen(),
     SubscriberScreen(),
     AdvertScreen(),
   ];
@@ -143,21 +143,21 @@ class _CreatorLayoutState extends State<CreatorLayout>
                   ),
                 )
               ),
-              BottomNavigationBarItem(
-                label: "Episodes",
-                icon: Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: Icon(
-                    Iconsax.menu
-                  ),
-                ),
-                activeIcon: Padding(
-                  padding: const EdgeInsets.only(bottom: 5),
-                  child: Icon(
-                    Iconsax.menu
-                  ),
-                )
-              ),
+              // BottomNavigationBarItem(
+              //   label: "Episodes",
+              //   icon: Padding(
+              //     padding: const EdgeInsets.only(bottom: 5),
+              //     child: Icon(
+              //       Iconsax.menu
+              //     ),
+              //   ),
+              //   activeIcon: Padding(
+              //     padding: const EdgeInsets.only(bottom: 5),
+              //     child: Icon(
+              //       Iconsax.menu
+              //     ),
+              //   )
+              // ),
               BottomNavigationBarItem(
                 label: "Subscribers",
                 icon: Padding(

@@ -11,12 +11,14 @@ class PlaylistTemplate extends StatefulWidget {
   final dynamic playlist;
   final Function(dynamic v)? callback;
   final bool compact;
+  final bool creator;
 
   const PlaylistTemplate({
     super.key,
     required this.playlist,
     this.callback,
-    this.compact = false
+    this.compact = false,
+    this.creator = false,
   });
 
   @override
@@ -99,8 +101,9 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
           return;
         }
 
-        RouteGenerator.goto(PODCAST, {
-          "podcast": widget.playlist
+        RouteGenerator.goto(
+          !widget.creator ? PODCAST : CREATOR_PODCAST_ID, {
+          "podcast": widget.playlist,
         });
 
       },
@@ -198,7 +201,6 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                       /*
                       var action = popup[isPodcast]!.firstWhere((e)
                       =>e.keys.first==index);
-
                       action[index]();
                       */
                       
@@ -211,10 +213,8 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                         return PopupMenuItem(
                           value: label,
                           onTap: () {
-
                             popup[isPodcast]!
                             [label](widget.playlist, widget.callback);
-
                           },
                           child: Row(
                             children: [

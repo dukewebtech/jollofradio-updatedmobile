@@ -5,11 +5,13 @@ import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/models/Playlist.dart';
 import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/routes/router.dart';
+import 'package:jollofradio/config/services/controllers/Creator/EpisodeController.dart';
 import 'package:jollofradio/config/services/controllers/User/PlaylistController.dart';
 import 'package:jollofradio/config/services/controllers/User/StreamController.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
+import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/string.dart';
 import 'package:jollofradio/utils/toaster.dart';
@@ -27,6 +29,7 @@ class PodcastTemplate extends StatefulWidget {
   final bool onPlaylist;
   final bool playing;
   final dynamic callback;
+  final bool creator;
 
   const PodcastTemplate({
     super.key,
@@ -38,6 +41,7 @@ class PodcastTemplate extends StatefulWidget {
     this.compact = false,
     this.callback,
     this.playing = false,
+    this.creator = false,
   });
 
   @override
@@ -71,7 +75,6 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     .onPlaylist==true){
       playlist = widget.playlist;
     }
-
     if(user != null){
       dropdown 
       = (user as User).playlist.map<String>( (e) => e['name'] )
@@ -167,12 +170,27 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
   }
 
   Future<void> _deleteItem(cb) async {
+    Navigator.pop(context);
+    Toaster.info("Deleting resource... please hold on.");
+
+    //episode
+    if(playlist == null){
+      await EpisodeController.delete(episode).then((res){
+
+        if(res){
+          return cb();
+        }
+        Toaster.info("Error occurred! please try again");
+      });
+      return;
+    }
+
+    //playlist
     Map data = {
       'playlist_id': playlist!.id,
       'episode_id': episode.id
     };
 
-    Navigator.pop(context);
     await PlaylistController.remove(data).then((deleted){
       if(deleted){
         cb(episode, {
@@ -293,11 +311,16 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
 
     if(layout == 'LIST'){
       return GestureDetector(
-        onTap: () => RouteGenerator.goto(TRACK_PLAYER, {
-          "track": episode,
-          "channel": "podcast",
-          "playlist": podcasts
-        }),
+        onTap: () {
+          RouteGenerator.goto(
+            widget
+            .creator ? CREATOR_EPISODE : TRACK_PLAYER, {
+            "track": episode,
+            "channel": "podcast",
+            "playlist": podcasts,
+            "callback": widget.callback
+          });
+        },
         child: Container(
           width: double.infinity,
           height: 80,
@@ -387,12 +410,13 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                 ),
                               ),
                               Spacer(),
-                              Container(
-                                width: 80,
-                                // margin: EdgeInsets.only(left: 10),
+                              SizedBox(
+                                width: !widget.creator 
+                                ? 80 : 25,
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                   children: <Widget>[
+                                    if(!widget.creator)
                                     GestureDetector(
                                       onTap: () async {
                                         if(user == null) {
@@ -416,6 +440,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                         size: 18,
                                       ),
                                     ),
+                                    if(!widget.creator)
                                     GestureDetector(
                                       onTap: () async {
                                         if(!widget.onPlaylist){
@@ -439,6 +464,10 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                         
                                         return deleteModal(
                                           context: context,
+                                          title: Message.build(Message.delete_item, {
+                                            "item": "track",
+                                            "source": "playlist"
+                                          }),
                                           state: _setState,
                                           callback: _deleteCall
                                         );
@@ -459,7 +488,8 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                               Future((){
                                                 RouteGenerator.goto(TRACK_PLAYER, {
                                                   "track": episode,
-                                                  "channel": "podcast"
+                                                  "channel": "podcast",
+                                                  "playlist": podcasts
                                                 });
                                               });
                                             },
@@ -490,6 +520,36 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                                 SizedBox(width: 10),
                                                 Text("Share", style: TextStyle(
                                                   color: Colors.white,
+                                                  fontSize: 14
+                                                )),
+                                              ],
+                                            ),
+                                          ),
+                                          if(widget.creator)
+                                          PopupMenuItem(
+                                            onTap: () async {
+                                              await Future((){ });
+                                              deleteModal(
+                                                context: context,
+                                                title: Message
+                                                  .build(Message.delete_item, {
+                                                  "item": "episode",
+                                                  "source": "podcast"
+                                                }),
+                                                state: _setState,
+                                                callback: _deleteCall
+                                              );
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.delete,
+                                                  size: 14,
+                                                  color: Colors.red,
+                                                ),
+                                                SizedBox(width: 10),
+                                                Text("Delete", style: TextStyle(
+                                                  color: Colors.red,
                                                   fontSize: 14
                                                 )),
                                               ],

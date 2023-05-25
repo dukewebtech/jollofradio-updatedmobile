@@ -40,7 +40,6 @@ class TextInput extends StatelessWidget {
     this.borderRadius = 10,
     this.onChanged,
     this.onSubmitted,
-    
   });
 
   @override
@@ -58,6 +57,7 @@ class TextInput extends StatelessWidget {
         controller: controller,
         autofocus: false,
         textAlign: align,
+        textAlignVertical: TextAlignVertical.top,
         obscureText: password,
         keyboardType: type,
         textInputAction: action,
@@ -70,21 +70,37 @@ class TextInput extends StatelessWidget {
         decoration: InputDecoration(
           contentPadding: padding ?? EdgeInsets.all(
             15
-          ) ,
-          prefixIcon: icon,
+          ),
+          prefixIcon: icon != null ? SizedBox(
+            width: 20,
+            child: Stack(
+              children: [
+                Positioned(
+                  top: 2,
+                  left: 0,
+                  child: Padding(
+                    padding:
+                          padding ?? EdgeInsets.all(
+                      15
+                    ),
+                    child: icon ?? SizedBox(),
+                  )
+                ),
+              ],
+            ),
+          ) : null,
           suffixIcon: trailingIcon,
           hintText: label,
           hintStyle: TextStyle(
             fontSize: fontSize,
-            color: Colors.white24
+            color: Colors.white30
           ),
-
           border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(50),
             borderSide: BorderSide.none,
           ),
         ),
-
+        
         onChanged: onChanged,
         onSubmitted: onSubmitted, /////////////////
 

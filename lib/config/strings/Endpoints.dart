@@ -51,6 +51,7 @@ const CREATOR_SUBSCRIBER_ROUTE = '/creator/subscribers';
 
 //SERVICE
 const SOCIAL_LOGIN_ROUTE = '/login';
+const VERIFY_ROUTE = '/services/verify';
 const FORGOT_ROUTE = '/forgot';
 const CREATOR_ROUTE = '/services/creators';
 const CATEGORY_ROUTE = '/services/category';

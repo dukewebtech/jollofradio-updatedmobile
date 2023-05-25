@@ -63,6 +63,7 @@ class AuthController {
       'creator': CREATOR_SIGNUP_ROUTE,
     });
 
+    /*
     List fullname = (data['fullname'] as String).split  (' ');
     if(fullname.length < 2){
       return response(400, 
@@ -70,14 +71,21 @@ class AuthController {
         data: {},
       );
     }
-    String firstname = fullname[0];
-    String lastname = fullname[1];
+    */
+    
+    String firstname = data['firstname'];
+    String lastname = data['lastname'];
     String email = data['email'];
     String telephone = data['telephone'];
+    String country = data['country'];
+    String state = data['state'];
+    String city = data['city'];
+    String age = data['age'];
     String password = data['password'];
     String confirmPassword = data['confirmPassword'];
-    data['firstname'] = firstname;
-    data['lastname'] = lastname;
+
+    // data['firstname'] = firstname;
+    // data['lastname'] = lastname;
 
     if(firstname == ""){
       return response(400, 
@@ -100,6 +108,30 @@ class AuthController {
     if(telephone == ""){
       return response(400, 
         message: "You need to enter your telephone",
+      );
+    }
+    else
+    if(country == ""){
+      return response(400, 
+        message: "You need to select your country",
+      );
+    }
+    else
+    if(state == ""){
+      return response(400, 
+        message: "You need to enter your state / region",
+      );
+    }
+    else
+    if(city == ""){
+      return response(400, 
+        message: "You need to enter your city",
+      );
+    }
+    else
+    if(age == ""){
+      return response(400, 
+        message: "You need to tell us how old you are 😉",
       );
     }
     else
@@ -156,7 +188,6 @@ class AuthController {
       'user': USER_PROFILE_ROUTE,
       'creator': CREATOR_PROFILE_ROUTE,
     });
-
     String file = data['file'];
     dynamic photo = data['data'];
     dynamic body;
@@ -240,6 +271,21 @@ class AuthController {
     return;
   }
 
+  static Future activate(Map data) async {
+    var request = await api().post(endpoint(VERIFY_ROUTE), 
+      data
+    ).then(
+      (data){
+
+      return response(data['status'], 
+        message: data['message'],
+        data: data['data'], ///////////////////////////////
+      );
+    });
+
+    return request;
+  }
+
   static Future service(Map data) async {
     String userType = data['userType'];
     String route = routeScope(
@@ -266,7 +312,7 @@ class AuthController {
     ).then(
       (data){
 
-      return response(data['status'], 
+      return response(data['status'],
         message: data['message'],
         data: data['data'], ///////////////////////////////
       );

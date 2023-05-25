@@ -12,9 +12,11 @@ class Creator {
   final String? city;
   final String? about;
   final bool? enrolled;
+  final bool? verified;
   final dynamic settings;
   final List? interests;
   final List? notifications;
+  final Map? verification;
   final List? podcasts;
   final List? episodes;
   final List? streams;
@@ -35,9 +37,11 @@ class Creator {
     required this.city,
     required this.about,
     required this.enrolled,
+    required this.verified,
     required this.settings,
     required this.interests,
     required this.notifications,
+    required this.verification,
     required this.podcasts,
     required this.episodes,
     required this.streams,
@@ -59,9 +63,11 @@ class Creator {
       city: json['city'] ?? '',
       about: json['about'] ?? '',
       enrolled: json['ads_enroll'],
+      verified: json['verified'],
       settings: json['settings'],
       interests: json['interests'],
       notifications: json['notifications'],
+      verification: json['verification'],
       podcasts: json['podcasts'],
       episodes: json['episodes'],
       streams: json['streams'],
@@ -83,9 +89,11 @@ class Creator {
     'city': city,
     'about': about,
     'ads_enroll': enrolled,
+    'verified': verified,
     'settings': settings,
     'interests': interests,
     'notifications': notifications,
+    'verification': verification,
     'podcasts': podcasts,
     'episodes': episodes,
     'streams': streams,

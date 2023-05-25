@@ -8,10 +8,20 @@ import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:jollofradio/widget/Buttons.dart';
+import 'package:jollofradio/widget/Shared.dart';
 
 class InterestScreen extends StatefulWidget {
+  final String type;
   final String token;
-  const InterestScreen({super.key, required this.token});
+  final String email;
+  final bool social;
+  const InterestScreen({
+    super.key, 
+    required this.type,
+    required this.token,
+    required this.email,
+    required this.social,
+  });
 
   @override
   State<InterestScreen> createState() => _InterestScreenState();
@@ -21,9 +31,19 @@ class _InterestScreenState extends State<InterestScreen> {
   bool isLoading = true;
   bool isOnboarding = false;
   List<Map<String, dynamic>> interests = [];
+  dynamic _setState;
+  String? age;
+  List<String> profiles = [
+    '18-27',
+    '28-37',
+    '38-47',
+    '48-57',
+    '58-above',
+  ];
 
   @override
   void initState() {
+    _setState = setState;
     _getCategory();
     super.initState();
   }
@@ -62,13 +82,19 @@ class _InterestScreenState extends State<InterestScreen> {
     ]).map(
       (e) => e['id']
     ).toList();
-
     if(isOnboarding) return;
 
     if(selected.length < 3){
       Toaster.info("You need to select at least 3 interest");
       return;
     }
+    /*
+    if(age == null && widget
+    .social)/**/{
+      Toaster.info("You need to tell us how old you are 😉");
+      return;
+    }
+    */
 
     setState(() {
       isOnboarding = true;
@@ -76,14 +102,25 @@ class _InterestScreenState extends State<InterestScreen> {
 
     Map data = {
       "token": token,
-      "interests": selected
+      "interests": selected,
+      // "age": age
     };
 
     await AuthController.onboard(data).then((dynamic data) {
       setState(() {
         isOnboarding = false;
       });
-      RouteGenerator.exit(DASHBOARD);
+
+      RouteGenerator.goto(
+        VERIFY_ACCOUNT, {
+          "email": widget.email
+        }
+      );
+      /*
+      RouteGenerator.exit(
+        widget.type == 'user' ? DASHBOARD : CREATOR_DASHBOARD
+      );
+      */
     });
   }
 
@@ -150,6 +187,21 @@ class _InterestScreenState extends State<InterestScreen> {
                               ],
                             ),
                           ),
+                          Visibility(
+                            visible: false, //widget.social,
+                            child: SizedBox(
+                              height: 50,
+                              child: Select(
+                                label: "How old are you?",
+                                selectedLabel: age,
+                                state: _setState,
+                                items: profiles,
+                                callback: (value){
+                                  return age = ( value['label'] );
+                                },
+                              ),
+                            ),
+                          ),
                           SizedBox(height: 20),
                           Buttons.primary(
                             label: !isOnboarding 
@@ -185,7 +237,7 @@ class _InterestScreenState extends State<InterestScreen> {
                       ),
                       recognizer: TapGestureRecognizer()..onTap=() async {
                         RouteGenerator.goto(WEBVIEW, {
-                          "url": 'https://jollofradio.com', 
+                          "url": 'https://m.jollofradio.com/terms-of-service',
                           "title": 'Terms & Conditions'
                         }); 
                       },
@@ -200,9 +252,9 @@ class _InterestScreenState extends State<InterestScreen> {
                       ),
                       recognizer: TapGestureRecognizer()..onTap=() async {
                         RouteGenerator.goto(WEBVIEW, {
-                          "url": 'https://jollofradio.com/privacy', 
+                          "url": 'https://m.jollofradio.com/privacy',
                           "title": 'Privacy Policy'
-                        }); 
+                        });
                       },
                     ),
                     TextSpan(

@@ -169,7 +169,7 @@ String generateURL(String url, Map? params){
 }
 
 Map<String, dynamic> response(int code, { 
-  String? message /*null*/, Map< dynamic, dynamic >? data
+  String? message /*null*/, dynamic data
 }){
   return {
     "error": code != 200 ? true : false,

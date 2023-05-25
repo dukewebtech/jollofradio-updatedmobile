@@ -14,6 +14,7 @@ class Episode {
   final String podcast;
   final int podcastId;
   final bool liked;
+  final bool? active;
   final String createdAt;
 
   Episode({
@@ -30,6 +31,7 @@ class Episode {
     required this.podcast,
     required this.podcastId,
     required this.liked,
+    this.active = true,
     required this.createdAt,
   });
 
@@ -49,6 +51,7 @@ class Episode {
       podcast: json['podcast'],
       podcastId: json['podcast_id'],
       liked: json['liked'],
+      active: json['active'],
       createdAt: json['created_at'],
   );
 
@@ -66,6 +69,7 @@ class Episode {
     'podcast': podcast,
     'podcast_id': podcastId,
     'liked': liked,
+    'active': active,
     'created_at': createdAt,
   };
 }

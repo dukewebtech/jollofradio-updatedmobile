@@ -44,7 +44,8 @@ class PlaylistController {
   }
 
   static Future<Podcast?> show(int id) async {
-    var request = await api(auth: true).get(endpoint(PODCASTS_ROUTE)+'/$id');
+    var request = await api(auth: true).get(endpoint(PODCASTS_ROUTE)
+    +'/$id?show=all');
         request = (request) as Map;
 
     Podcast? playlist;
@@ -59,7 +60,6 @@ class PlaylistController {
 
     return playlist;
   }
-
 
   static Future<bool> create(Map data) async {
     var request = await api(auth: true).post(endpoint(USER_PLAYLIST_ROUTE),

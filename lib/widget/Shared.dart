@@ -4,6 +4,7 @@ import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
+import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Input.dart';
 import 'package:jollofradio/widget/Labels.dart';
@@ -15,6 +16,7 @@ class Tile extends StatefulWidget {
   final String label;
   final IconData icon;
   final dynamic data;
+  final Color? color;
 
   const Tile({ 
     Key? key,
@@ -23,6 +25,7 @@ class Tile extends StatefulWidget {
     required this.label,
     required this.icon,
     required this.data,
+    this.color
   }) : super(key: key);
 
   @override
@@ -98,7 +101,7 @@ class _TileState extends State<Tile> {
             child: Text(
               widget.data.toString(), 
               style: TextStyle(
-                color: color,
+                color: widget.color ?? color,
                 fontSize: 25, fontWeight: FontWeight.bold
               ),
             ),
@@ -239,6 +242,9 @@ class Select extends StatefulWidget {
   final String? selectedLabel;
   final dynamic state;
   final List<String> items;
+  final Color? underlineColor;
+  final Color? hintColor;
+  final Color? iconColor;
   final dynamic callback;
 
   const Select({ 
@@ -247,6 +253,9 @@ class Select extends StatefulWidget {
     required this.selectedLabel,
     required this.state,
     required this.items,
+    this.underlineColor,
+    this.hintColor,
+    this.iconColor,
     required this.callback,
   }) : super(key: key);
 
@@ -259,6 +268,9 @@ class _SelectState extends State<Select> {
   late String? selectedLabel;
   late dynamic state;
   late List<String> items;
+  late Color? underlineColor;
+  late Color? hintColor;
+  late Color? iconColor;
   late dynamic callback;
 
   @override
@@ -267,6 +279,9 @@ class _SelectState extends State<Select> {
     selectedLabel = widget.selectedLabel;
     state = widget.state;
     items = widget.items;
+    underlineColor = widget.underlineColor;
+    hintColor = widget.hintColor;
+    iconColor = widget.iconColor;
     callback = widget.callback;
 
     super.initState();
@@ -284,15 +299,18 @@ class _SelectState extends State<Select> {
           dropdownColor: AppColor.primary,
           underline: Container(
             height: 0.5,
-            color: AppColor.secondary
+            color: underlineColor ?? AppColor.secondary
           ),
           isExpanded: true,
           icon: Icon(
             Icons.keyboard_arrow_down,
-            color: AppColor.secondary,
+            color: iconColor ?? AppColor.secondary,
           ),
           value: selectedLabel,
-          hint: Labels.secondary(label),
+          hint: Text(label, style: TextStyle(
+            color: hintColor ?? AppColor.secondary,
+            fontSize: 14
+          )),
           items: items.map<DropdownMenuItem>( (val) => 
           DropdownMenuItem<String>(
             value: val,
@@ -317,9 +335,78 @@ class _SelectState extends State<Select> {
   }
 }
 
+class Dropdown extends StatelessWidget {
+  final String label;
+  final bool icon;
+  final List<String> items;
+  final dynamic value;
+  final dynamic state;
+  final dynamic onChanged;
+
+  const Dropdown({ 
+    Key? key,
+    required this.label,
+    this.icon = true,
+    required this.items,
+    required this.value,
+    required this.state,
+    required this.onChanged,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      height: 50,
+      margin: EdgeInsets.only(bottom: 20),
+      padding: EdgeInsets.fromLTRB(15,0, 10,0),
+      decoration: BoxDecoration(
+        color: Color(0XFF0D1921),
+        borderRadius: BorderRadius.circular(7)
+      ),
+      child: Stack(
+        clipBehavior: Clip.none,
+        fit: StackFit.passthrough,
+        children: [
+          Visibility(
+            visible: icon,
+            child: Positioned(
+              top: 14,
+              left: 0,
+              child: Icon(
+                Iconsax.menu,
+                color: Colors.white30,
+                size: 15,
+              ),
+            ),
+          ),
+          Container(
+            width: MediaQuery.of(context).size.
+            width-105,
+            padding: EdgeInsets.only(
+              left: icon ? 35 : 0
+            ),
+            child: Select(
+              label: label, 
+              selectedLabel: value,
+              state: state, 
+              items: items,
+              callback: (data){
+                return onChanged(data['label']);
+              },
+              underlineColor: Colors.transparent,
+              hintColor: Colors.white30,
+              iconColor: Colors.white30,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 Future<void> playlistModal({
   required BuildContext context,
-  // required bool loading,
   required String? label,
   required List<String> playlist,
   required TextEditingController controller,
@@ -337,7 +424,6 @@ Future<void> playlistModal({
         builder: (context, setState) {     
           state = setState;
           callback({'state': state}); //fire parent logic
-          // cb = callback;
           return AlertDialog(
             backgroundColor: AppColor.primary,
             title: Row(
@@ -415,6 +501,7 @@ Future<void> playlistModal({
 
 Future<void> deleteModal({
   required BuildContext context,
+  required String title,
   required dynamic state,
   required dynamic callback
 }) async {
@@ -428,8 +515,7 @@ Future<void> deleteModal({
             backgroundColor: AppColor.primary,
             title: Row(
               children: [
-                Icon(Icons.delete, color: Colors.white),
-                SizedBox(width: 10),
+                // Icon(Icons.delete, color: Colors.white),
                 Text("Warning", style: TextStyle(
                   color: Colors.white,
                   fontSize: 15,
@@ -437,10 +523,7 @@ Future<void> deleteModal({
                 )),
               ],
             ),
-            content: Text(
-              "Are you sure you want to delete item from ${""
-              }your playlist?",
-              style: TextStyle(
+            content: Text(title, style: TextStyle(
                 color: Colors.white,
                 fontSize: 14
               ),
@@ -470,4 +553,48 @@ Future<void> deleteModal({
       );
     },
   );
+}
+
+class EmptyRecord extends StatelessWidget {
+  final IconData? icon;
+  final String? message;
+
+  const EmptyRecord({ 
+    Key? key,
+    this.icon,
+    this.message
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 360,
+      margin: EdgeInsets.only(
+        // top: MediaQuery.of(context).size.height / 9
+        bottom: 20
+      ),
+      padding: EdgeInsets.fromLTRB(40, 20, 40, 10),
+      child: Column(
+        mainAxisAlignment: /** */ MainAxisAlignment.center,
+        children: <Widget>[
+          Icon(
+            icon ?? Iconsax.menu_1,
+            size: 40,
+            color: Color(0XFF9A9FA3),
+          ),
+          SizedBox(
+            height: 10,
+          ),
+          Text(
+            message ?? Message.no_data,
+            style: TextStyle(color: const Color(0XFF9A9FA3),
+              fontSize: 14
+            ),
+            textAlign: TextAlign.center,
+          )
+        ],
+      ),
+    );
+  }
+  
 }

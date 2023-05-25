@@ -9,7 +9,6 @@ import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
-// import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:just_audio/just_audio.dart';
@@ -91,7 +90,7 @@ class _PlayerState extends State<Player> {
       else{
         await player.setPlaylist(playlist.map( ////
           (item){
-          Episode episode = Episode.fromJson(item);          
+          Episode episode = Episode.fromJson(item);
           if(item['id']==track['id']){
             duration = Duration(
               milliseconds: track['duration']  ////
@@ -123,7 +122,7 @@ class _PlayerState extends State<Player> {
         );
       }
         if(user!=null && user.setting('autoplay')){
-          player.play();
+          // player.play();
         }
     });
 
@@ -215,7 +214,7 @@ class _PlayerState extends State<Player> {
     var playlist = await Storage.get('podcasts'); //tracks
     if(playlist != null){
       playlist = jsonDecode(playlist);
-    }
+    }    
     RouteGenerator.goto(route['name'], <String, dynamic> {
       ...route,
       "playlist": playlist?.map<Episode>((dynamic track) {
@@ -238,7 +237,9 @@ class _PlayerState extends State<Player> {
               await Storage.delete('lastTrack');
               return true;
             },
-            onDismissed: (DismissDirection direction) {},
+            onDismissed: (DismissDirection direction) {
+              //do nothing!
+            },
             child: Container(
               width: MediaQuery.of(context).size.width,
               height: 60,
