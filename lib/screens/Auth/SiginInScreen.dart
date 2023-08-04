@@ -1,3 +1,4 @@
+import 'package:cache_stream/utils/helpers/storage.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/core/NotificationService.dart';
@@ -10,7 +11,6 @@ import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
-import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Input.dart';
@@ -28,7 +28,8 @@ class SiginInScreen extends StatefulWidget {
 class _SiginInScreenState extends State<SiginInScreen> {
   bool isLoading = false;
   bool showPassword = false;
-  String userType = "user";
+  bool social = false;
+  String userType = "";
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   GoogleSigninAuth googleSignIn = GoogleSigninAuth();
@@ -43,6 +44,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
       token = await NotificationService.getToken(); // device ID
 
     });
+    
     googleSignIn.init();
     super.initState();
   }
@@ -70,6 +72,12 @@ class _SiginInScreenState extends State<SiginInScreen> {
   }
 
   Future<void> _googleSignin() async {
+    if(userType.isEmpty){
+      Toaster.info("You have not selected a user account type ");
+      return;
+    }
+
+    googleSignIn.signOut();
     final signIn = await googleSignIn.signIn(); // attempt login
     if(signIn == null){
       setState(() {
@@ -93,6 +101,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
 
     await AuthController.social(data).then((dynamic data) async {
 
+      social = true;
       completeSignin(data);
 
     });
@@ -117,12 +126,14 @@ class _SiginInScreenState extends State<SiginInScreen> {
       if(verification == null
       || verification
       ['data']['email']['status'] == 'unverified') { ////////////
-        RouteGenerator.goto(
-          VERIFY_ACCOUNT, {
-            "email": email.text
-          }
-        );
-        return;
+        if(!social){
+          RouteGenerator.goto(
+            VERIFY_ACCOUNT, {
+              "email": email.text
+            }
+          );
+          return;
+        }
       }
 
       Storage.set('token', token);
@@ -135,7 +146,6 @@ class _SiginInScreenState extends State<SiginInScreen> {
         'category',
         'subscriptions',
         'playlist',
-
         'statistics',
         '_podcasts',
         'subscribers',
@@ -359,7 +369,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
                                   size: 18,
                                 ), 
                                 label: Text(
-                                  "Signin with Google", style: TextStyle(
+                                  "Sign in with Google", style: TextStyle(
                                   ),
                                 )
                               ),

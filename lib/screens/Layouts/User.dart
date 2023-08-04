@@ -84,7 +84,7 @@ class _UserLayoutState extends State<UserLayout>
     socket.cancel();
     super.dispose();
   }
-    
+  
   @override
   Widget build(BuildContext context) {
     return Scaffold(

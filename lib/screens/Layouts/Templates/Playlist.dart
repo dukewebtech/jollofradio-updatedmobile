@@ -34,7 +34,6 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
     'Edit Playlist': Iconsax.edit,
     'Delete Playlist': Iconsax.close_circle
   };
-  
 
   final Map<bool, Map> popup = {
     true: <String, dynamic>{
@@ -89,7 +88,6 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
       }
     } catch(e){
       isPodcast = true;
-      
     }
       
     return GestureDetector(
@@ -105,7 +103,6 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
           !widget.creator ? PODCAST : CREATOR_PODCAST_ID, {
           "podcast": widget.playlist,
         });
-
       },
       child: Container(
         width: compact ? 140 : null,
@@ -140,12 +137,9 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                     height: compact ? 120 : 130,
                     imageUrl: widget.playlist.logo,
                     placeholder: (context, url) {
-                      return Center(
-                        child: SizedBox(
-                          width: 50,
-                          height: 50,
-                          child: CircularProgressIndicator()
-                        )
+                      return Image.asset(
+                        'assets/images/loader.png',
+                        fit: BoxFit.cover,
                       );
                     },
                     errorWidget: (context, url, error) => Icon(
@@ -174,7 +168,6 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                       ),
                     ),
                   )
-
                 ],
               ),
             ),
@@ -193,17 +186,14 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                     ),
                   ),
                   if(widget.callback!=null)
-                  
                   PopupMenuButton(
                     color: AppColor.primary,
                     onSelected: (index) {
-
                       /*
                       var action = popup[isPodcast]!.firstWhere((e)
                       =>e.keys.first==index);
                       action[index]();
                       */
-                      
                     },
                     itemBuilder: (context) {
                       return 

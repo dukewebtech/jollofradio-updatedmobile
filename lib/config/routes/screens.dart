@@ -249,6 +249,7 @@ class ScreenProvider {
           podcast: data['podcast'],
           episode: data['episode'],
           callback: data['callback'],
+          history: data['history'] ?? 2
         ));
 
       case WEBVIEW:

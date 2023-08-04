@@ -233,10 +233,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 onPressed: () async {
 
                   await AuthController.logout();
-                  await googleSignIn.signOut ();
                   audioHandler.stop();
                   
                 },
+                
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[

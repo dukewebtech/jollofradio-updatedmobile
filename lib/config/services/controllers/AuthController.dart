@@ -3,10 +3,12 @@ import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/api.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/config/strings/Endpoints.dart';
+import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/utils/scope.dart';
 import 'package:http/http.dart' as http;
 import 'package:http_parser/http_parser.dart';
+import 'package:jollofradio/utils/validator.dart';
 
 class AuthController {
 
@@ -14,6 +16,7 @@ class AuthController {
     String userType = data['userType'];
     String route = routeScope(
       userType, {
+      '': '',
       'user': USER_SIGNIN_ROUTE,
       'creator': CREATOR_SIGNIN_ROUTE,
     });
@@ -32,6 +35,12 @@ class AuthController {
         message: "You need to enter your password",
       );
     }
+    else
+    if(userType.isEmpty){
+      return response(400, 
+        message: "You have not selected a user account type",
+      );
+    }
     else{
       var request = await api().post(endpoint(route), data);
       return response(request['status'], 
@@ -47,7 +56,7 @@ class AuthController {
 
     var request = await api().post(endpoint(SOCIAL_LOGIN_ROUTE
       +'/$oauth/$token'
-    ));
+    ), data);
 
     return response(request['status'], 
       message: request['message'],
@@ -71,6 +80,7 @@ class AuthController {
         data: {},
       );
     }
+    
     */
     
     String firstname = data['firstname'];
@@ -84,8 +94,16 @@ class AuthController {
     String password = data['password'];
     String confirmPassword = data['confirmPassword'];
 
+    bool passValidated = checkPassword(
+      password
+    )[
+      'validated'
+    ];
+
+
     // data['firstname'] = firstname;
     // data['lastname'] = lastname;
+
 
     if(firstname == ""){
       return response(400, 
@@ -144,6 +162,12 @@ class AuthController {
     if(confirmPassword == ""){
       return response(400, 
         message: "You need to confirm your account password",
+      );
+    }
+    else
+    if(!passValidated){
+      return response(400, 
+        message: Message.password_invalid,
       );
     }
     else{

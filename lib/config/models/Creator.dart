@@ -3,7 +3,7 @@ class Creator {
   final String firstname;
   final String lastname;
   final String email;
-  final String telephone;
+  final String? telephone;
   final String photo;
   final String banner;
   final String? country;

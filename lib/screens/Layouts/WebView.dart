@@ -7,9 +7,12 @@ import 'package:flutter/services.dart';
 
  class WebViewScreen extends StatefulWidget {
   final String? url;
-  final String title;
+  final String? title;
   final String? file;
-  final Future<bool> Function()? onClose;
+  final Future<bool> Function(
+    BuildContext, 
+    WebViewController
+  )? onClose;
   final FutureOr<NavigationDecision> Function(NavigationRequest)? 
   navigationDelegate;
 
@@ -47,11 +50,21 @@ import 'package:flutter/services.dart';
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
-        appBar: AppBar(
-          title: Text(widget.title),
-        ),
+        appBar: widget.title !=null ? 
+        AppBar(
+          title: Text(widget.title!),
+        ) : null,
         body: WillPopScope(
-          onWillPop: widget.onClose,
+          onWillPop: () {
+            if(widget.onClose!=null){
+
+              return /*!*/ widget.onClose!(context, _controller);
+            
+            }
+
+            return Future.value(true);
+
+          },
           child: Stack(
             children: <Widget>[
               webView(),
@@ -70,25 +83,32 @@ import 'package:flutter/services.dart';
     return WebView(
       initialUrl: widget.file 
       == null ? Uri.encodeFull(widget.url!) : ( 'about:blank' ),
-      onPageFinished: (finish) {
-        setState(() => isLoading = !true );
-      },
 
+      onPageStarted: (started) {
+        setState( () => isLoading = true );
+      },
+      onPageFinished: (finish) {
+        setState( () => isLoading = false);
+      },
       javascriptMode: JavascriptMode.unrestricted,
       onWebViewCreated: ( WebViewController webviewController ){
         _controller = webviewController;
         if(widget.file != null){
+
           loadHtmlFromAssets(widget.file!);
+
         }
       },
 
       navigationDelegate: widget.navigationDelegate, // callback
+
     );
   }
   
   loadHtmlFromAssets(String file) async {
+
     String html = await rootBundle.loadString(file.toString( ));
-    _controller.loadUrl( Uri.dataFromString(
+    _controller.loadUrl( Uri.dataFromString (
         ( html ),
         mimeType: 'text/html',
         encoding: Encoding.getByName('utf-8')

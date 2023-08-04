@@ -81,12 +81,12 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
       .toList();
     }
 
-    super.initState(); 
+    super.initState();
   }
 
   void callback(Map args /* ={} */) {
     _setState = args['state'];
-
+    
     if(args['label'] != null) {
       selectedLabel = args['label'];
     }
@@ -99,21 +99,26 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     Map data = {
       'episode_id': episode.id
     };
-
     setState(() {
       _fav = !_fav;
     });
 
     if(widget.callback != (null)) {
-      if(!liked)
+      if(!liked){
         widget.callback!(episode, {
           "unliked": true
         });
+      }
     }
 
     // if(liked){
       await StreamController.engage(data).then((status){
-        if(liked && !status){
+        if(widget.callback != (null)) {
+          widget.callback!(episode, {
+            "mounted": true
+          });
+        }
+        if(liked && status == false){
           setState(() => _fav = !_fav);
         }
       });
@@ -131,9 +136,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
 
   Future<void> _savePlaylist() async {
     if(isSaving) return;
-    setState(() {
-      isSaving = true;
-    });
+    // setState(() => isSaving = true);
 
     final name = selectedLabel ?? controller.text.trim();
     Map data = {
@@ -143,23 +146,22 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
 
     if(selectedLabel == null 
     && name.isEmpty){
-      setState(() => isSaving = false);
+      // setState(() => isSaving = false);
       Toaster.error("You have not selected a playlist");
       return;
     }
 
     await PlaylistController.create(data).then((created) 
     async{
-      setState(() => isSaving = false);
+      // setState(() => isSaving = false);
       if(!created){
         Toaster.error(
           "Oops! while saving playlist, please try again"
         );
       }
       Toaster.success("Episode added to playlist: $name");
-
       controller.clear();
-      Navigator.pop(context);
+      RouteGenerator.goBack();
     });
   }
 
@@ -176,12 +178,12 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     //episode
     if(playlist == null){
       await EpisodeController.delete(episode).then((res){
-
         if(res){
           return cb();
         }
         Toaster.info("Error occurred! please try again");
       });
+      
       return;
     }
 
@@ -249,12 +251,9 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                       height: widget.compact ? 130 : 120,
                       imageUrl: episode.logo,
                       placeholder: (context, url) {
-                        return Center(
-                          child: SizedBox(
-                            width: 50,
-                            height: 50,
-                            child: CircularProgressIndicator()
-                          )
+                        return Image.asset(
+                          'assets/images/loader.png',
+                          fit: BoxFit.cover,
                         );
                       },
                       errorWidget: (context, url, error) =>  Icon(
@@ -297,7 +296,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                 margin: EdgeInsets.only(bottom: 3)
               ),
               Text(
-               episode.creator?.username() ?? '-',
+               episode.creator?.username() ?? 'Jollof Radio',
                 style: TextStyle(
                   color: Colors.grey,
                   fontSize: 12
@@ -344,12 +343,9 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                 child: CachedNetworkImage(
                   imageUrl: episode.logo,
                   placeholder: (context, url) {
-                    return Center(
-                      child: SizedBox(
-                        width: 30,
-                        height: 30,
-                        child: CircularProgressIndicator()
-                      )
+                    return Image.asset(
+                      'assets/images/loader.png',
+                      fit: BoxFit.cover,
                     );
                   },
                   errorWidget: (context, url, error) =>  Icon(
@@ -398,11 +394,12 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
-                                    Text(episode.creator?.username() ?? '', 
-                                    style: TextStyle(
-                                      color: Color(0XFF9A9FA3),
-                                      fontSize: 10
-                                    ),
+                                    Text(
+                                      episode.creator?.username() ?? 'Jollof Radio', 
+                                      style: TextStyle(
+                                        color: Color(0XFF9A9FA3),
+                                        fontSize: 10
+                                      ),
                                       maxLines: 1,
                                       overflow: TextOverflow.ellipsis,
                                     ),
@@ -426,9 +423,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                             }this podcast"
                                           );
                                         }
-                                        
                                         await _doSubscribe();
-
                                       },
                                       child: !_fav ? Icon(
                                         Iconsax.heart, 
@@ -525,7 +520,33 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                               ],
                                             ),
                                           ),
-                                          if(widget.creator)
+                                          if(widget.creator) ...[
+                                          PopupMenuItem(
+                                            onTap: () async {
+                                              await Future((){ });
+                                              RouteGenerator.goto(
+                                                CREATOR_EPISODE_NEW, {
+                                                "type": "update",
+                                                "episode": episode,
+                                                "callback": widget.callback,
+                                                "history": 1
+                                              });
+                                            },
+                                            child: Row(
+                                              children: [
+                                                Icon(
+                                                  Icons.edit,
+                                                  size: 14,
+                                                  color: Colors.white,
+                                                ),
+                                                SizedBox(width: 10),
+                                                Text("Edit", style: TextStyle(
+                                                  color: Colors.white,
+                                                  fontSize: 14
+                                                )),
+                                              ],
+                                            ),
+                                          ),
                                           PopupMenuItem(
                                             onTap: () async {
                                               await Future((){ });
@@ -555,6 +576,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                                               ],
                                             ),
                                           )
+                                          ]
                                         ];
                                       },
                                       child: Icon(
@@ -608,14 +630,9 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                   child: CachedNetworkImage(
                     imageUrl: episode.logo,
                     placeholder: (context, url) {
-                      return Center(
-                        child: SizedBox(
-                          width: 30,
-                          height: 30,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                          )
-                        )
+                      return Image.asset(
+                        'assets/images/loader.png',
+                        fit: BoxFit.cover,
                       );
                     },
                     errorWidget: (context, url, error) =>  Icon(
@@ -642,7 +659,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              Text(episode.creator?.username() ?? '', 
+                              Text(episode.creator?.username() ?? '-', 
                               style: TextStyle(
                                 fontSize: 12,
                                 color: Color(0XFF9A9FA3)

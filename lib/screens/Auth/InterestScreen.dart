@@ -111,16 +111,20 @@ class _InterestScreenState extends State<InterestScreen> {
         isOnboarding = false;
       });
 
-      RouteGenerator.goto(
-        VERIFY_ACCOUNT, {
-          "email": widget.email
-        }
-      );
-      /*
+      if(!widget.social){
+        RouteGenerator.goto(
+          VERIFY_ACCOUNT, {
+            "email": widget.email
+          }
+        );
+        return;
+      }
+
+      // /*
       RouteGenerator.exit(
         widget.type == 'user' ? DASHBOARD : CREATOR_DASHBOARD
       );
-      */
+      // */
     });
   }
 

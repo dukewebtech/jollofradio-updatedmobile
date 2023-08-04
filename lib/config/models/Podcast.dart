@@ -3,7 +3,7 @@ import 'package:jollofradio/config/models/Episode.dart';
 
 class Podcast {
   final int id;
-  final Creator creator;
+  final Creator? creator;
   final String title;
   final String slug;
   final String logo;
@@ -36,7 +36,7 @@ class Podcast {
 
   factory Podcast.fromJson(Map<String, dynamic> json) => Podcast(
       id: json["id"] as int,
-      creator: Creator.fromJson(
+      creator: json['creator'] == null ? null : Creator.fromJson(
         json['creator']
       ),
       

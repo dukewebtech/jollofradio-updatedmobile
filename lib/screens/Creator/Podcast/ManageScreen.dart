@@ -205,29 +205,56 @@ class _ManageScreenState extends State<ManageScreen> {
                           */
                         ),
                         clipBehavior: Clip.hardEdge,
-                        child: CachedNetworkImage(
-                          imageUrl: podcast.logo,
-                          placeholder: (context, url) {
-                            return Center(
-                              child: SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: CircularProgressIndicator()
-                              )
-                            );
-                          },
-                          imageBuilder: (context, imageProvider) {
-                            return ZoomIn(
-                              child: Image(
-                                image: imageProvider,
-                                fit: BoxFit.cover,
+                        child: Stack(
+                          fit: StackFit.expand,
+                          children: [
+                            isLoading ? 
+                            Image.asset(
+                              'assets/images/loader.png',
+                              fit: BoxFit.cover,
+                            ) :
+                            CachedNetworkImage(
+                              imageUrl: podcast.logo,
+                              placeholder: (context, url) {
+                                return Image.asset(
+                                  'assets/images/loader.png',
+                                  fit: BoxFit.cover,
+                                );
+                              },
+                              imageBuilder: (context, imageProvider) {
+                                return ZoomIn(
+                                  child: Image(
+                                    image: imageProvider,
+                                    fit: BoxFit.cover,
+                                  ),
+                                );
+                              },
+                              errorWidget: (context, url, error) => Icon(
+                                Icons.error
                               ),
-                            );
-                          },
-                          errorWidget: (context, url, error) => Icon(
-                            Icons.error
-                          ),
-                          fit: BoxFit.cover,
+                              fit: BoxFit.cover,
+                            ),
+                            if(!isLoading)
+                            Positioned(
+                              top: 10,
+                              right: 10,
+                              child: Container(
+                                width: 80,
+                                height: 20,
+                                decoration: BoxDecoration(
+                                  color: status[podcast.approved]['color'],
+                                  borderRadius: BorderRadius.circular(2)
+                                ),
+                                alignment: Alignment.center,
+                                child: Text(
+                                  status[podcast.approved]['label'], 
+                                  style: TextStyle(
+                                    fontSize: 10
+                                  ),
+                                ),
+                              ),
+                            )
+                          ],
                         ),
                       ),
                       Row(
@@ -238,24 +265,6 @@ class _ManageScreenState extends State<ManageScreen> {
                             fontSize: 18,
                             margin: EdgeInsets.only(bottom: 5)
                           ),
-                          if(!isLoading)
-                          FadeIn(
-                            child: Container(
-                              width: 80,
-                              height: 15,
-                              decoration: BoxDecoration(
-                                color: status[podcast.approved]['color'],
-                                borderRadius: BorderRadius.circular(50)
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                status[podcast.approved]['label'], 
-                                style: TextStyle(
-                                  fontSize: 10
-                                ),
-                              ),
-                            ),
-                          )
                         ],
                       ),
                       Wrap(
@@ -330,12 +339,14 @@ class _ManageScreenState extends State<ManageScreen> {
                                 color: AppColor.primary,
                                 itemBuilder: (context) {
                                   List<Map> popupActions = [
+                                    /*
                                     {
                                       "id": "edit",
                                       "label": "Edit Podcast",
                                       "icon": Iconsax.edit_2, //////////////
                                       "color": Colors.white
                                     },
+                                    */
                                     {
                                       "id": "share",
                                       "label": "Share",
@@ -348,6 +359,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                       "icon": Iconsax.trash,  //////////////
                                       "color": Colors.red
                                     },
+                                    
                                   ];
 
                                   return popupActions.map<PopupMenuItem>((e){
@@ -374,7 +386,6 @@ class _ManageScreenState extends State<ManageScreen> {
                                       ),
                                     );
                                   }).toList();
-                                  
                                 },
                                 child: Icon(
                                   Icons.more_horiz, color: Color(0XFF9A9FA3)
@@ -419,21 +430,27 @@ class _ManageScreenState extends State<ManageScreen> {
                             height: 40,
                             child: ElevatedButton(
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.redAccent
+                                backgroundColor: Colors.blue
                               ),
                               onPressed: () {
-                                Toaster.info("Service coming soon..");
+
+                                // Toaster.info("Service coming soon..");
+                                _action('edit');
+
                               },
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  Text('Go live', style: TextStyle()),
+                                  Text('Edit Podcast', style: TextStyle(
+                                    // color: Colors.black
+                                  )),
                                   SizedBox(
                                     width: 5,
                                   ),
                                   Icon(
-                                    Iconsax.microphone_2,
+                                    Iconsax.edit_2,
                                     size: 18,
+                                    // color: Colors.black,
                                   ),
                                 ],
                               ),

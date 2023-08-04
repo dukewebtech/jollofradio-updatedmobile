@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
           },
         },
       }, Duration(
-        seconds: 20
+        seconds: 10
       ));
 
       getStatistics();
@@ -293,7 +293,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   : statistics!['summary'].isEmpty ? 
                    Container(
                     height: 100,
-                    padding: EdgeInsets.fromLTRB(40, 00, 40, 00),
+                    padding: EdgeInsets.fromLTRB(20, 00, 20, 00),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: <Widget>[
@@ -331,7 +331,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 SizedBox(height: 20),
                 Labels.primary(
-                  "Top Tracks",
+                  "Top Podcasts",
                   fontSize: 18,
                   fontWeight: FontWeight.bold
                 ),
@@ -341,7 +341,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     // top: MediaQuery.of(context).size.height / 9
                     bottom: 20
                   ),
-                  padding: EdgeInsets.fromLTRB(40, 20, 40, 10),
+                  padding: EdgeInsets.fromLTRB(20, 20, 20, 10),
                   child: Column(
                     children: <Widget>[
                       Center(

@@ -79,7 +79,7 @@ class _AdvertScreenState extends State<AdvertScreen> {
               SizedBox(
                 width: 300,
                 child: Transform.scale(
-                  scale: 1.8,
+                  scale: 1.6,
                   child: Image.asset(
                     "assets/images/illustration/rocket.gif"
                   ),
@@ -173,7 +173,7 @@ class _AdvertScreenState extends State<AdvertScreen> {
         return FadeInUp(
           child: Center(
             child: Container(
-              width: 360,
+              width: 300,
               height: 250,
               decoration: BoxDecoration(
                 color: AppColor.primary,

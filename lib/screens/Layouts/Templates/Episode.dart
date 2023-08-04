@@ -74,7 +74,7 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
     double width = MediaQuery.of(context).size.width as double;
 
     return GestureDetector(
-      onTap: () => RouteGenerator.goto(TRACK_PLAYER, {
+      onTap: () => RouteGenerator.goto(CREATOR_EPISODE, {
         "track": episode,
         "channel": "podcast",
         "playlist": podcasts?.map((e) => toEpisode(e)).toList()
@@ -101,12 +101,9 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
               child: CachedNetworkImage(
                 imageUrl: episode.logo,
                 placeholder: (context, url) {
-                  return Center(
-                    child: SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: CircularProgressIndicator()
-                    )
+                  return Image.asset(
+                    'assets/images/loader.png',
+                    fit: BoxFit.cover,
                   );
                 },
                 errorWidget: (context, url, error) =>  Icon(
@@ -170,7 +167,9 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
                                             Future((){
                                               RouteGenerator.goto(TRACK_PLAYER, {
                                                 "track": episode,
-                                                "channel": "podcast"
+                                                "channel": "podcast",
+                                                "playlist": podcasts?.map((e) => 
+                                                toEpisode(e)).toList()
                                               });
                                             });
                                           },

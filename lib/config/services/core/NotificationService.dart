@@ -86,8 +86,8 @@ class NotificationService {
   static Future<dynamic> notificationDetails() async {
     return NotificationDetails(
       android: AndroidNotificationDetails(
-        "Telemedical",
-        "Telemedical",
+        "Jollof Radio",
+        "Jollof Radio",
         priority: Priority.high,
         importance: Importance.max,
         enableLights: true,

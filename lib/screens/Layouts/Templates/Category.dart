@@ -50,13 +50,9 @@ class CategoryTemplate extends StatelessWidget {
               height: double.infinity,
               imageUrl: category.logo,
               placeholder: (context, url) {
-                return Center(
-                  child: Container(
-                    width: 50,
-                    height: 50,
-                    margin: const EdgeInsets.only(top: 20),
-                    child: CircularProgressIndicator()
-                  )
+                return Image.asset(
+                  'assets/images/loader.png',
+                  fit: BoxFit.cover,
                 );
               },
               imageBuilder: (context, imageProvider) {
@@ -73,23 +69,36 @@ class CategoryTemplate extends StatelessWidget {
               fit: BoxFit.cover,
             ),
             FutureBuilder(
-              future: Colorly().fromNetwork().get(category.logo),
+              future: Future((){ 
+                return {}; 
+              }),
+              // future: Colorly().fromNetwork().get(category.logo),
+
               builder: (context, snapshot) {          
                 if(!snapshot.hasData)
                   return SizedBox.shrink();
+
+                /*
+
+                Map colors = snapshot.data!;
+                
+                */
     
-                Map colors = snapshot.data;
-    
-                return FadeIn(
+                return SizedBox(
                   child: Container(
                     width: double.infinity,
                     height: 40,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
+
+                      /*
                       color: colors['vibrantDark'].withOpacity(0.5),
+                      */
+                      
+                      color: Colors.black.withOpacity(.25),
                       borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(5),
-                        bottomRight: Radius.circular(5),
+                        bottomLeft: Radius.circular(0),
+                        bottomRight: Radius.circular(0),
                       ),
                     ),
                     child: Text(category.name, style: TextStyle(

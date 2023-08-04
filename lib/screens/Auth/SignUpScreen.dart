@@ -125,7 +125,8 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
         var token = login(response)['token'];
 
         Storage.set('token', token);
-
+        
+        /*
         if(userType == 'user'){
           Provider.of<UserProvider   > ( context, listen: false )
           .login(user);
@@ -136,6 +137,7 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
           .login(user);
           
           return;
+        */
       });
       
       if(userType == 'user'){
@@ -145,7 +147,6 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
           'email': email.text,
           'social': social
         });
-        
         return;
       }
 
@@ -154,16 +155,14 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
           "email": email.text
         }
       );
-
       /*
-
       RouteGenerator.goto(CREATOR_DASHBOARD);   // redirecting..
-      
       */
     }
   }
 
   Future<void> _googleSignin() async {
+    googleSignIn.signOut();
     final signIn = await googleSignIn.signIn(); // attempt login
     if(signIn == null){
       setState(() {
@@ -216,27 +215,29 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
       .of<CreatorProvider>(context, listen: false ); ////////////
 
       if(userType == 'user'){
+        if(social){
+          user.login(auth);
+        }
         RouteGenerator.goto(SIGNUP_ONBOARD, < String, dynamic > {
           'type': userType,
           'token': auth['token'],
           'email': email.text,
           'social': social
         });
-        
         return;
       }
 
-      RouteGenerator.goto(
-        VERIFY_ACCOUNT, {
-          "email": email.text
-        }
-      );
-      
-      /*
-
-      RouteGenerator.goto(CREATOR_DASHBOARD);   // redirecting..
-
-      */
+      if(!social){
+        RouteGenerator.goto(
+          VERIFY_ACCOUNT, {
+            "email": email.text
+          }
+        );
+      }
+      else {
+        creator.login(auth);
+        RouteGenerator.goto(CREATOR_DASHBOARD);  // redirecting..
+      }
     }
   }
 
@@ -562,7 +563,7 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
                                   size: 18,
                                 ), 
                                 label: Text(
-                                  "Signin with Google", style: TextStyle(
+                                  "Sign up with Google", style: TextStyle(
                                   ),
                                 )
                               ),
@@ -669,7 +670,6 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
             ),
           ),
         );
-
       },
     );
   }

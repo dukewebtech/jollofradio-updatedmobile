@@ -361,7 +361,7 @@ class AudioServiceHandler
       return;
 
     if(player.shuffleModeEnabled)
-      index = player.shuffleIndices!.indexOf(index);//////////
+      index = player.shuffleIndices![index]; /** */ //////////
 
     await player.seek(Duration.zero , index: index);//////////
     // await player.play();

@@ -58,7 +58,7 @@ class _PodcastScreenState extends State<PodcastScreen> {
       getPodcasts();
 
       Timer.periodic(Duration(seconds: 5), (Timer timer) async { 
-        getPodcasts();
+        // getPodcasts();
       });
 
     }());
@@ -70,6 +70,7 @@ class _PodcastScreenState extends State<PodcastScreen> {
     // setState(() {
     //   isLoading = true;
     // });
+
     final podcasts = await cacheManager.stream( ////////////////
       '_podcasts', 
       fallback: () async {
@@ -99,6 +100,7 @@ class _PodcastScreenState extends State<PodcastScreen> {
     }).toList();
     */
 
+    if(mounted)
     setState(() {
       isLoading = false;
     });
@@ -480,6 +482,7 @@ class _PodcastScreenState extends State<PodcastScreen> {
             ],
           ),
         );
+        
       },
     );
   }

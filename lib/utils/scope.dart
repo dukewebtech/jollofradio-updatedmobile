@@ -13,7 +13,7 @@ Future<dynamic> auth() async {
   //read user object
   final user = await Storage.get('user', Map);
   if(user == null)
-    return false;
+    return null;
 
   return user;
 

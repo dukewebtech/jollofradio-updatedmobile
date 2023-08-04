@@ -20,6 +20,7 @@ import 'package:jollofradio/screens/Layouts/Shimmers/Podcast.dart';
 import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
 import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/helpers/Storage.dart';
+import 'package:jollofradio/utils/scope.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Labels.dart';
@@ -116,7 +117,6 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
     if(podcast != playlist.title){
     */
     final playlist = player.getPlaylist() ;
-
     podcast.episodes!.map( (dynamic item) {
       item = MediaItem(
         id: item.id.toString(),
@@ -164,6 +164,12 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
     Map data = {
       'podcast_id': podcast.id
     };
+
+    if(await auth() == null){
+      return Toaster.info(
+        "You need to sign in to subscribe to this podcast. "
+      );
+    }
 
     setState(() {
       _fav = !_fav;
@@ -227,15 +233,17 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                           */
                         ),
                         clipBehavior: Clip.hardEdge,
-                        child: CachedNetworkImage(
+                        child: isLoading ? 
+                        Image.asset(
+                          'assets/images/loader.png',
+                          fit: BoxFit.cover,
+                        ) :
+                        CachedNetworkImage(
                           imageUrl: podcast.logo,
                           placeholder: (context, url) {
-                            return Center(
-                              child: SizedBox(
-                                width: 50,
-                                height: 50,
-                                child: CircularProgressIndicator()
-                              )
+                            return Image.asset(
+                              'assets/images/loader.png',
+                              fit: BoxFit.cover,
                             );
                           },
                           imageBuilder: (context, imageProvider) {
@@ -252,10 +260,48 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                           fit: BoxFit.cover,
                         ),
                       ),
-                      Labels.primary(
-                        "About",
-                        fontSize: 18,
-                        margin: EdgeInsets.only(bottom: 5)
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: <Widget>[
+                          Labels.primary(
+                            podcast.title,
+                             maxLines: 2,
+                            fontSize: 18,
+                            margin: EdgeInsets.only(bottom: 5)
+                          ),
+                          Text.rich(
+                            TextSpan(
+                              text: "by ",
+                              children: <InlineSpan>[
+                                TextSpan(
+                                  text: podcast
+                                    .creator?.username() ?? 'Jollof Radio',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: AppColor.secondary.withOpacity(
+                                      0.8
+                                    )
+                                  ),
+                                  recognizer: 
+                                  TapGestureRecognizer()
+                                  ..onTap = (){
+                                    if((podcast.creator == null) == true)
+                                      return;
+
+                                    RouteGenerator.goto(CREATOR_PROFILE, {
+                                      "creator": podcast.creator,
+                                    }); 
+                                  },
+                                )
+                              ],
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Color(0XFFBBBBBB)
+                              ),
+                            )
+                          ),
+                          SizedBox(height: 20),
+                        ],
                       ),
                       Wrap(
                         children: [
@@ -313,50 +359,68 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                               child: Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: <Widget>[
-                                  Text(
-                                    podcast.title, style: TextStyle(
-                                      fontSize: 15,
-                                      fontWeight: FontWeight.bold,
-                                      color: Color(0XFFFFFFFF)
+                                  Container(
+                                    width: 160,
+                                    height: 40,
+                                    decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(50)
                                     ),
-                                  ),
-                                  SizedBox(height: 10),
-                                  Text.rich(
-                                    TextSpan(
-                                      text: "by ",
-                                      children: <InlineSpan>[
-                                        TextSpan(
-                                          text: podcast.creator.username(),
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            color: AppColor.secondary.withOpacity(
-                                              0.8
-                                            )
+                                    clipBehavior: Clip.hardEdge,
+                                    child: !_fav ? 
+                                    ElevatedButton.icon(
+                                      onPressed: () => _doSubscribe(), 
+                                      icon: Icon(
+                                        Iconsax.notification,
+                                        size: 16,
+                                        color: AppColor.secondary,
+                                      ),
+                                      label: Text(
+                                        "Susbscribe", style: TextStyle(
+                                          color: AppColor.secondary
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        shape: RoundedRectangleBorder(
+                                          side: BorderSide(
+                                            width: 1,
+                                            color: AppColor.secondary
                                           ),
-                                          recognizer: 
-                                          TapGestureRecognizer()
-                                          ..onTap = (){
-                                            RouteGenerator.goto(CREATOR_PROFILE, {
-                                              "creator": podcast.creator,
-                                            }); 
-                                          },
-                                        )
-                                      ],
-                                      style: TextStyle(
-                                        fontSize: 13,
-                                        color: Color(0XFFBBBBBB)
+                                          borderRadius: BorderRadius.circular(
+                                            50
+                                          )
+                                        ),
+                                        backgroundColor: Colors.transparent
                                       ),
                                     )
+                                    :
+                                    ElevatedButton.icon(
+                                      onPressed: () => _doSubscribe(), 
+                                      icon: Icon(
+                                        Iconsax.notification,
+                                        size: 16,
+                                        color: AppColor.primary,
+                                      ),
+                                      label: Text(
+                                        "Susbscribed", style: TextStyle(
+                                          color: AppColor.primary
+                                        ),
+                                      ),
+                                      style: ElevatedButton.styleFrom(
+                                        backgroundColor: AppColor.secondary
+                                      ),
+                                    )
+                                    ,
                                   )
                                 ],
                               ),
                             ),
                             SizedBox(
-                              width: 95,
+                              width: 105,
                               height: 40,
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.spaceAround,
                                 children: <Widget>[
+                                  /*
                                   GestureDetector(
                                     onTap: () => _doSubscribe(),
                                     child: !_fav ? Icon(
@@ -384,6 +448,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                                       gravity: 1,
                                     ),
                                   ),
+                                  */
                                   Container(
                                     width: 40,
                                     height: 40,

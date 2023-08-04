@@ -22,6 +22,7 @@ class CreateScreen extends StatefulWidget {
   final Podcast? podcast;
   final Episode? episode;
   final dynamic callback;
+  final int? history;
 
   const CreateScreen({ 
     Key? key,
@@ -29,6 +30,7 @@ class CreateScreen extends StatefulWidget {
     this.podcast,
     this.episode,
     this.callback,
+    this.history,
   }) : super(key: key);
 
   @override
@@ -44,6 +46,7 @@ class _CreateScreenState extends State<CreateScreen> {
   TextEditingController source = TextEditingController();
   TextEditingController description = TextEditingController();
   String logo = "";
+  Uint8List? imageByte;
   String audio = "";
   bool urlUpload = false;
   Map mode = {
@@ -65,7 +68,6 @@ class _CreateScreenState extends State<CreateScreen> {
     1: "ACTIVE",
     0: "DISABLED"
   };
-
   Map buttons = {
     "create": [
       "Upload", "Uploading..."
@@ -92,19 +94,18 @@ class _CreateScreenState extends State<CreateScreen> {
       setState(() {
         isLoading = false;        
       });
-
        return;
     }
 
     title.text = episode!.title;
     // file.text = "IMAGE";
-    source.text = episode!.source;
+    // source.text = episode!.source.split('/').last; ///////////
     active = episode!.active!
     ? status[1] : status[0];
     description.text = episode!.description ?? ""; //////////////
 
     setState(() {
-      isLoading = false;        
+      isLoading = false;
     });
   }
 
@@ -132,6 +133,7 @@ class _CreateScreenState extends State<CreateScreen> {
 
     setState(() {
       if(type == 'logo'){
+        imageByte = data;
         file.text = result.files.first.name;
         logo = "data:image/png;base64,"  + base64Encode (data);
       }
@@ -177,7 +179,6 @@ class _CreateScreenState extends State<CreateScreen> {
         item['source']).isAbsolute
       ){
         return Toaster.info("Audio source is not valid URL! ");
-
       }
     }
 
@@ -206,6 +207,9 @@ class _CreateScreenState extends State<CreateScreen> {
     if(widget.type == 'update'){
       if(item['title'].isEmpty){
         return Toaster.info("You have not entered a title! ");
+      }
+      if(item['source'].isEmpty){
+        item['source'] = episode!.source; //initiating default
       }
 
       setState(() {
@@ -258,11 +262,11 @@ class _CreateScreenState extends State<CreateScreen> {
     */
 
     if(episode != null){
-      RouteGenerator.goBack(2);
+      RouteGenerator.goBack(
+        widget.history!
+      );
       return;
-
     }
-    
     RouteGenerator.goBack();
   }
 
@@ -316,7 +320,6 @@ class _CreateScreenState extends State<CreateScreen> {
                     Message.episode_note, style: TextStyle(
                       fontSize: 13.5,
                       color: AppColor.secondary
-
                     ),
                   ),
                 ),
@@ -339,7 +342,7 @@ class _CreateScreenState extends State<CreateScreen> {
                           onPressed: () {
                             setState(() {
                               urlUpload = false;
-                              // source.clear();
+                              source.clear();
                             });
                           },
                           child: Text(
@@ -361,7 +364,7 @@ class _CreateScreenState extends State<CreateScreen> {
                           onPressed: () {
                             setState(() {
                               urlUpload = true;
-                              // source.clear();
+                              source.text = episode?.source ?? '';
                             });
                           },
                           child: Text(
@@ -374,7 +377,6 @@ class _CreateScreenState extends State<CreateScreen> {
                         ),
                       )
                     ],
-
                   ),
                 ),
                 Input.primary(
@@ -393,7 +395,7 @@ class _CreateScreenState extends State<CreateScreen> {
                           controller: file
                         ),
                       ),
-                      if(episode != null)
+                      if(episode  !=  null)
                       Positioned(
                         top: 10,
                         right: 10,
@@ -404,7 +406,19 @@ class _CreateScreenState extends State<CreateScreen> {
                             episode!.logo, fit: BoxFit.cover
                           ),
                         ),
-                      )
+                      ),
+                      if(imageByte != null)
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: SizedBox(
+                          width: 30,
+                          height: 30,
+                          child: Image.memory(
+                            imageByte!, fit: BoxFit.cover
+                          ),
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -418,6 +432,22 @@ class _CreateScreenState extends State<CreateScreen> {
                           "Audio Source",
                           leadingIcon: Iconsax.music,
                           controller: source
+                        ),
+                      ),
+                      if(episode  !=  null)
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          color: AppColor.primary,
+                          alignment: Alignment.center,
+                          child: Icon(
+                            Iconsax.musicnote,
+                            color: Colors.white,
+                            size: 14,
+                          )
                         ),
                       ),
                     ],

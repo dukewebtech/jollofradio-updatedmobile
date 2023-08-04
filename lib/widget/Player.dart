@@ -70,7 +70,6 @@ class _PlayerState extends State<Player> {
         return;
 
       firstrun = true;
-      
       final track = item['track'];
       bool isPodcast = track['extras'].containsKey(
         'episode'
@@ -201,7 +200,7 @@ class _PlayerState extends State<Player> {
         }
       };
       
-      Timer(Duration(seconds: 1), () =>{        
+      Timer(Duration(seconds: 5), () =>{        
         if(isPlaying)
         Storage.set(
           'lastTrack', jsonEncode(media) // saving...
@@ -261,12 +260,9 @@ class _PlayerState extends State<Player> {
                           height: double.infinity,
                           imageUrl: track?.logo ?? '-',
                           placeholder: (context, url) {
-                            return Center(
-                              child: SizedBox(
-                                width: 20,
-                                height: 20,
-                                child: CircularProgressIndicator()
-                              )
+                            return Image.asset(
+                              'assets/images/loader.png',
+                              fit: BoxFit.cover,
                             );
                           },
                           errorWidget: (context, url, error) =>  Icon(

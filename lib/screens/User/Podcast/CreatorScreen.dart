@@ -153,7 +153,6 @@ class _CreatorScreenState extends State<CreatorScreen> {
           subscribed = creator.subscribed(user);
         else 
           subscribed = false;
-        
       });
     });
   }
@@ -215,12 +214,9 @@ class _CreatorScreenState extends State<CreatorScreen> {
                               CachedNetworkImage(
                                 imageUrl: creator.banner,
                                 placeholder: (context, url) {
-                                  return Center(
-                                    child: SizedBox(
-                                      width: 50,
-                                      height: 50,
-                                      child: CircularProgressIndicator()
-                                    )
+                                  return Image.asset(
+                                    'assets/images/loader.png',
+                                    fit: BoxFit.cover,
                                   );
                                 },
                                 errorWidget: (context, url, error) => Icon(

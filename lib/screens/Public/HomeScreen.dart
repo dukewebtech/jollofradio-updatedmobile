@@ -32,8 +32,12 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   // late User user;
-  late Map streams;
-  late List stations;
+  List stations = [];
+  Map streams = {
+    'latest': [],
+    'trending': [],
+    'release': [],
+  };
   bool isLoading = true;
   bool refresh = false;
 
@@ -117,10 +121,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> fetchStation() async {
-    // setState(() {
-    //   isLoading = true;
-    // });
-
     final stations = await cacheManager.stream( ///////////////
       'stations', 
       fallback: () async {
@@ -135,9 +135,9 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
     this.stations.shuffle();
 
-    // setState(() {
-    //   isLoading = false;
-    // });
+    setState(() {
+      // isLoading = false;
+    });
   }
 
   Future<List<Category>> category() async {

@@ -32,7 +32,6 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
     if(data.containsKey ('deleted')){
       playlist.collection.removeWhere((e) => e.id == (record.id));
-
       CacheStream().mount({
         'playlist': {
           'data': () async {
@@ -41,8 +40,9 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           'rules': (data) => data.isNotEmpty,
         }
       }, null);
+
+      setState(() { });
     }
-    setState(() { });
   }
 
   @override

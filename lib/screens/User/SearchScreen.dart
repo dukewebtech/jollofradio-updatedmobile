@@ -61,7 +61,8 @@ class _SearchScreenState extends State<SearchScreen> {
     );
 
     category.shuffle();
-    categories = Factory(category).get(0,8);
+    // categories = Factory(category).get(0,8);
+    categories = category;
     
     setState(() {
       isLoading = false;

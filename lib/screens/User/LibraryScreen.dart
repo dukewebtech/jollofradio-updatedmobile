@@ -129,7 +129,6 @@ class _LibraryScreenState extends State<LibraryScreen>
 
   void callback(resource, [Map? data]){
     data = data ?? {};
-    getSubscription();
 
     if(data.containsKey ('deleted')){
       subscriptions
@@ -143,6 +142,27 @@ class _LibraryScreenState extends State<LibraryScreen>
 
     if(data.containsKey ('station')){
       stations    .removeWhere((e) => e.id == ( resource.id ));
+    }
+
+    if(data.containsKey ('mounted')){
+      cacheManager.mount({
+        'streams': {
+          'data': () async {
+            return await StreamController.index(); ////////////
+          },
+          'rules': (data){
+            return data['trending'].isNotEmpty;
+          },
+        },
+        'subscriptions': {
+          'data': () async {
+            return await SubscriptionController.index(); //////
+          },
+          'rules': (data){
+            return data['status'] == 200;
+          },
+        }
+      }, null);
     }
     setState(() {});
   }

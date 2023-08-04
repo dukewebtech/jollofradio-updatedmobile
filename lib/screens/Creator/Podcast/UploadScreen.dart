@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:file_picker/file_picker.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
@@ -46,6 +47,7 @@ class _UploadScreenState extends State<UploadScreen> {
   TextEditingController file = TextEditingController();
   TextEditingController description = TextEditingController();
   String logo = "";
+  Uint8List? imageByte;
   
   List<String> dropdown = [];
   List categories = [];
@@ -53,6 +55,7 @@ class _UploadScreenState extends State<UploadScreen> {
   dynamic podcast;
   String? selectedLabel;
   String? active;
+  bool update = false;
   Map tagline = {
     "import": Message.import_note,
     "edit": Message.upload_note,
@@ -110,9 +113,11 @@ class _UploadScreenState extends State<UploadScreen> {
       for(var i in categories){
         dropdown.add(i.name.toString());
       }
+      
       setState(() {
         isLoading = false;
       });
+      
     });
   }
 
@@ -132,6 +137,7 @@ class _UploadScreenState extends State<UploadScreen> {
     image = result.files.first.bytes!;
 
     setState(() {
+      imageByte = image;
       file.text = result.files.first.name;
       logo = "data:image/png;base64," + base64Encode ( image );
     });
@@ -153,6 +159,7 @@ class _UploadScreenState extends State<UploadScreen> {
     Map data = {
       "url": rssInput.text,
       "category_id": categoryId,
+      "auto_update": update,
 
       "id": podcast?.id,
       "name": title.text,
@@ -261,6 +268,7 @@ class _UploadScreenState extends State<UploadScreen> {
     });
     
     RouteGenerator.goBack();
+    
   }
 
   @override
@@ -336,6 +344,42 @@ class _UploadScreenState extends State<UploadScreen> {
                       selectedLabel = value;
                     }
                   ),
+                  Container(
+                    height: 50,
+                    margin: EdgeInsets.only(bottom: 20),
+                    decoration: BoxDecoration(
+                      color: AppColor.input,
+                      borderRadius: BorderRadius.circular(7)
+                    ),
+                    child: Row(
+                      children: [
+                        Padding(
+                          padding: EdgeInsets.only(
+                            left: 15,
+                            right: 15
+                          ),
+                          child: Icon(
+                            Icons.refresh, color: Colors.white30, size: 20,
+                          ),
+                        ),
+                        SizedBox(
+                          width: 100,
+                          child: Text("Auto Update", style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.white30
+                          )),
+                        ),
+                        Spacer(),
+                        CupertinoSwitch(
+                          activeColor: AppColor.secondary,
+                          value: update, 
+                          onChanged: (value) {
+                            setState(()=> update = value);
+                          },
+                        )
+                      ],
+                    ),
+                  ),
                   SizedBox(
                     child: Buttons.secondary(
                       label: !importing ? 
@@ -371,7 +415,7 @@ class _UploadScreenState extends State<UploadScreen> {
                             controller: file
                           ),
                         ),
-                        if(podcast != null)
+                        if(podcast  !=  null)
                         Positioned(
                           top: 10,
                           right: 10,
@@ -382,7 +426,19 @@ class _UploadScreenState extends State<UploadScreen> {
                               podcast.logo, fit: BoxFit.cover
                             ),
                           ),
-                        )
+                        ),
+                        if(imageByte != null)
+                        Positioned(
+                          top: 10,
+                          right: 10,
+                          child: SizedBox(
+                            width: 30,
+                            height: 30,
+                            child: Image.memory(
+                              imageByte!, fit: BoxFit.cover
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),

@@ -79,7 +79,6 @@ class _RadioTemplateState extends State<RadioTemplate> {
       });
 
       setState(() { });
-      
     });
   }
 
@@ -114,14 +113,9 @@ class _RadioTemplateState extends State<RadioTemplate> {
               child: CachedNetworkImage(
                 imageUrl: station.logo,
                 placeholder: (context, url) {
-                  return Center(
-                    child: SizedBox(
-                      width: 30,
-                      height: 30,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                      )
-                    )
+                  return Image.asset(
+                    'assets/images/loader.png',
+                    fit: BoxFit.cover,
                   );
                 },
                 errorWidget: (context, url, error) =>  Icon(

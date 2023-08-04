@@ -5,6 +5,7 @@ import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
+import 'package:jollofradio/config/models/Podcast.dart';
 import 'package:jollofradio/config/services/controllers/User/PlaylistController.dart';
 import 'package:jollofradio/config/services/controllers/User/StreamController.dart';
 import 'package:jollofradio/config/services/controllers/HomeController.dart';
@@ -13,6 +14,7 @@ import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
+import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/utils/scope.dart';
@@ -43,6 +45,7 @@ class PlayerScreen extends StatefulWidget {
 
 class _PlayerScreenState extends State<PlayerScreen> 
 with SingleTickerProviderStateMixin {
+  bool isLoading = true;
   late AnimationController _controller;
   ColorTween? _colorTween;
   Animation<Color?>? _colorTweenAnimation;
@@ -51,6 +54,7 @@ with SingleTickerProviderStateMixin {
   AudioServiceHandler player = AudioServiceHandler();
   dynamic user;
   late bool loggedIn = false;
+  Podcast? podcast;
   late Episode track;
   late String channel;
   late List? playlist;
@@ -75,6 +79,12 @@ with SingleTickerProviderStateMixin {
 
     (() async {
       user = await auth();
+      if(user == null){
+        setState(() {
+         isLoading = false; 
+        });
+      }
+
       if(await auth() != null && await isCreator()==false){
         loggedIn = true;
         List playlist = user[
@@ -95,6 +105,7 @@ with SingleTickerProviderStateMixin {
       getEffects()
     });
 
+    getPodcast();
     _verifyPlayback();
 
     super.initState();
@@ -146,6 +157,7 @@ with SingleTickerProviderStateMixin {
         if(player.currentTrack()?.title == (track.title)){
           return;
         }
+
         return safetyDialog();
       }
     }
@@ -206,11 +218,18 @@ with SingleTickerProviderStateMixin {
     setState(() {
       //
     });
-      
+    
     bool onTrack = tracks.every((element) {
       //
+      /*
       return playlist.any(
         (e) => e.id == element.id) == true; // check tracks
+      */
+      return playlist.any((e){
+        return 
+        e.id == element.id 
+        && ( e.extras!['url'] == element.extras!['url'] ) ;
+      });
       //
     });
 
@@ -245,24 +264,10 @@ with SingleTickerProviderStateMixin {
         )
       ]);
       */
-
-      //tracking stream
-      if(!await isCreator())
-      await Storage.get('guest',bool).then((dynamic guest){
-        
-        if(guest == true){
-          HomeController.stream({'episode_id':  track.id});
-
-        }
-        else{
-          StreamController.create({'episode_id': track.id});
-
-        }
-      });
     }
     else{
       if(currentTrack?.title != track.title){
-        if(playlist.length > 1){ //!
+        if(playlist.length > 1){
           int index = playlist.indexWhere(
             (media) => media.id == track.id.toString (   ) 
           );
@@ -273,8 +278,15 @@ with SingleTickerProviderStateMixin {
             );
             player.play();
           }
-        } //!
+        }
       }
+    }
+
+    //trackng stream
+    if(currentTrack?.title != track.title ) {
+
+      stream(track);
+    
     }
 
     player.streams().listen((dynamic event) {
@@ -291,10 +303,25 @@ with SingleTickerProviderStateMixin {
         });
       }
     });
-    
-    ///////////////////////////////////////////////////////
   }
 
+  Future stream(Episode track) async {
+    if(!await isCreator())
+    await Storage.get('guest',bool).then((dynamic guest){
+      
+      if(guest == true){
+        
+        HomeController.stream({'episode_id':  track.id});
+
+      }
+      else{
+        
+        StreamController.create({'episode_id': track.id});
+
+      }
+    });
+  }
+  
   Future skipTrack(mode) async {
     late MediaItem media;
 
@@ -318,6 +345,9 @@ with SingleTickerProviderStateMixin {
       track = Episode.fromJson(
         media.extras!['episode']
       );
+
+      stream(track);
+      
       currentIndex = tracks.indexOf(media);//set cur. index
     });
   }
@@ -371,6 +401,27 @@ with SingleTickerProviderStateMixin {
         setState(() => _fav = !_fav);
       }
     });    
+  }
+
+  Future<void> getPodcast() async {
+    int id = track.podcastId;
+
+    await PlaylistController.show(id).then((playlist)async{
+      if(playlist != null){
+        var episode = playlist.episodes?.firstWhere(( e ) {
+
+          return e.id == track.id;
+          
+        }, orElse: () => track);
+
+        setState(() {
+          podcast = playlist;
+          // track = episode!; //prevent rebuild & flicker
+          _fav = episode!.liked;
+          isLoading = false;
+        });
+      }
+    });
   }
 
   Future<void> _savePlaylist() async {
@@ -439,9 +490,18 @@ with SingleTickerProviderStateMixin {
             appBar: AppBar(
               leading: Buttons.back(),
               actions: [
-                SizedBox(
+                Container(
                   width: 60,
-                  child: IconButton(
+                  alignment: Alignment.center,
+                  child: isLoading ? 
+                  SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: const CircularProgressIndicator(
+                      strokeWidth: 2,
+                    )
+                  )
+                  : IconButton(
                     onPressed: () async => showMoreOptions(), 
                     icon: Icon(Iconsax.more)
                   ),
@@ -489,12 +549,9 @@ with SingleTickerProviderStateMixin {
                                 CachedNetworkImage(
                                   imageUrl: track.logo,
                                   placeholder: (context, url) {
-                                    return Center(
-                                      child: SizedBox(
-                                        width: 50,
-                                        height: 50,
-                                        child: CircularProgressIndicator()
-                                      )
+                                    return Image.asset(
+                                      'assets/images/loader.png',
+                                      fit: BoxFit.cover,
                                     );
                                   },
                                   errorWidget: (context, url, error) => Icon(
@@ -521,24 +578,38 @@ with SingleTickerProviderStateMixin {
                                   children: [
                                     SizedBox(
                                       height: 90,
-                                      child: Column(
-                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                        children: <Widget>[
-                                          Container(
-                                            constraints: BoxConstraints(
-                                              maxHeight: 60
+                                      child: GestureDetector(
+                                      onTap: () {
+                                        if(podcast == null){
+                                          Toaster.error(
+                                            "Fail to load the podcast at the moment!"
+                                          );
+                                          return;
+                                        }
+
+                                        RouteGenerator.goto(PODCAST, {
+                                          "podcast": podcast
+                                        });
+                                      },
+                                        child: Column(
+                                          crossAxisAlignment: CrossAxisAlignment.start,
+                                          children: <Widget>[
+                                            Container(
+                                              constraints: BoxConstraints(
+                                                maxHeight: 60
+                                              ),
+                                              child: Labels.primary(
+                                                track.title,
+                                                fontSize: 20,
+                                                fontWeight: FontWeight.bold,
+                                                maxLines: 2,
+                                              ),
                                             ),
-                                            child: Labels.primary(
-                                              track.title,
-                                              fontSize: 20,
-                                              fontWeight: FontWeight.bold,
-                                              maxLines: 2
+                                            Labels.secondary(
+                                              track.podcast,
                                             ),
-                                          ),
-                                          Labels.secondary(
-                                            track.podcast
-                                          ),
-                                        ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                     SizedBox(height: 20),
@@ -856,7 +927,6 @@ with SingleTickerProviderStateMixin {
                     fn: _savePlaylist,
                     callback: callback
                   );
-
                 }
               ),
               ListTile(

@@ -32,7 +32,7 @@ class GoogleSigninAuth {
       
     } catch (error) {
 
-      print('Fail to login: $error'); // returns exception
+      print('Fail to signin: $error '); //return exception
 
     }
 
@@ -40,10 +40,16 @@ class GoogleSigninAuth {
   }
 
   Future<GoogleSignInAccount?> signOut() async {
-    if(await _googleSignIn?.
-      isSignedIn() ?? false){
+    // if(await _googleSignIn?.
+    //   isSignedIn() ?? false){
+      
+    try {
 
-      await _googleSignIn?.disconnect(); //signout session
+      await _googleSignIn?.disconnect();// signing out jwt
+
+    } catch (error) {
+
+      print('Fail to signout: $error'); //return exception
 
     }
 
