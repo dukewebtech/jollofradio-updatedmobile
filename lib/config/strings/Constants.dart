@@ -30,6 +30,7 @@ const STATIONS = '/user/radio/:id';
 const CATEGORY = '/user/category';
 const CATEGORY_TRACK = '/user/category/:id';
 const TRENDING = '/user/playlist/trending';
+const JOLLOF_LATEST = '/user/playlist/podcast';
 const NEW_RELEASE = '/user/playlist/release';
 
 const CREATOR_PROFILE = '/user/creator/:id';

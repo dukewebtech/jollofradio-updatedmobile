@@ -114,7 +114,7 @@ class _CategoryScreenState extends State<CategoryScreen> {
                                 ),
                               )
                             else
-                              FadeInUp(
+                              FadeIn(
                                 child: GridView.builder(
                                   shrinkWrap: true,
                                   padding: EdgeInsets.zero,

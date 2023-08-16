@@ -3,34 +3,34 @@ import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/Message.dart';
-import 'package:jollofradio/screens/Layouts/Templates/Podcast.dart';
+import 'package:jollofradio/screens/Layouts/Templates/Playlist.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Player.dart';
 import 'package:provider/provider.dart';
 
-class ReleaseScreen extends StatefulWidget {
+class LatestScreen extends StatefulWidget {
   final String title;
-  final List episodes;
-  const ReleaseScreen({
+  final List podcasts;
+  const LatestScreen({
     super.key, 
     required this.title, 
-    required this.episodes
+    required this.podcasts
   });
 
   @override
-  State<ReleaseScreen> createState() => _ReleaseScreenState();
+  State<LatestScreen> createState() => _LatestScreenState();
 }
 
-class _ReleaseScreenState extends State<ReleaseScreen> {
+class _LatestScreenState extends State<LatestScreen> {
   late dynamic user;
   bool isLoading = false;
-  List episodes = [];
+  List podcasts = [];
 
   @override
   void initState() {
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
-    episodes = widget.episodes;
+    podcasts = widget.podcasts;
     super.initState();
   }
 
@@ -79,7 +79,7 @@ class _ReleaseScreenState extends State<ReleaseScreen> {
                         else ...[
                           Column(
                             children: [
-                              if(episodes.isEmpty)
+                              if(podcasts.isEmpty)
                                 Container(
                                   height: 300,
                                   margin: EdgeInsets.only(
@@ -119,16 +119,14 @@ class _ReleaseScreenState extends State<ReleaseScreen> {
                                     ),
                                     physics: 
                                     ScrollPhysics(parent: NeverScrollableScrollPhysics(  )),
-                                    itemCount: episodes.length,
+                                    itemCount: podcasts.length,
                                     itemBuilder: (context, index){
                                       return Container(
                                         margin: EdgeInsets.only(
                                           bottom: 10
                                         ),
-                                        child: PodcastTemplate(
-                                          type: 'grid',
-                                          episode: episodes[index],
-                                          podcasts: episodes, //////////////////////////////
+                                        child: PlaylistTemplate(
+                                          playlist: podcasts[index] ///////////////////////
                                         ),
                                       );
                                     }

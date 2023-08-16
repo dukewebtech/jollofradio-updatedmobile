@@ -209,7 +209,7 @@ class _AdvertScreenState extends State<AdvertScreen> {
                     ],
                   ),
                 ),
-              ),    
+              ),
             ),
           ),
         );

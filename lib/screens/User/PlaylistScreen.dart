@@ -38,6 +38,8 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
 
+    super.initState();
+
     //cache manager
     (() async {
       await cacheManager.mount({
@@ -51,9 +53,7 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
 
       getPlaylists();
 
-    }());
-    
-    super.initState();
+    }());    
   }
 
   Future<void> getPlaylists([cache]) async {

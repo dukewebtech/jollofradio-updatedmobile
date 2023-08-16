@@ -67,6 +67,7 @@ dependencies:
   rxdart: ^0.27.7
   audio_session: ^0.1.13
   google_sign_in: ^6.1.0
+  image_cropper: ^4.0.1
   dismissible_page: ^1.0.2
 
 dev_dependencies:

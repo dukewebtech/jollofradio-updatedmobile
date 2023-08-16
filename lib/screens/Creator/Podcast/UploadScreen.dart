@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
@@ -16,6 +17,7 @@ import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/utils/string.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
+import 'package:jollofradio/widget/Crop.dart';
 import 'package:jollofradio/widget/Input.dart';
 import 'package:jollofradio/widget/Shared.dart';
 import 'package:provider/provider.dart';
@@ -123,6 +125,7 @@ class _UploadScreenState extends State<UploadScreen> {
 
   Future _selectLogo  () async {
     Uint8List image;
+    File? imageFile;
 
     final dynamic result = await FilePicker.platform.pickFiles(
         type: FileType.image, 
@@ -135,6 +138,17 @@ class _UploadScreenState extends State<UploadScreen> {
     }
 
     image = result.files.first.bytes!;
+    imageFile = File(
+      result.files.first.path
+    );
+
+    //init crop
+    dynamic cropImage = ( await Cropper.cropImage(imageFile) );
+    if(cropImage == null)
+      return;
+
+    image = await cropImage
+    .readAsBytes();
 
     setState(() {
       imageByte = image;

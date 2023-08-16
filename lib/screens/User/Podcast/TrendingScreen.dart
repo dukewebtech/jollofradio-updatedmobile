@@ -11,8 +11,13 @@ import 'package:jollofradio/widget/Player.dart';
 import 'package:provider/provider.dart';
 
 class TrendingScreen extends StatefulWidget {
+  final String title;
   final List episodes;
-  const TrendingScreen({super.key, required this.episodes});
+  const TrendingScreen({
+    super.key, 
+    required this.title,
+    required this.episodes
+  });
 
   @override
   State<TrendingScreen> createState() => _TrendingScreenState();
@@ -36,7 +41,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
     return Scaffold(
       appBar: AppBar(
         leading: Buttons.back(),
-        title: Text("Trending Podcasts"),
+        title: Text(widget.title),
       ),
       body: Center(
         child: Container(
@@ -105,7 +110,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
                                   ),
                                 )
                               else
-                                FadeInUp(
+                                FadeIn(
                                   child: GridView.builder(
                                     shrinkWrap: true,
                                     padding: EdgeInsets.zero,
@@ -135,6 +140,7 @@ class _TrendingScreenState extends State<TrendingScreen> {
                                               type: 'grid',
                                               compact: true,
                                               episode: episodes[index] ///////////////////////
+                                              
                                             ),
                                           ),
                                         ),

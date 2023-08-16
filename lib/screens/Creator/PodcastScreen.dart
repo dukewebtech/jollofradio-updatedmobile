@@ -286,7 +286,7 @@ class _PodcastScreenState extends State<PodcastScreen> {
                         else
                         Container(
                           margin: EdgeInsets.only(
-                            left: width / 25
+                            left: (width - 400) / 2
                           ),
                           child: const EmptyRecord(
                             icon: Iconsax.music,
@@ -348,7 +348,7 @@ class _PodcastScreenState extends State<PodcastScreen> {
                         else
                         Container(
                           margin: EdgeInsets.only(
-                            left: width / 25
+                            left: (width - 400) / 2
                           ),
                           child: const EmptyRecord(
                             icon: Iconsax.music,

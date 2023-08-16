@@ -47,6 +47,8 @@ class _LibraryScreenState extends State<LibraryScreen>
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
 
+    super.initState();
+
     tabController = TabController(
       initialIndex: 0,
       length: 3, 
@@ -85,8 +87,6 @@ class _LibraryScreenState extends State<LibraryScreen>
       getSubscription();
 
     }());
-
-    super.initState();
   }
 
   Future<dynamic> getFavorites() async {

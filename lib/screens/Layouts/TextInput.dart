@@ -28,7 +28,7 @@ class TextInput extends StatelessWidget {
     this.controller,
     this.type = TextInputType.text,
     this.align = TextAlign.left,
-    this.action = TextInputAction.none,
+    this.action = TextInputAction.done,
     this.password = false,
     this.maxLines = 1,
     this.height = 50,

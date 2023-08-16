@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -13,6 +14,7 @@ import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Message.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
+import 'package:jollofradio/widget/Crop.dart';
 import 'package:jollofradio/widget/Input.dart';
 import 'package:jollofradio/widget/Shared.dart';
 import 'package:provider/provider.dart';
@@ -103,13 +105,13 @@ class _CreateScreenState extends State<CreateScreen> {
     active = episode!.active!
     ? status[1] : status[0];
     description.text = episode!.description ?? ""; //////////////
-
     setState(() {
       isLoading = false;
     });
   }
 
   Future _selectFile(type) async {
+    File? imageFile;
     Uint8List data;
     FileType format = {
       "logo": FileType.image,
@@ -130,6 +132,19 @@ class _CreateScreenState extends State<CreateScreen> {
     }
 
     data = result.files.first.bytes!;
+    imageFile = File(
+      result.files.first.path
+    );
+
+    //init crop
+    if(type == 'logo'){
+      dynamic cropImage = (await Cropper.cropImage(imageFile));
+      if(cropImage == null)
+        return;
+
+      data = await cropImage
+      .readAsBytes();
+    }
 
     setState(() {
       if(type == 'logo'){
@@ -137,7 +152,6 @@ class _CreateScreenState extends State<CreateScreen> {
         file.text = result.files.first.name;
         logo = "data:image/png;base64,"  + base64Encode (data);
       }
-
       if(type == 'file'){
         source.text = result.files.first.name;
         audio = "data:audio/mpeg;base64,"+ base64Encode (data);
@@ -150,7 +164,6 @@ class _CreateScreenState extends State<CreateScreen> {
       return;
 
     active = active ?? 'ACTIVE';
-
     dynamic item;
     Map data = <String, dynamic>{
       "podcast": podcast,
@@ -169,7 +182,6 @@ class _CreateScreenState extends State<CreateScreen> {
     };
 
     item = data['episodes'][0];
-
     if(audio != ""){
       item['source'] = (audio);
     }
@@ -228,7 +240,7 @@ class _CreateScreenState extends State<CreateScreen> {
     setState(() {
       isSaving = false;
     });
-
+    
     if(response['error']){
       return Toaster.error(
         response['message']
@@ -247,7 +259,6 @@ class _CreateScreenState extends State<CreateScreen> {
     if(widget.callback != null){
       widget.callback();
     }
-    
     /*
     await CacheStream().mount({
       '_podcasts': {
@@ -260,7 +271,6 @@ class _CreateScreenState extends State<CreateScreen> {
       },
     }, null);
     */
-
     if(episode != null){
       RouteGenerator.goBack(
         widget.history!

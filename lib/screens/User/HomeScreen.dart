@@ -39,8 +39,11 @@ class _HomeScreenState extends State<HomeScreen> {
   late User user;
   List stations = [];
   Map streams = {
+    'toppick': [],
     'latest': [],
     'trending': [],
+    'library': [],
+    'podcast': [],
     'release': [],
   };
   bool isLoading = true;
@@ -55,6 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
+
+    super.initState();
 
     //cache manager
     (() async {
@@ -82,15 +87,13 @@ class _HomeScreenState extends State<HomeScreen> {
           'rules': (data) => data.isNotEmpty,
         },
       }, Duration(
-        seconds: 10
+        seconds: 20
       ));
 
       fetchStreams() ;
       fetchStation() ;
 
     }());
-
-    super.initState();
   }
 
   @override
@@ -313,59 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                SizedBox(height: 20),
-                Labels.primary(
-                  "Recently Played",
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold
-                ),
-                SizedBox(
-                  height: 70,
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: <Widget>[
-                        if(isLoading || streams['recent'].isEmpty)  ... [
-
-                          if(!isLoading && streams['recent'].isEmpty)
-                            Container(
-                              alignment: Alignment.center,
-                              width: width - 40,
-                              padding: EdgeInsets.fromLTRB(40, 20, 40, 10),
-                              child: Column(
-                                children: <Widget>[
-                                  Text(
-                                    Message.no_activity,
-                                    style: TextStyle(
-                                      color: Color(0XFF9A9FA3),
-                                      fontSize: 14
-                                    ),
-                                    textAlign: TextAlign.center,
-                                  )
-                                ],
-                              ),
-                            )
-                          else
-                            PlaylistShimmer(
-                              type: 'recent', 
-                              length: 3
-                            )
-                        ] 
-                        else ...[
-                          ...Factory(streams['recent'])
-                          .get(0, 5).map(
-                                    (episode) => /** */ PodcastTemplate (
-                            type: 'play',
-                            episode: episode,
-                            podcasts: streams['recent'],
-                            callback: callback,
-                          ))
-                        ]
-                      ],
-                    ),
-                  ),
-                ),
-                SizedBox(height: 30),              
+                SizedBox(height: 30),
                 SizedBox(
                   height: 35,
                   child: Row(
@@ -421,20 +372,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   )
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 20),
                 SizedBox(
                   height: 35,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Labels.primary(
-                        "Top this week",
+                        "Daily Top",
                         fontSize: 18,
                         fontWeight: FontWeight.bold
                       ),
                       GestureDetector(
                         onTap: () {
                           RouteGenerator.goto(TRENDING, {
+                            "title": "Daily Top",
                             "episodes": streams['trending'] ?? []
                           });
                         },
@@ -446,22 +398,49 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SizedBox(
-                  child: SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
+                  child: Center(
+                    child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading || streams['trending'].isEmpty)... [
+                        if(isLoading) ... [
                           PodcastShimmer(
-                            type: 'grid',
+                            type: 'list',
                             length: 3
                           )
-                        ] 
+                        ]
+                        else
+                        if(stations.isEmpty) ... [
+                          Container(
+                            alignment: Alignment.center,
+                            width: width - 40,
+                            padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
+                            child: Column(
+                              children: <Widget>[
+                                Icon(
+                                  Iconsax.radar5,
+                                  size: 40,
+                                  color: Color(0XFF9A9FA3),
+                                ),
+                                SizedBox(
+                                  height: 10,
+                                ),
+                                Text(
+                                  Message.no_data,
+                                  style: TextStyle(
+                                    color: Color(0XFF9A9FA3),
+                                    fontSize: 14
+                                  ),
+                                  textAlign: TextAlign.center,
+                                )
+                              ],
+                            ),
+                          )
+                        ]
                         else ...[
                           ...Factory(streams['trending'])
                           .get(0, 5).map(
                                     (episode) => /** */ PodcastTemplate (
-                            type: 'grid',
+                            type: 'list',
                             episode: episode,
                             podcasts: streams['trending'],
                           ))
@@ -470,22 +449,21 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   )
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 20),
                 SizedBox(
                   height: 35,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Labels.primary(
-                        "New Release",
+                        "Your Subscribed",
                         fontSize: 18,
                         fontWeight: FontWeight.bold
                       ),
                       GestureDetector(
                         onTap: () {
-                          RouteGenerator.goto(NEW_RELEASE, {
-                            "podcasts": streams['release'] ?? []
-                          });
+                          LibraryScreen.page = 'Subscribed';
+                          widget.tabController!(1);
                         },
                         child: Labels.secondary(
                           "See All"
@@ -500,14 +478,14 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading || streams['release'].isEmpty)... [
+                        if(isLoading || streams['library'].isEmpty)... [
                           PodcastShimmer(
                             type: 'grid',
                             length: 3
                           )
                         ] 
                         else ...[
-                          ...Factory(streams['release'])
+                          ...Factory(streams['library'])
                           .get(0, 5).map(
                                     (podcast) => /** */ PlaylistTemplate (
                             playlist: podcast,
@@ -518,7 +496,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   )
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 20),
                 SizedBox(
                   height: 35,
                   child: Row(
@@ -594,14 +572,64 @@ class _HomeScreenState extends State<HomeScreen> {
                     )
                   )
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 20),
                 SizedBox(
                   height: 35,
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Labels.primary(
-                        "Radio Stations",
+                        "Shuffled Pod 247",
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          RouteGenerator.goto(TRENDING, {
+                            "title": "Shuffled Pod 247",
+                            "episodes": streams['toppick'] ?? []
+                          });
+                        },
+                        child: Labels.secondary(
+                          "See All"
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        if(isLoading || streams['toppick'].isEmpty)... [
+                          PodcastShimmer(
+                            type: 'grid',
+                            length: 3
+                          )
+                        ] 
+                        else ...[
+                          ...Factory(streams['toppick'])
+                          .get(0, 5).map(
+                                    (episode) => /** */ PodcastTemplate (
+                            type: 'grid',
+                            episode: episode,
+                            podcasts: streams['toppick'],
+                          ))
+                        ]
+                      ],
+                    )
+                  )
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                  height: 35,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Labels.primary(
+                        "Radio 247",
                         fontSize: 18,
                         fontWeight: FontWeight.bold
                       ),
@@ -664,6 +692,156 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     )
                   )
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                  height: 35,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Labels.primary(
+                        "New on Jollof Radio",
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          RouteGenerator.goto(JOLLOF_LATEST, {
+                            "title": "New on Jollof Radio",
+                            "podcasts": streams['podcast'] ?? []
+                          });
+                        },
+                        child: Labels.secondary(
+                          "See All"
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        if(isLoading || streams['podcast'].isEmpty)... [
+                          PodcastShimmer(
+                            type: 'grid',
+                            length: 3
+                          )
+                        ] 
+                        else ...[
+                          ...Factory(streams['podcast'])
+                          .get(0, 5).map(
+                                    (podcast) => /** */ PlaylistTemplate (
+                            playlist: podcast,
+                            compact: true
+                          ))
+                        ]
+                      ],
+                    )
+                  )
+                ),
+                SizedBox(height: 20),
+                SizedBox(
+                  height: 35,
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Labels.primary(
+                        "New Releases",
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          RouteGenerator.goto(NEW_RELEASE, {
+                            "title": "New Releases",
+                            "episodes": streams['release'] ?? []
+                          });
+                        },
+                        child: Labels.secondary(
+                          "See All"
+                        ),
+                      )
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        if(isLoading || streams['release'].isEmpty)... [
+                          PodcastShimmer(
+                            type: 'grid',
+                            length: 3
+                          )
+                        ] 
+                        else ...[
+                          ...Factory(streams['release'])
+                          .get(0, 5).map(
+                                    (podcast) => /** */ PodcastTemplate(
+                            type: 'grid',
+                            episode: podcast,
+                            podcasts: streams['release'],
+                          ))
+                        ]
+                      ],
+                    )
+                  )
+                ),
+                SizedBox(height: 20),
+                Labels.primary(
+                  "Recently Played",
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold
+                ),
+                SizedBox(
+                  height: 70,
+                  child: SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: Row(
+                      children: <Widget>[
+                        if(isLoading || streams['recent'].isEmpty)  ... [
+
+                          if(!isLoading && streams['recent'].isEmpty)
+                            Container(
+                              alignment: Alignment.center,
+                              width: width - 40,
+                              padding: EdgeInsets.fromLTRB(40, 20, 40, 10),
+                              child: Column(
+                                children: <Widget>[
+                                  Text(
+                                    Message.no_activity,
+                                    style: TextStyle(
+                                      color: Color(0XFF9A9FA3),
+                                      fontSize: 14
+                                    ),
+                                    textAlign: TextAlign.center,
+                                  )
+                                ],
+                              ),
+                            )
+                          else
+                            PlaylistShimmer(
+                              type: 'recent', 
+                              length: 3
+                            )
+                        ] 
+                        else ...[
+                          ...Factory(streams['recent'])
+                          .get(0, 5).map(
+                                    (episode) => /** */ PodcastTemplate (
+                            type: 'play',
+                            episode: episode,
+                            podcasts: streams['recent'],
+                          ))
+                        ]
+                      ],
+                    ),
+                  ),
                 ),
                 SizedBox(height: 10),
               ],

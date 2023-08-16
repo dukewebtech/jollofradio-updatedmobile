@@ -31,6 +31,7 @@ import 'package:jollofradio/screens/User/Notification/NotificationScreen.dart';
 import 'package:jollofradio/screens/User/PlaylistScreen.dart';
 import 'package:jollofradio/screens/User/Podcast/CreatorScreen.dart';
 import 'package:jollofradio/screens/User/Podcast/EpisodeScreen.dart';
+import 'package:jollofradio/screens/User/Podcast/LatestScreen.dart';
 import 'package:jollofradio/screens/User/Podcast/PlayerScreen.dart';
 import 'package:jollofradio/screens/User/Podcast/PlaylistScreen.dart' as track;
 import 'package:jollofradio/screens/User/Podcast/ReleaseScreen.dart';
@@ -149,12 +150,20 @@ class ScreenProvider {
 
       case TRENDING:
         return MaterialPageRoute(builder: (context) => TrendingScreen(
+          title: data['title'],
           episodes: data['episodes'],
+        ));
+
+      case JOLLOF_LATEST:
+        return MaterialPageRoute(builder: (context) => LatestScreen(
+          title: data['title'],
+          podcasts: data['podcasts'],
         ));
 
       case NEW_RELEASE:
         return MaterialPageRoute(builder: (context) => ReleaseScreen(
-          podcasts: data['podcasts'],
+          title: data['title'],
+          episodes: data['episodes'],
         ));
 
       case PLAYLIST:

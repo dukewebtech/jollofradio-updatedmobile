@@ -20,7 +20,7 @@ Future main() async {
   FlutterNativeSplash.preserve(
     widgetsBinding: widget
   );
-  await Firebase.initializeApp();
+  Firebase.initializeApp();
 
   //ensure device is init on "portraits"
   SystemChrome.setPreferredOrientations([
