@@ -40,7 +40,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
   late Podcast podcast;
   late ConfettiController confettiController;
   AudioServiceHandler player = AudioServiceHandler();
-  late PlaybackState playerState;
+  PlaybackState? playerState;
   bool isLoading = true;
   bool _fav = false;
   List<MediaItem> tracks = [];
@@ -49,15 +49,14 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
 
   @override
   void initState() {
+    super.initState();
     podcast = widget.podcast;
     _fav = podcast.subscribed;
     confettiController = ConfettiController(duration: Duration(
       seconds: 1
     ));
 
-    initPlayer ();
     getPlaylist();
-    super.initState();
   }
 
   @override
@@ -68,12 +67,22 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
 
   Future<void> initPlayer() async {
     audioHandler.playbackState.listen((PlaybackState state) {
-      playerState = state;
       currentTrack = player.currentTrack();  //updating track
 
-      if(mounted) {
-        setState(() {});
+      if(state.processingState 
+      != playerState?.processingState){
+
+        playerState = state;
+        /*
+        Toaster.info("Audio state remounted! tracking ttl.");
+        */
+        
+        if(mounted) {
+          setState(() {});
+        }
+        
       }
+
     });
   }
 
@@ -81,7 +90,7 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
     String episodeId = episode.id.toString();//fetch track id
 
     if(currentTrack?.id == episodeId){
-      if(playerState.playing == true){
+      if(playerState?.playing == true){
         return true;
       }
     }
@@ -98,6 +107,13 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
           episodes = playlist.episodes!;
           isLoading = false;
         });
+
+        Future.delayed(
+          Duration(seconds: 0), () {
+            initPlayer();
+          }
+        );
+
         /*
         episodes = playlist.episodes!.map<Episode>((episode){
           return episode;

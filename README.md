@@ -1,4 +1,4 @@
-# jollofradio
+# Jollof Radio
 
 A new Flutter project.
 

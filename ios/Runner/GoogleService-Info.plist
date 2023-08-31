@@ -3,9 +3,11 @@
 <plist version="1.0">
 <dict>
 	<key>CLIENT_ID</key>
-	<string>287534834538-cjlslfh5rbcvtqp27b0tc1gl9b3lvucl.apps.googleusercontent.com</string>
+	<string>287534834538-djs8sl24sbc086lgcdkj8119oklmvkdu.apps.googleusercontent.com</string>
 	<key>REVERSED_CLIENT_ID</key>
-	<string>com.googleusercontent.apps.287534834538-cjlslfh5rbcvtqp27b0tc1gl9b3lvucl</string>
+	<string>com.googleusercontent.apps.287534834538-djs8sl24sbc086lgcdkj8119oklmvkdu</string>
+	<key>ANDROID_CLIENT_ID</key>
+	<string>287534834538-trumuc0ne7j1msve5ss7h23g3jojlat1.apps.googleusercontent.com</string>
 	<key>API_KEY</key>
 	<string>AIzaSyB0CICAs4mhcAwIfu2mIG_Yn-m-fgrgcpA</string>
 	<key>GCM_SENDER_ID</key>
@@ -13,7 +15,7 @@
 	<key>PLIST_VERSION</key>
 	<string>1</string>
 	<key>BUNDLE_ID</key>
-	<string>com.example.jollofradio</string>
+	<string>com.jollofradio.app</string>
 	<key>PROJECT_ID</key>
 	<string>jollofradio-92494</string>
 	<key>STORAGE_BUCKET</key>
@@ -29,12 +31,14 @@
 	<key>IS_SIGNIN_ENABLED</key>
 	<true></true>
 	<key>GOOGLE_APP_ID</key>
-	<string>1:287534834538:ios:dfe3318829de172bb2fb13</string>
+	<string>1:287534834538:ios:6ecae88deb584e6bb2fb13</string>
 	<key>DATABASE_URL</key>
 	<string>https://jollofradio-92494-default-rtdb.firebaseio.com</string>
 	
+
 	<!-- Backend Syncronization -->
 	<key>SERVER_CLIENT_ID</key>
-	<string>150332999856-k1ki4gp2l7qkcgsgtrus0pni2dg07erk.apps.googleusercontent.com</string>
+	<string>150332999856-1r27jhgf7l1vp579l6p7otq1gmiqo3md.apps.googleusercontent.com</string>
+
 </dict>
 </plist>

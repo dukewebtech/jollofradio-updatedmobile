@@ -44,10 +44,9 @@ class _PlayerState extends State<Player> {
 
   @override
   void initState() {
+    super.initState();
     user = Player.user;
     initPlayer ();
-    
-    super.initState();
   }
 
   @override
@@ -176,6 +175,7 @@ class _PlayerState extends State<Player> {
         if(!mounted) return;
         print('state rebuild fired!');
         setState(() {
+          firstrun = (true) ;
           this.track = track;
           this.playState = playState;
           isVisible = 

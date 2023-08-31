@@ -96,7 +96,6 @@ class _PodcastScreenState extends State<PodcastScreen> {
       .split('T')[0];
 
       return subDate == Date().format("yyyy-MM-dd"); //test date
-
     }).toList();
     */
 
@@ -215,21 +214,20 @@ class _PodcastScreenState extends State<PodcastScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      if(isLoading || podcasts['all']!.isEmpty)... [
+                      if(isLoading || podcasts['all']!.isEmpty) ...[
                         if(isLoading)
-                        PodcastShimmer(
-                          type: 'grid',
-                          length: 3
-                        )
+                          PodcastShimmer(
+                            type: 'grid',
+                            length: 3
+                          )
                         else
-                        Container(
-                          margin: EdgeInsets.only(
-                            left: width / 25
-                          ),
-                          child: const EmptyRecord(
-                            icon: Iconsax.music,
-                          ),
-                        )
+                          Container(
+                            width: width - 40,
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.music,
+                            ),
+                          )
                       ] 
                       else ...[
                         ...Factory(podcasts['all']!)
@@ -277,21 +275,20 @@ class _PodcastScreenState extends State<PodcastScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      if(isLoading || podcasts['pending']!.isEmpty)... [
+                      if(isLoading || podcasts['pending']!.isEmpty) ...[
                         if(isLoading)
-                        PodcastShimmer(
-                          type: 'grid',
-                          length: 3
-                        )
+                          PodcastShimmer(
+                            type: 'grid',
+                            length: 3
+                          )
                         else
-                        Container(
-                          margin: EdgeInsets.only(
-                            left: (width - 400) / 2
-                          ),
-                          child: const EmptyRecord(
-                            icon: Iconsax.music,
-                          ),
-                        )
+                          Container(
+                            width: width - 40,
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.music,
+                            ),
+                          )
                       ] 
                       else ...[
                         ...Factory(podcasts['pending']!)
@@ -339,21 +336,20 @@ class _PodcastScreenState extends State<PodcastScreen> {
                   child: Row(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: <Widget>[
-                      if(isLoading || podcasts['top']!.isEmpty)... [
+                      if(isLoading || podcasts['top']!.isEmpty) ...[
                         if(isLoading)
-                        PodcastShimmer(
-                          type: 'grid',
-                          length: 3
-                        )
+                          PodcastShimmer(
+                            type: 'grid',
+                            length: 3
+                          )
                         else
-                        Container(
-                          margin: EdgeInsets.only(
-                            left: (width - 400) / 2
-                          ),
-                          child: const EmptyRecord(
-                            icon: Iconsax.music,
-                          ),
-                        )
+                          Container(
+                            width: width - 40,
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.music,
+                            ),
+                          )
                       ] 
                       else ...[
                         ...Factory(podcasts['top']!)
@@ -424,7 +420,6 @@ class _PodcastScreenState extends State<PodcastScreen> {
                                 RouteGenerator.goto(CREATOR_PODCAST_NEW, {
                                   "type": "import",
                                   "callback": getPodcasts
-
                                 });
                               },
                               child: Container(
@@ -451,7 +446,6 @@ class _PodcastScreenState extends State<PodcastScreen> {
                                 RouteGenerator.goto(CREATOR_PODCAST_NEW, {
                                   "type": "create",
                                   "callback": getPodcasts
-                                  
                                 });
                               },
                               child: Container(

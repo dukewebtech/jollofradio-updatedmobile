@@ -7,11 +7,12 @@ class HomeController {
 
   static Future<Map> construct(Map model) async {
     Map streams = {
-      'recent': [],
       'latest': [],
       'trending': [],
-      'likes': [],
+      'toppick': [],
+      'podcast': [],
       'release': [],
+      'playlist': [],
     };
 
     // if (model.containsKey('data')){
@@ -26,15 +27,26 @@ class HomeController {
         streams['trending'].add(Episode.fromJson(episode));
 
       }
-      for(var podcast in data['release']){
+      for(var episode in data['toppick']){
 
-        streams['release'].add(Podcast.fromJson(podcast));
+        streams['toppick'].add(Episode.fromJson(episode));
 
       }
+      for(var podcast in data['podcast']){
+
+        streams['podcast'].add(Podcast.fromJson(podcast));
+
+      }
+      for(var episode in data['release']){
+
+        streams['release'].add(Episode.fromJson(episode));
+
+      }
+      streams['playlist'] = data['playlist']; //:: playlist
+
     // }
-
+    
     return streams;
-
   }
 
   static Future<Map> index([Map? query]) async {
@@ -46,28 +58,18 @@ class HomeController {
     Map streams = {
       'latest': [],
       'trending': [],
+      'toppick': [],
+      'podcast': [],
       'release': [],
+      'playlist': [],
     };
 
     if (request.containsKey('data')){
       dynamic data = request['data'];
 
-      for(var episode in data['latest']){
-
-        streams['latest'].add(Episode.fromJson(episode));
-
-      }
-      for(var episode in data['trending']){
-
-        streams['trending'].add(Episode.fromJson(episode));
-
-      }
-      for(var podcast in data['release']){
-
-        streams['release'].add(Podcast.fromJson(podcast));
-
-      }
+      streams = await construct(data);
     }
+
     return streams;
   }
 
@@ -85,6 +87,5 @@ class HomeController {
 
     return false;
   }
-
 
 }

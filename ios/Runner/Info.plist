@@ -5,7 +5,7 @@
 		<key>CFBundleDevelopmentRegion</key>
 		<string>$(DEVELOPMENT_LANGUAGE)</string>
 		<key>CFBundleDisplayName</key>
-		<string>Jollofradio</string>
+		<string>Jollof Radio</string>
 		<key>CFBundleExecutable</key>
 		<string>$(EXECUTABLE_NAME)</string>
 		<key>CFBundleIdentifier</key>
@@ -13,7 +13,7 @@
 		<key>CFBundleInfoDictionaryVersion</key>
 		<string>6.0</string>
 		<key>CFBundleName</key>
-		<string>jollofradio</string>
+		<string>Jollof Radio</string>
 		<key>CFBundlePackageType</key>
 		<string>APPL</string>
 		<key>CFBundleShortVersionString</key>
@@ -58,6 +58,7 @@
 			<key>NSAllowsArbitraryLoads</key>
 			<true/>
 		</dict>
+		
 		<!-- Google Sign-in Section -->
 		<key>CFBundleURLTypes</key>
 		<array>
@@ -69,7 +70,7 @@
 					<!-- TODO Replace this value: -->
 					<!-- Copied from GoogleService-Info.plist 
 					key REVERSED_CLIENT_ID -->
-					<string>com.googleusercontent.apps.287534834538-cjlslfh5rbcvtqp27b0tc1gl9b3lvucl</string>
+					<string>com.googleusercontent.apps.287534834538-djs8sl24sbc086lgcdkj8119oklmvkdu</string>
 				</array>
 			</dict>
 		</array>

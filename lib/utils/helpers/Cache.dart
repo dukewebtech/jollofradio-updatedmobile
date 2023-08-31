@@ -124,11 +124,11 @@ class CacheStream {
         }
 
         //stores data
-        Storage.set(
-          stream, json.encode(
-            data
-          )
-        );
+        // Storage.set(
+        //   stream, json.encode(
+        //     data
+        //   )
+        // );
         print("'$stream' mounted on the cache loader.");
 
       } catch(e) {

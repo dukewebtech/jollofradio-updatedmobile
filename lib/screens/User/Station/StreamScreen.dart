@@ -82,7 +82,7 @@ with SingleTickerProviderStateMixin {
 
       _colorTweenAnimation = _colorTween!.animate(  //////
         CurvedAnimation(
-            parent: _controller, 
+            parent: _controller,
             curve: Curves.easeIn
           )
       )..addListener(() {

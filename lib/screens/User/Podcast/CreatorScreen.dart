@@ -250,7 +250,7 @@ class _CreatorScreenState extends State<CreatorScreen> {
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: <Widget>[
                                     Text(
-                                      "$subscribers Subscribers", 
+                                      "$subscribers Followers", 
                                       style: TextStyle(
                                         fontSize: 15,
                                         color: Color(0XFF9A9FA3)

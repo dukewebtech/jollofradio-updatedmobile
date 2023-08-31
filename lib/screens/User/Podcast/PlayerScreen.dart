@@ -72,6 +72,8 @@ with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
+    super.initState();
+
     channel = widget.channel;       ///////////////////////
     track = widget.track;
     playlist = widget.playlist;
@@ -81,16 +83,16 @@ with SingleTickerProviderStateMixin {
       user = await auth();
       if(user == null){
         setState(() {
-         isLoading = false; 
+         isLoading = false;
         });
       }
 
-      if(await auth() != null && await isCreator()==false){
+      if(user != null && await isCreator(  )  ==  (false)){
         loggedIn = true;
         List playlist = user[
           'playlist'
         ] as List;
-        dropdown = playlist.map<String>( (e) => e['name'] )
+        dropdown = playlist.map<String> ((e)  => e['name'])
         .toList();
       }
     })();
@@ -107,8 +109,6 @@ with SingleTickerProviderStateMixin {
 
     getPodcast();
     _verifyPlayback();
-
-    super.initState();
   }
 
   Future<void> getEffects() async {
@@ -460,6 +460,7 @@ with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    controller.dispose();
     _controller.dispose();
     super.dispose();
   }

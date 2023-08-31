@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' hide SearchController;
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/SearchController.dart';

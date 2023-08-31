@@ -5,19 +5,18 @@ import 'package:jollofradio/config/strings/Endpoints.dart';
 
 class StreamController {
 
-  static Map streams = {
-    'recent': [],
-    'latest': [],
-    'trending': [],
-    'likes': [],
-    'library': [],
-    'toppick': [],
-    'podcast': [],
-    'release': [],
-  };
-
   static Future<Map> construct(Map model) async {
-    Map streams = StreamController.streams;
+    Map streams = {
+      'recent': [],
+      'latest': [],
+      'trending': [],
+      'likes': [],
+      'library': [],
+      'toppick': [],
+      'podcast': [],
+      'release': [],
+      'playlist': [],
+    };
 
     // if (model.containsKey('data')){
       dynamic data = model;
@@ -61,6 +60,7 @@ class StreamController {
         streams['release'].add(Episode.fromJson(episode));
 
       }
+      streams['playlist'] = data['playlist']; //:: playlist
     // }
 
     return streams;
@@ -72,7 +72,17 @@ class StreamController {
     );
         request = (request) as Map;
 
-    Map streams = StreamController.streams;
+    Map streams = {
+      'recent': [],
+      'latest': [],
+      'trending': [],
+      'likes': [],
+      'library': [],
+      'toppick': [],
+      'podcast': [],
+      'release': [],
+      'playlist': [],
+    };
 
     if (request.containsKey('data')){
       dynamic data = request['data'];

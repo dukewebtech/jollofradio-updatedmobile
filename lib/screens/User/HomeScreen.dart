@@ -2,6 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/models/Category.dart';
+import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/models/Test/PodcastFactory.dart';
 import 'package:jollofradio/config/models/User.dart';
 import 'package:jollofradio/config/routes/router.dart';
@@ -24,6 +25,7 @@ import 'package:jollofradio/utils/date.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/utils/helpers/Factory.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:jollofradio/widget/Shared.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
 import 'package:provider/provider.dart';
 
@@ -37,6 +39,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late User user;
+  List categories = [];
   List stations = [];
   Map streams = {
     'toppick': [],
@@ -45,6 +48,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'library': [],
     'podcast': [],
     'release': [],
+    'playlist': [],
   };
   bool isLoading = true;
   bool refresh = false;
@@ -90,9 +94,9 @@ class _HomeScreenState extends State<HomeScreen> {
         seconds: 20
       ));
 
-      fetchStreams() ;
-      fetchStation() ;
-
+      fetchStreams();
+      fetchStation();
+      
     }());
   }
 
@@ -158,7 +162,7 @@ class _HomeScreenState extends State<HomeScreen> {
     });
   }
 
-  Future<List<Category>> category() async {
+  Future<List<Category>> getCategory() async {
     final category = await cacheManager.stream( ///////////////
       'category', 
       fallback: () async {
@@ -170,7 +174,9 @@ class _HomeScreenState extends State<HomeScreen> {
         );
       }
     );
-    
+
+    categories = category;
+
     return category;
 
     /*
@@ -330,12 +336,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       GestureDetector(
                         onTap: () async {
                           RouteGenerator.goto(CATEGORY, {
-                            "categories": await category()
+                            "categories": categories
                           });
                         },
-                        child: Labels.secondary(
-                          "See All"
-                        ),
+                        child: Labels.secondary("See All"),
                       )
                     ],
                   ),
@@ -347,7 +351,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: /**/CrossAxisAlignment.start,
                       children: <Widget>[
                         FutureBuilder(
-                          future: category(),
+                          future: getCategory(),
                           builder: (context, snapshot) {
                             List<Category>? categories = snapshot.data;
                             if(!snapshot.hasData || 
@@ -390,9 +394,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             "episodes": streams['trending'] ?? []
                           });
                         },
-                        child: Labels.secondary(
-                          "See All"
-                        ),
+                        child: Labels.secondary("See All"),
                       )
                     ],
                   ),
@@ -402,37 +404,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading) ... [
+                        if(isLoading) ...[
                           PodcastShimmer(
                             type: 'list',
                             length: 3
                           )
                         ]
                         else
-                        if(stations.isEmpty) ... [
+                        if(streams['trending'].isEmpty) ...[
                           Container(
-                            alignment: Alignment.center,
                             width: width - 40,
-                            padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
-                            child: Column(
-                              children: <Widget>[
-                                Icon(
-                                  Iconsax.radar5,
-                                  size: 40,
-                                  color: Color(0XFF9A9FA3),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  Message.no_data,
-                                  style: TextStyle(
-                                    color: Color(0XFF9A9FA3),
-                                    fontSize: 14
-                                  ),
-                                  textAlign: TextAlign.center,
-                                )
-                              ],
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.music,
                             ),
                           )
                         ]
@@ -465,9 +449,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           LibraryScreen.page = 'Subscribed';
                           widget.tabController!(1);
                         },
-                        child: Labels.secondary(
-                          "See All"
-                        ),
+                        child: Labels.secondary("See All"),
                       )
                     ],
                   ),
@@ -478,12 +460,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading || streams['library'].isEmpty)... [
+                        if(isLoading) ...[
                           PodcastShimmer(
                             type: 'grid',
                             length: 3
                           )
                         ] 
+                        else
+                        if(streams['library'].isEmpty) ...[
+                          Container(
+                            width: width - 40,
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.menu_1,
+                            ),
+                          )
+                        ]
                         else ...[
                           ...Factory(streams['library'])
                           .get(0, 5).map(
@@ -512,9 +504,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           LibraryScreen.page = 'Liked';
                           widget.tabController!(1);
                         },
-                        child: Labels.secondary(
-                          "See All"
-                        ),
+                        child: Labels.secondary("See All"),
                       )
                     ],
                   ),
@@ -525,37 +515,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading) ... [
+                        if(isLoading) ...[
                           PodcastShimmer(
                             type: 'grid',
                             length: 3
                           )
                         ]
                         else
-                        if(streams['likes'].isEmpty) ... [
+                        if(streams['likes'].isEmpty) ...[
                           Container(
-                            alignment: Alignment.center,
                             width: width - 40,
-                            padding: EdgeInsets.fromLTRB(40, 20, 40, 10),
-                            child: Column(
-                              children: <Widget>[
-                                Icon(
-                                  Iconsax.heart,
-                                  size: 40,
-                                  color: Color(0XFF9A9FA3),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  Message.no_activity,
-                                  style: TextStyle(
-                                    color: Color(0XFF9A9FA3),
-                                    fontSize: 14
-                                  ),
-                                  textAlign: TextAlign.center,
-                                )
-                              ],
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.heart,
+                              message: Message.no_activity,
                             ),
                           )
                         ]
@@ -590,9 +563,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             "episodes": streams['toppick'] ?? []
                           });
                         },
-                        child: Labels.secondary(
-                          "See All"
-                        ),
+                        child: Labels.secondary("See All"),
                       )
                     ],
                   ),
@@ -603,12 +574,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading || streams['toppick'].isEmpty)... [
+                        if(isLoading)... [
                           PodcastShimmer(
                             type: 'grid',
                             length: 3
                           )
                         ] 
+                        else
+                        if(streams['toppick'].isEmpty) ...[
+                          Container(
+                            width: width - 40,
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.music,
+                            ),
+                          )
+                        ]
                         else ...[
                           ...Factory(streams['toppick'])
                           .get(0, 5).map(
@@ -649,37 +630,20 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading) ... [
+                        if(isLoading) ...[
                           PodcastShimmer(
                             type: 'list',
                             length: 3
                           )
                         ]
                         else
-                        if(stations.isEmpty) ... [
+                        if(stations.isEmpty) ...[
                           Container(
-                            alignment: Alignment.center,
                             width: width - 40,
-                            padding: EdgeInsets.fromLTRB(40, 20, 40, 40),
-                            child: Column(
-                              children: <Widget>[
-                                Icon(
-                                  Iconsax.radar5,
-                                  size: 40,
-                                  color: Color(0XFF9A9FA3),
-                                ),
-                                SizedBox(
-                                  height: 10,
-                                ),
-                                Text(
-                                  Message.no_data,
-                                  style: TextStyle(
-                                    color: Color(0XFF9A9FA3),
-                                    fontSize: 14
-                                  ),
-                                  textAlign: TextAlign.center,
-                                )
-                              ],
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.radar5,
+                              message: Message.no_data,
                             ),
                           )
                         ]
@@ -700,20 +664,18 @@ class _HomeScreenState extends State<HomeScreen> {
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       Labels.primary(
-                        "New on Jollof Radio",
+                        "New Podcasters",
                         fontSize: 18,
                         fontWeight: FontWeight.bold
                       ),
                       GestureDetector(
                         onTap: () {
                           RouteGenerator.goto(JOLLOF_LATEST, {
-                            "title": "New on Jollof Radio",
+                            "title": "New Podcasters",
                             "podcasts": streams['podcast'] ?? []
                           });
                         },
-                        child: Labels.secondary(
-                          "See All"
-                        ),
+                        child: Labels.secondary("See All"),
                       )
                     ],
                   ),
@@ -724,12 +686,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading || streams['podcast'].isEmpty)... [
+                        if(isLoading) ...[
                           PodcastShimmer(
                             type: 'grid',
                             length: 3
                           )
                         ] 
+                        else
+                        if(streams['podcast'].isEmpty) ...[
+                          Container(
+                            width: width - 40,
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.user,
+                            ),
+                          )
+                        ]
                         else ...[
                           ...Factory(streams['podcast'])
                           .get(0, 5).map(
@@ -760,9 +732,7 @@ class _HomeScreenState extends State<HomeScreen> {
                             "episodes": streams['release'] ?? []
                           });
                         },
-                        child: Labels.secondary(
-                          "See All"
-                        ),
+                        child: Labels.secondary("See All"),
                       )
                     ],
                   ),
@@ -773,12 +743,22 @@ class _HomeScreenState extends State<HomeScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
-                        if(isLoading || streams['release'].isEmpty)... [
+                        if(isLoading) ...[
                           PodcastShimmer(
                             type: 'grid',
                             length: 3
                           )
                         ] 
+                        else
+                        if(streams['release'].isEmpty) ...[
+                          Container(
+                            width: width - 40,
+                            alignment: Alignment.center,
+                            child: EmptyRecord(
+                              icon: Iconsax.music,
+                            ),
+                          )
+                        ]
                         else ...[
                           ...Factory(streams['release'])
                           .get(0, 5).map(
@@ -843,7 +823,63 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                SizedBox(height: 10),
+                if(streams['playlist'].isNotEmpty)
+                  ...streams['playlist'].entries.map((playlist) => Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(height: 20),
+                      SizedBox(
+                        height: 35,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Labels.primary(
+                              playlist.key,
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold
+                            ),
+                            GestureDetector(
+                              onTap: () {
+                                RouteGenerator.goto(NEW_RELEASE, {
+                                  "title": playlist.key,
+                                  "episodes": playlist.value['episodes'].map(
+                                    (e) => Episode.fromJson(e)).toList()
+                                });
+                              },
+                              child: Labels.secondary("See All"),
+                            )
+                          ],
+                        ),
+                      ),
+                      SizedBox(
+                        child: SingleChildScrollView(
+                          scrollDirection: Axis.horizontal,
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              if(playlist.value['episodes'].isEmpty)... [
+                                EmptyRecord()
+                              ] 
+                              else ...[
+                                ...Factory(playlist.value['episodes'])
+                                .get(0, 5).map(
+                                          (podcast) => /** */ PodcastTemplate(
+                                  type: 'grid',
+                                  episode: Episode.fromJson(
+                                    podcast
+                                  ),
+                                  podcasts: playlist.value['episodes'].map(
+                                    (e) => Episode.fromJson(e)).toList(   ),
+                                ))
+                              ]
+                            ],
+                          )
+                        )
+                      ),
+                    ],
+                  )).toList(),
+
+                SizedBox(height: 20),
               ],
             ),
           ),

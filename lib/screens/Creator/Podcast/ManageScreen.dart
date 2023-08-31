@@ -34,7 +34,7 @@ class ManageScreen extends StatefulWidget {
 class _ManageScreenState extends State<ManageScreen> {
   late Podcast podcast;
   AudioServiceHandler player = AudioServiceHandler();
-  late PlaybackState playerState;
+  PlaybackState? playerState;
   bool isLoading = true;
   List<MediaItem> tracks = [];
   MediaItem? currentTrack;
@@ -62,12 +62,22 @@ class _ManageScreenState extends State<ManageScreen> {
 
   Future<void> initPlayer() async {
     audioHandler.playbackState.listen((PlaybackState state) {
-      playerState = state;
       currentTrack = player.currentTrack();  //updating track
 
-      if(mounted) {
-        setState(() {});
+      if(state.processingState 
+      != playerState?.processingState){
+
+        playerState = state;
+        /*
+        Toaster.info("Audio state remounted! tracking ttl.");
+        */
+        
+        if(mounted) {
+          setState(() {});
+        }
+        
       }
+
     });
   }
 
@@ -75,7 +85,7 @@ class _ManageScreenState extends State<ManageScreen> {
     String episodeId = episode.id.toString();//fetch track id
 
     if(currentTrack?.id == episodeId){
-      if(playerState.playing == true){
+      if(playerState?.playing== true){
         return true;
       }
     }
