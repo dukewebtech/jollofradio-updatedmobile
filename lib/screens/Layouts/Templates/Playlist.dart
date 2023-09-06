@@ -38,40 +38,34 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
   final Map<bool, Map> popup = {
     true: <String, dynamic>{
       'Unsubscribe': (playlist, cb) async {
-
         cb(playlist);
-
         return await SubscriptionController.delete({
           'podcast_id': playlist.id
         });
-
       }
     },
+    
     false: <String, dynamic>{
       // /*
       'View Playlist': (playlist, cb) async {
-
         Future((){
           cb(playlist, {
             'redirect': PLAYLIST_TRACK
           });
         });
-        
       },
-      'Edit Playlist': (playlist, cb) async {
 
+      'Edit Playlist': (playlist, cb) async {
         cb(playlist, {
           "edit": true
         });
-
       },
+
       // */
       'Delete Playlist': (playlist, cb) async {
-
         cb(playlist, {
           "sync": true
         });
-
       }
     }
   };
@@ -133,6 +127,8 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
               child: Stack(
                 children: <Widget>[
                   CachedNetworkImage(
+                    memCacheWidth: 200,
+                    memCacheHeight: 200,
                     width: double.infinity,
                     height: compact ? 120 : 130,
                     imageUrl: widget.playlist.logo,
@@ -140,6 +136,8 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                       return Image.asset(
                         'assets/images/loader.png',
                         fit: BoxFit.cover,
+                        cacheWidth: 140,
+                        cacheHeight: 120,
                       );
                     },
                     errorWidget: (context, url, error) => Icon(
@@ -189,11 +187,13 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                   PopupMenuButton(
                     color: AppColor.primary,
                     onSelected: (index) {
+
                       /*
                       var action = popup[isPodcast]!.firstWhere((e)
                       =>e.keys.first==index);
                       action[index]();
                       */
+
                     },
                     itemBuilder: (context) {
                       return 

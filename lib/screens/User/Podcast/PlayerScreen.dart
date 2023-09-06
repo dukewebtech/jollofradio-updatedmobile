@@ -47,6 +47,7 @@ class _PlayerScreenState extends State<PlayerScreen>
 with SingleTickerProviderStateMixin {
   bool isLoading = true;
   late AnimationController _controller;
+  StreamSubscription? playerStream;
   ColorTween? _colorTween;
   Animation<Color?>? _colorTweenAnimation;
   Color defaultColor = AppColor.primary;
@@ -73,7 +74,6 @@ with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-
     channel = widget.channel;       ///////////////////////
     track = widget.track;
     playlist = widget.playlist;
@@ -115,7 +115,7 @@ with SingleTickerProviderStateMixin {
     var logo = track.logo;
     Colorly().fromNetwork().get(logo).then((colors) async {
       _colorTween = ColorTween(
-        begin: defaultColor, 
+        begin: defaultColor,
         end: colors['primary']
       );
 
@@ -215,6 +215,7 @@ with SingleTickerProviderStateMixin {
     currentIndex = tracks.indexWhere( (i)=> // fetch index!
     i.id == track.id.toString());
 
+    if(mounted)
     setState(() {
       //
     });
@@ -239,14 +240,26 @@ with SingleTickerProviderStateMixin {
       setState(() => isLoading = true) ; // inform UI state
       */
 
-      //mount playlist
-      await player.stop();
-      await player.setPlaylist(tracks);
+      //mount 
+      try {
+        await player.stop();
+        await player.setPlaylist(tracks);
+        await player.skipToQueueItem (  //skip to the track
+          currentIndex
+        );
+        player.play();
 
-      await player.skipToQueueItem (    //skip to the track
-        currentIndex
-      );
-      player.play();
+      }  
+      catch(error) {
+
+        player.stop();
+
+        print(error);
+        Toaster.error(
+          "We're having issues playing the track right now."
+        );
+
+      }
 
       /*
       await player.setPlaylist([
@@ -289,14 +302,19 @@ with SingleTickerProviderStateMixin {
     
     }
 
-    player.streams().listen((dynamic event) {
+    playerStream = player.streams().listen((dynamic event) {
       final MediaItem? currentTrack = player.currentTrack();
-      if(mounted) {
-        setState(() {
-          track = Episode.fromJson(
-            currentTrack?.extras!['episode']
-          );
+      final episode = Episode.fromJson(
+        currentTrack?.extras!['episode']
+      );
 
+      if(track.id != episode.id) {
+        /*
+        print('mounting for track: '+episode.id.toString());
+        */
+        if(mounted)
+        setState(() {
+          track = episode;
           currentIndex = tracks.indexOf(
             currentTrack!
           );
@@ -460,6 +478,7 @@ with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    playerStream?.cancel();
     controller.dispose();
     _controller.dispose();
     super.dispose();
@@ -476,11 +495,9 @@ with SingleTickerProviderStateMixin {
       direction: DismissiblePageDismissDirection.down,
       backgroundColor: _colorTweenAnimation == (null) 
         ? defaultColor : _colorTweenAnimation!.value!,
-      
       // dismissThresholds: {
       //   DismissiblePageDismissDirection.down: .2,
       // },
-
       child: AnimatedBuilder(
         animation: _controller,
         builder: (context, snapshot) {
@@ -548,6 +565,8 @@ with SingleTickerProviderStateMixin {
                               alignment: Alignment.center,
                               children: [
                                 CachedNetworkImage(
+                                  // memCacheWidth: 320,
+                                  // memCacheHeight: 320,
                                   imageUrl: track.logo,
                                   placeholder: (context, url) {
                                     return Image.asset(

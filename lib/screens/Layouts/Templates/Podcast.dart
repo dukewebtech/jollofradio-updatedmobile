@@ -183,7 +183,6 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
         }
         Toaster.info("Error occurred! please try again");
       });
-      
       return;
     }
 
@@ -249,11 +248,15 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                     CachedNetworkImage(
                       width: double.infinity,
                       height: widget.compact ? 130 : 120,
+                      memCacheWidth: 200,
+                      memCacheHeight: 200,
                       imageUrl: episode.logo,
                       placeholder: (context, url) {
                         return Image.asset(
                           'assets/images/loader.png',
                           fit: BoxFit.cover,
+                          cacheWidth: 120,
+                          cacheHeight: 120,
                         );
                       },
                       errorWidget: (context, url, error) =>  Icon(
@@ -341,11 +344,15 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                 ),
                 clipBehavior: Clip.hardEdge,
                 child: CachedNetworkImage(
+                  memCacheWidth: 150,
+                  memCacheHeight: 100,
                   imageUrl: episode.logo,
                   placeholder: (context, url) {
                     return Image.asset(
                       'assets/images/loader.png',
                       fit: BoxFit.cover,
+                      cacheWidth: 150,
+                      cacheHeight: 100,
                     );
                   },
                   errorWidget: (context, url, error) =>  Icon(
@@ -628,11 +635,15 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                   ),
                   clipBehavior: Clip.hardEdge,
                   child: CachedNetworkImage(
+                    memCacheWidth: 100,
+                    memCacheHeight: 100,
                     imageUrl: episode.logo,
                     placeholder: (context, url) {
                       return Image.asset(
                         'assets/images/loader.png',
                         fit: BoxFit.cover,
+                        cacheWidth: 100,
+                        cacheHeight: 100,
                       );
                     },
                     errorWidget: (context, url, error) =>  Icon(
@@ -712,6 +723,5 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
 
     //:layout == 'SLIM //
       return Container();
-      
   }
 }

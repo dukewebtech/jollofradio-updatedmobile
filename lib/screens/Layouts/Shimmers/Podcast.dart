@@ -22,6 +22,8 @@ class PodcastShimmer extends StatelessWidget {
           baseColor: AppColor.primary,
           highlightColor: Color(0XFF0D1921),
           child: ListView.builder(
+            addAutomaticKeepAlives: false,
+            addRepaintBoundaries: false,
             scrollDirection: Axis.horizontal,
             shrinkWrap: true,
             itemCount: length,
@@ -95,6 +97,8 @@ class PodcastShimmer extends StatelessWidget {
         baseColor: AppColor.primary,
         highlightColor: Color(0XFF0D1921),
         child: ListView.builder(
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
           shrinkWrap: true,
           itemCount: length,
           itemBuilder: (context, index) {

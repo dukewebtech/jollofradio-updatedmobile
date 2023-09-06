@@ -20,6 +20,8 @@ class CategoryShimmer extends StatelessWidget {
         baseColor: AppColor.primary,
         highlightColor: Color(0XFF0D1921),
         child: ListView.builder(
+          addAutomaticKeepAlives: false,
+          addRepaintBoundaries: false,
           scrollDirection: Axis.horizontal,
           shrinkWrap: true,
           itemCount: length,

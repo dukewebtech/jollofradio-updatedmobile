@@ -88,9 +88,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
+    debugInvertOversizedImages = true;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'Jollof radio',
+      title: 'Jollof Radio',
       theme: Stylesheet.lightTheme(),
       initialRoute: SPLASH,
       navigatorKey: navigator,
@@ -104,7 +105,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           data: MediaQuery.of(context).copyWith(textScaleFactor: scaleSize),
           child: child!,
         );
-        
       },
     );
   }

@@ -45,11 +45,15 @@ class _RadioTemplateState extends State<RadioTemplate> {
       stations = stations ?? [];
 
       if(!_fav){
+
         stations.add(station.toJson());
+
       }
       else{
         stations.removeWhere((item){
+
           return item['title'] == station.title; //select
+
         });
 
         if(widget.callback != (null)) {
@@ -111,11 +115,15 @@ class _RadioTemplateState extends State<RadioTemplate> {
               ),
               clipBehavior: Clip.hardEdge,
               child: CachedNetworkImage(
+                  memCacheWidth: 150,
+                  memCacheHeight: 100,
                 imageUrl: station.logo,
                 placeholder: (context, url) {
                   return Image.asset(
                     'assets/images/loader.png',
                     fit: BoxFit.cover,
+                    cacheWidth: 150,
+                    cacheHeight: 100,
                   );
                 },
                 errorWidget: (context, url, error) =>  Icon(
@@ -189,13 +197,11 @@ class _RadioTemplateState extends State<RadioTemplate> {
                                   ),
                                   GestureDetector(
                                     onTap: () async {
-
                                       await Share.share(
                                         shareLink(
                                           type: 'station', data: station
                                         )
                                       );
-                                      
                                     },
                                     child: Icon(
                                       FontAwesomeIcons.share, 

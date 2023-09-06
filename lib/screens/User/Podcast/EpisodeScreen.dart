@@ -67,7 +67,13 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
 
   Future<void> initPlayer() async {
     audioHandler.playbackState.listen((PlaybackState state) {
-      currentTrack = player.currentTrack();  //updating track
+      var track = player.currentTrack(); //updating new track
+      if( track != currentTrack){
+        if(mounted)
+        setState(() {
+          currentTrack = track;
+        });
+      }
 
       if(state.processingState 
       != playerState?.processingState){
@@ -76,13 +82,11 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
         /*
         Toaster.info("Audio state remounted! tracking ttl.");
         */
-        
         if(mounted) {
           setState(() {});
         }
         
       }
-
     });
   }
 
@@ -255,11 +259,15 @@ class _EpisodeScreenState extends State<EpisodeScreen> {
                           fit: BoxFit.cover,
                         ) :
                         CachedNetworkImage(
+                          memCacheWidth: 300,
+                          memCacheHeight: 200,
                           imageUrl: podcast.logo,
                           placeholder: (context, url) {
                             return Image.asset(
                               'assets/images/loader.png',
                               fit: BoxFit.cover,
+                              cacheWidth: 300,
+                              cacheHeight: 200,
                             );
                           },
                           imageBuilder: (context, imageProvider) {

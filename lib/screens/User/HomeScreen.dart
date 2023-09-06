@@ -823,8 +823,8 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                 ),
-                if(streams['playlist'].isNotEmpty)
-                  ...streams['playlist'].entries.map((playlist) => Column(
+                if(!isLoading && streams['playlist'].isNotEmpty)
+                  ...streams['playlist'].entries.map( (playlist) => Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       SizedBox(height: 20),

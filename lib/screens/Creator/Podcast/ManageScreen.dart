@@ -62,7 +62,13 @@ class _ManageScreenState extends State<ManageScreen> {
 
   Future<void> initPlayer() async {
     audioHandler.playbackState.listen((PlaybackState state) {
-      currentTrack = player.currentTrack();  //updating track
+      var track = player.currentTrack(); //updating new track
+      if( track != currentTrack){
+        if(mounted)
+        setState(() {
+          currentTrack = track;
+        });
+      }
 
       if(state.processingState 
       != playerState?.processingState){
@@ -71,13 +77,11 @@ class _ManageScreenState extends State<ManageScreen> {
         /*
         Toaster.info("Audio state remounted! tracking ttl.");
         */
-        
         if(mounted) {
           setState(() {});
         }
         
       }
-
     });
   }
 
@@ -169,6 +173,7 @@ class _ManageScreenState extends State<ManageScreen> {
           });
         }
       );
+      
     }
   }
 

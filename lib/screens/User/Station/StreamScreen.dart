@@ -9,8 +9,8 @@ import 'package:jollofradio/config/models/Station.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
-import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/config/services/controllers/StationController.dart';
+import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/utils/helper.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
@@ -39,6 +39,7 @@ class StreamScreen extends StatefulWidget {
 class _StreamScreenState extends State<StreamScreen> 
 with SingleTickerProviderStateMixin {
   late AnimationController _controller;
+  StreamSubscription? playerStream;
   ColorTween? _colorTween;
   Animation<Color?>? _colorTweenAnimation;
   Color defaultColor = AppColor.primary;
@@ -53,6 +54,7 @@ with SingleTickerProviderStateMixin {
 
   @override
   void initState() {
+    super.initState();
     channel = widget.channel;       ///////////////////////
     radio = widget.radio;
 
@@ -68,8 +70,6 @@ with SingleTickerProviderStateMixin {
 
     syncAllStations();
     initializeRadio();
-
-    super.initState();
   }
 
   Future<void> getEffects() async {
@@ -167,11 +167,20 @@ with SingleTickerProviderStateMixin {
       });
     }
 
-    player.streams().listen((dynamic event) {
+    playerStream = player.streams().listen((dynamic event) {
       final MediaItem? currentTrack = player.currentTrack();
-      if(mounted) {
+      final station = Station.fromJson(
+        currentTrack?.extras!['station']
+      );
+
+      if(radio.id != station.id) {
+        /*
+        print('mounting for radio: '+station.id.toString());
+        */
+        if(mounted)
         setState(() {
-          if(_tuning) return;
+          if(_tuning==true) return;
+
           radio = Station.fromJson(
             currentTrack?.extras!['station']
           );     
@@ -186,6 +195,7 @@ with SingleTickerProviderStateMixin {
 
   @override
   void dispose() {
+    playerStream?.cancel();
     _controller.dispose();
     super.dispose();
   }

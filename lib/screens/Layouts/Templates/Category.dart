@@ -48,13 +48,18 @@ class CategoryTemplate extends StatelessWidget {
             CachedNetworkImage(
               width: double.infinity,
               height: double.infinity,
+              memCacheWidth: 200,
+              memCacheHeight: 200,
               imageUrl: category.logo,
               placeholder: (context, url) {
                 return Image.asset(
                   'assets/images/loader.png',
                   fit: BoxFit.cover,
+                  cacheWidth: 150,
+                  cacheHeight: 125,
                 );
               },
+              /*
               imageBuilder: (context, imageProvider) {
                 return FadeIn(
                   child: Image(
@@ -63,6 +68,7 @@ class CategoryTemplate extends StatelessWidget {
                   ),
                 );
               },
+              */
               errorWidget: (context, url, error) =>  Icon(
                 Icons.error
               ),
@@ -79,22 +85,17 @@ class CategoryTemplate extends StatelessWidget {
                   return SizedBox.shrink();
 
                 /*
-
                 Map colors = snapshot.data!;
-                
                 */
-    
                 return SizedBox(
                   child: Container(
                     width: double.infinity,
                     height: 40,
                     padding: EdgeInsets.all(10),
                     decoration: BoxDecoration(
-
                       /*
                       color: colors['vibrantDark'].withOpacity(0.5),
                       */
-                      
                       color: Colors.black.withOpacity(.25),
                       borderRadius: BorderRadius.only(
                         bottomLeft: Radius.circular(0),
@@ -109,7 +110,6 @@ class CategoryTemplate extends StatelessWidget {
                     ),
                   ),
                 );
-                
               }
             ),
           ],

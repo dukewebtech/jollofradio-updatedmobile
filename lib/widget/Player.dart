@@ -94,6 +94,7 @@ class _PlayerState extends State<Player> {
               milliseconds: track['duration']  ////
             );
           }
+
           return MediaItem(
             id: episode.id.toString(),
             title: episode.title,
@@ -108,6 +109,7 @@ class _PlayerState extends State<Player> {
               "episode": episode.toJson()
             }
           );
+          
         }).toList());
 
         ///////////////////////////////////////////
@@ -256,6 +258,8 @@ class _PlayerState extends State<Player> {
                         color: Color(0XFF0D1921),
                         margin: EdgeInsets.only(right: 10),
                         child: CachedNetworkImage(
+                          memCacheWidth: 60,
+                          memCacheHeight: 50,
                           width: double.infinity,
                           height: double.infinity,
                           imageUrl: track?.logo ?? '-',

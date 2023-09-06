@@ -18,6 +18,8 @@ class PlaylistShimmer extends StatelessWidget {
 
     if(type == 'recent'){
       return ListView.builder(
+        addAutomaticKeepAlives: false,
+        addRepaintBoundaries: false,
         scrollDirection: Axis.horizontal,
         shrinkWrap: true,
         itemCount: length,
@@ -73,5 +75,6 @@ class PlaylistShimmer extends StatelessWidget {
     }
 
     return Placeholder();
+    
   }
 }
