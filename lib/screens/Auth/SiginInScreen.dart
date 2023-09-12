@@ -29,11 +29,22 @@ class _SiginInScreenState extends State<SiginInScreen> {
   bool isLoading = false;
   bool showPassword = false;
   bool social = false;
-  String userType = "";
+  String userType = "user";
   final TextEditingController email = TextEditingController();
   final TextEditingController password = TextEditingController();
   GoogleSigninAuth googleSignIn = GoogleSigninAuth();
   String? token;
+  Map mode = {
+    true: {
+      "bg": AppColor.secondary,
+      "text": Colors.black
+    },
+    false: {
+      "bg": Color(0XFF0D1921),
+      "text": Colors.white
+    },
+  };
+
 
   @override
   void initState() {
@@ -178,6 +189,9 @@ class _SiginInScreenState extends State<SiginInScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: unnecessary_cast
+    double width = MediaQuery.of(context).size.width as double;
+
     return Scaffold(
       appBar: null,
       body: SingleChildScrollView(
@@ -210,6 +224,60 @@ class _SiginInScreenState extends State<SiginInScreen> {
                 ],
               ),
               SizedBox(height: 40),
+              Container(
+                margin: EdgeInsets.only(
+                  bottom: 20
+                ),
+                width: width - 60,
+                child: Row(
+                  mainAxisAlignment: 
+                                MainAxisAlignment.spaceBetween,
+                  children: <Widget>[
+                    SizedBox(
+                      width: (width - 60) / 2.1,
+                      height: 40,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: mode[userType == 'user']['bg']
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            userType = 'user';
+                          });
+                        },
+                        child: Text(
+                          "Login As User", style: /**/TextStyle(
+                            color: mode[
+                              userType == 'user'
+                            ]['text']
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(
+                      width: (width - 60) / 2.1,
+                      height: 40,
+                      child: TextButton(
+                        style: TextButton.styleFrom(
+                          backgroundColor: mode[userType != 'user']['bg']
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            userType = 'creator';
+                          });
+                        },
+                        child: Text(
+                          "Login As Creator", style: /**/TextStyle(
+                            color: mode[
+                              userType != 'user'
+                            ]['text']
+                          ),
+                        ),
+                      ),
+                    )
+                  ],
+                ),
+              ),
               Labels.primary("Email Address, Username"),
               Input.primary(
                 "",
@@ -245,6 +313,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
                   ],
                 ),
               ),
+              /*
               Row(
                 children: <Widget>[
                    Labels.primary("Signin as:"),
@@ -294,6 +363,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
                    )
                 ],
               ),
+              */
               SizedBox(height: 20),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,

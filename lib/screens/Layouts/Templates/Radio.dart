@@ -73,7 +73,7 @@ class _RadioTemplateState extends State<RadioTemplate> {
     });
   }
 
-  Future<dynamic> getFavorites() async {    
+  Future<dynamic> getFavorites() async {
     await Storage.get('favRadio',Map).then((stations)  {
       if(stations == null)
         return;
@@ -90,20 +90,20 @@ class _RadioTemplateState extends State<RadioTemplate> {
   Widget build(BuildContext context) {
     double width = MediaQuery.of(context).size.width;
       
-    return Container(
-      width: double.infinity,
-      height: 80,
-      padding: EdgeInsets.all(5),
-      margin: EdgeInsets.only(bottom: 10),
-      decoration: BoxDecoration(
-        color: Color(0XFF12222D),
-        borderRadius: BorderRadius.circular(5)
-      ),
-      child: GestureDetector(
-        onTap: () => RouteGenerator.goto(RADIO_PLAYER, {
-          "radio": station,
-          "channel": "station"
-        }),
+    return GestureDetector(
+      onTap: () => RouteGenerator.goto(RADIO_PLAYER, {
+        "radio": station,
+        "channel": "station"
+      }),
+      child: Container(
+        width: double.infinity,
+        height: 80,
+        padding: EdgeInsets.all(5),
+        margin: EdgeInsets.only(bottom: 10),
+        decoration: BoxDecoration(
+          color: Color(0XFF12222D),
+          borderRadius: BorderRadius.circular(5)
+        ),
         child: Row(
           children: <Widget>[
             Container(
@@ -116,14 +116,14 @@ class _RadioTemplateState extends State<RadioTemplate> {
               clipBehavior: Clip.hardEdge,
               child: CachedNetworkImage(
                   memCacheWidth: 150,
-                  memCacheHeight: 100,
+                  memCacheHeight: 150,
                 imageUrl: station.logo,
                 placeholder: (context, url) {
                   return Image.asset(
                     'assets/images/loader.png',
                     fit: BoxFit.cover,
                     cacheWidth: 150,
-                    cacheHeight: 100,
+                    cacheHeight: 150,
                   );
                 },
                 errorWidget: (context, url, error) =>  Icon(

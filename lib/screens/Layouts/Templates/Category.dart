@@ -48,15 +48,15 @@ class CategoryTemplate extends StatelessWidget {
             CachedNetworkImage(
               width: double.infinity,
               height: double.infinity,
-              memCacheWidth: 200,
-              memCacheHeight: 200,
+              memCacheWidth: 300,
+              memCacheHeight: 300,
               imageUrl: category.logo,
               placeholder: (context, url) {
                 return Image.asset(
                   'assets/images/loader.png',
                   fit: BoxFit.cover,
                   cacheWidth: 150,
-                  cacheHeight: 125,
+                  cacheHeight: 150,
                 );
               },
               /*

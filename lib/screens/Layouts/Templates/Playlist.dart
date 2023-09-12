@@ -127,8 +127,8 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
               child: Stack(
                 children: <Widget>[
                   CachedNetworkImage(
-                    memCacheWidth: 200,
-                    memCacheHeight: 200,
+                    memCacheWidth: 300,
+                    memCacheHeight: 300,
                     width: double.infinity,
                     height: compact ? 120 : 130,
                     imageUrl: widget.playlist.logo,
@@ -136,8 +136,8 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                       return Image.asset(
                         'assets/images/loader.png',
                         fit: BoxFit.cover,
-                        cacheWidth: 140,
-                        cacheHeight: 120,
+                        cacheWidth: 150,
+                        cacheHeight: 150,
                       );
                     },
                     errorWidget: (context, url, error) => Icon(

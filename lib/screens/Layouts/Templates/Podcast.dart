@@ -248,15 +248,15 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                     CachedNetworkImage(
                       width: double.infinity,
                       height: widget.compact ? 130 : 120,
-                      memCacheWidth: 200,
-                      memCacheHeight: 200,
+                      memCacheWidth: 300,
+                      memCacheHeight: 300,
                       imageUrl: episode.logo,
                       placeholder: (context, url) {
                         return Image.asset(
                           'assets/images/loader.png',
                           fit: BoxFit.cover,
-                          cacheWidth: 120,
-                          cacheHeight: 120,
+                          cacheWidth: 150,
+                          cacheHeight: 150,
                         );
                       },
                       errorWidget: (context, url, error) =>  Icon(
@@ -345,14 +345,14 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                 clipBehavior: Clip.hardEdge,
                 child: CachedNetworkImage(
                   memCacheWidth: 150,
-                  memCacheHeight: 100,
+                  memCacheHeight: 150,
                   imageUrl: episode.logo,
                   placeholder: (context, url) {
                     return Image.asset(
                       'assets/images/loader.png',
                       fit: BoxFit.cover,
                       cacheWidth: 150,
-                      cacheHeight: 100,
+                      cacheHeight: 150,
                     );
                   },
                   errorWidget: (context, url, error) =>  Icon(
@@ -635,15 +635,15 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                   ),
                   clipBehavior: Clip.hardEdge,
                   child: CachedNetworkImage(
-                    memCacheWidth: 100,
-                    memCacheHeight: 100,
+                    memCacheWidth: 150,
+                    memCacheHeight: 150,
                     imageUrl: episode.logo,
                     placeholder: (context, url) {
                       return Image.asset(
                         'assets/images/loader.png',
                         fit: BoxFit.cover,
-                        cacheWidth: 100,
-                        cacheHeight: 100,
+                        cacheWidth: 150,
+                        cacheHeight: 150,
                       );
                     },
                     errorWidget: (context, url, error) =>  Icon(
