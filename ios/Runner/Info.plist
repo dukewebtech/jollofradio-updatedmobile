@@ -58,6 +58,8 @@
 			<key>NSAllowsArbitraryLoads</key>
 			<true/>
 		</dict>
+		<key>NSFaceIDUsageDescription</key>
+		<string>$(PRODUCT_NAME) Authentication with TouchId or FaceID</string>
 		
 		<!-- Google Sign-in Section -->
 		<key>CFBundleURLTypes</key>
