@@ -12,7 +12,7 @@ class RouteGenerator {
     );
   }
 
-   static goto(String route, [Map ?parameters]){
+  static goto(String route, [Map ?parameters]){
     var args = parameters ?? {};
     /*
     return Navigator.of( context ).pushNamed( // initial routing style

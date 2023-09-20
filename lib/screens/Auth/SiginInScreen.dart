@@ -159,7 +159,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
         'playlist',
         'statistics',
         '_podcasts',
-        'subscribers',
+        'subscribers',  
       });
 
       final user = Provider

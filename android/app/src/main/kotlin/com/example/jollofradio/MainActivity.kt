@@ -1,4 +1,4 @@
-package com.jollofradio.app
+package com.dukewebtech.jollofradio
 
 import io.flutter.embedding.android.FlutterActivity
 
