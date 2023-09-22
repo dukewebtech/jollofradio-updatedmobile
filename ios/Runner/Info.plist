@@ -60,7 +60,14 @@
 		</dict>
 		<key>NSFaceIDUsageDescription</key>
 		<string>$(PRODUCT_NAME) Authentication with TouchId or FaceID</string>
+		<key>NSCameraUsageDescription</key>
+		<string>Allow access to the camera for capturing photos and uploading image to your account.</string>
+		<key>NSMicrophoneUsageDescription</key>
+		<string>Used to capture audio for image picker plugin.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>Allow photo access to add photo to your profile and uploading image to your account.</string>
 		
+
 		<!-- Google Sign-in Section -->
 		<key>CFBundleURLTypes</key>
 		<array>
@@ -77,5 +84,6 @@
 			</dict>
 		</array>
 		<!-- End of the Google Sign-in Section -->
+
 	</dict>
 </plist>
