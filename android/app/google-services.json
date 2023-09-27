@@ -1,41 +1,58 @@
 {
   "project_info": {
-    "project_number": "287534834538",
-    "firebase_url": "https://jollofradio-92494-default-rtdb.firebaseio.com",
-    "project_id": "jollofradio-92494",
-    "storage_bucket": "jollofradio-92494.appspot.com"
+    "project_number": "150332999856",
+    "firebase_url": "https://jollofradio-default-rtdb.firebaseio.com",
+    "project_id": "jollofradio",
+    "storage_bucket": "jollofradio.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:287534834538:android:2d2b4428a988a80fb2fb13",
+        "mobilesdk_app_id": "1:150332999856:android:fa0a3f82d45e73aa459375",
         "android_client_info": {
           "package_name": "com.dukewebtech.jollofradio"
         }
       },
       "oauth_client": [
         {
-          "client_id": "287534834538-287bj54akp8uqkqcgjq88vqr412ulspj.apps.googleusercontent.com",
+          "client_id": "150332999856-9b0v15824ddie8a7ln53vj6r00i12r97.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dukewebtech.jollofradio",
+            "certificate_hash": "42551db636e1f45de3380c9f176798cb6a3345a3"
+          }
+        },
+        {
+          "client_id": "150332999856-met3isuhlbctg6srurc1sh53oo9m1aot.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.dukewebtech.jollofradio",
+            "certificate_hash": "618fb1ccd8a14ce014671963bd8b3894a378c5c9"
+          }
+        },
+        {
+          "client_id": "150332999856-cr3k4q8haqrfvhetpitushuudl86urbo.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyDcprtM72bodku2XAS4H7avGYBw6Y2qRjI"
+          "current_key": "AIzaSyA7kZLFEgGsfBL8BVPqOIHF_qLExXGv7HM"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "287534834538-287bj54akp8uqkqcgjq88vqr412ulspj.apps.googleusercontent.com",
+              "client_id": "150332999856-1r27jhgf7l1vp579l6p7otq1gmiqo3md.apps.googleusercontent.com",
               "client_type": 3
             },
             {
-              "client_id": "287534834538-cjlslfh5rbcvtqp27b0tc1gl9b3lvucl.apps.googleusercontent.com",
+              "client_id": "150332999856-00ctcpphbr10jk0ehgt0ekj8eaq9aphf.apps.googleusercontent.com",
               "client_type": 2,
               "ios_info": {
-                "bundle_id": "com.example.jollofradio"
+                "bundle_id": "com.dukewebtech.jollofradio",
+                "app_store_id": "1473841302"
               }
             }
           ]
