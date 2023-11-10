@@ -4,7 +4,12 @@ import 'package:jollofradio/widget/Buttons.dart';
 
 class NotificationScreen extends StatefulWidget {
   final dynamic user;
-  const NotificationScreen({super.key, required this.user});
+  final dynamic callback;
+  const NotificationScreen({
+    super.key, 
+    required this.user,
+    required this.callback
+  });
 
   @override
   State<NotificationScreen> createState() => _NotificationScreenState();
@@ -38,7 +43,11 @@ class _NotificationScreenState extends State<NotificationScreen> {
           child: Column(
             children: [
               ...user.notifications.map((notification) {
-                return NotificationTemplate(notification);
+                return NotificationTemplate(
+                  notification,
+                  user,
+                  widget.callback
+                );
 
               }).toList()
             ],

@@ -216,6 +216,11 @@ class _AccountScreenState extends State<AccountScreen> {
       ? 'creator' : 'user'
     };
 
+    if(mode == 'security'){
+      if(password.text.isEmpty||confPassword.text.isEmpty)
+        return;
+    }
+
     setState(() {
       isSaving = true;
     });

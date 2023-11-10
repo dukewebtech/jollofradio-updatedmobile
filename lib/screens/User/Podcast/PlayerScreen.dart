@@ -17,6 +17,7 @@ import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/utils/helper.dart';
+import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/utils/scope.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
@@ -260,7 +261,6 @@ with SingleTickerProviderStateMixin {
         );
 
       }
-
       /*
       await player.setPlaylist([
         MediaItem(
@@ -464,6 +464,17 @@ with SingleTickerProviderStateMixin {
     await PlaylistController.create(data).then((created) 
     async{
       setState(() => isSaving = false);
+
+      //reload cache
+      CacheStream().mount({
+        'playlist': {
+          'data': () async {
+            return /**/await PlaylistController.index();
+          },
+          'rules': (data) => data.isNotEmpty,
+        }
+      }, null);
+
       if(!created){
         Toaster.error(
           "Oops! while saving playlist, please try again"
@@ -565,8 +576,6 @@ with SingleTickerProviderStateMixin {
                               alignment: Alignment.center,
                               children: [
                                 CachedNetworkImage(
-                                  // memCacheWidth: 320,
-                                  // memCacheHeight: 320,
                                   imageUrl: track.logo,
                                   placeholder: (context, url) {
                                     return Image.asset(

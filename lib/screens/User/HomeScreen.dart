@@ -246,7 +246,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     GestureDetector(
                       onTap: () {
                         RouteGenerator.goto(NOTIFICATION, {
-                          "user": user
+                          "user": user, 
+                          "callback": (user){
+                            setState(() {
+                              this.user = user;
+                            });
+                          }
                         });
                       },
                       child: Container(

@@ -212,7 +212,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
     if(layout == 'GRID'){
       return Container(
         width: 140,
-        height: 170,
+        height: 180,
         margin: EdgeInsets.only(
           right: widget.compact ? 0 : 10,
         ),
@@ -236,7 +236,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
             children: <Widget>[
               Container(
                 width: double.infinity,
-                height: widget.compact ? 130 : 120,
+                height: widget.compact ? 130 : 130,
                 margin: EdgeInsets.only(bottom: 5),
                 decoration: BoxDecoration(
                   color: AppColor.primary,
@@ -247,7 +247,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
                   children: <Widget>[
                     CachedNetworkImage(
                       width: double.infinity,
-                      height: widget.compact ? 130 : 120,
+                      height: widget.compact ? 130 : 130,
                       memCacheWidth: 300,
                       memCacheHeight: 300,
                       imageUrl: episode.logo,
@@ -325,7 +325,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
         },
         child: Container(
           width: double.infinity,
-          height: 80,
+          height: 90,
           padding: EdgeInsets.all(5),
           margin: EdgeInsets.only(bottom: 10),
           decoration: BoxDecoration(
@@ -337,7 +337,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
             children: <Widget>[
               Container(
                 width: 80,
-                height: 70,
+                height: 80,
                 decoration: BoxDecoration(
                   color: AppColor.primary,
                   borderRadius: BorderRadius.circular(5)
@@ -628,7 +628,7 @@ class _PodcastTemplateState extends State<PodcastTemplate> {
             child: Row(
               children: <Widget>[
                 Container(
-                  width: 60,
+                  width: 50,
                   height: double.infinity,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(2),

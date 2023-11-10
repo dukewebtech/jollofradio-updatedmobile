@@ -47,7 +47,6 @@ import 'package:jollofradio/screens/Welcome/SplashScreen.dart';
 import 'package:jollofradio/screens/Error/ErrorScreen.dart';
 import 'package:jollofradio/screens/Welcome/StartupScreen.dart';
 
-
 class ScreenProvider {
   static MaterialPageRoute route(String? route, data){
 
@@ -222,6 +221,7 @@ class ScreenProvider {
       case NOTIFICATION:
         return MaterialPageRoute(builder: (context) => NotificationScreen(
           user: data['user'],
+          callback: data['callback'],
         ));
 
       // Creators

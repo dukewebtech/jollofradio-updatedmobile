@@ -7,9 +7,15 @@ import 'package:jollofradio/widget/Labels.dart';
 
 class NotificationTemplate extends StatefulWidget {
   final Map notification;
-  const NotificationTemplate(this.notification, {
-    Key? key, 
-  }) : super(key: key);
+  final dynamic user;
+  final dynamic callback;
+  const NotificationTemplate(
+    this.notification,
+    this.user, 
+    this.callback, {
+      Key? key, 
+    }
+  ) : super(key: key);
 
   @override
   State<NotificationTemplate> createState() => _NotificationTemplateState();
@@ -30,6 +36,17 @@ class _NotificationTemplateState extends State<NotificationTemplate> {
       'id': alert['id'],
       'userType': await isCreator() ? 'creator' : 'user'
     };
+
+    widget.user.notifications.map((notification){
+      if(notification['id'] == this.notification['id']){
+        notification['status'] = 'read';
+      }
+      return notification;
+    }).toList();
+
+    widget.callback(
+      widget.user
+    );
 
     final seen = NotificationController.update( data );
 

@@ -32,6 +32,8 @@ class _SubscriberScreenState extends State<SubscriberScreen> {
     var auth = Provider.of<CreatorProvider>(context,listen: false);
     user = auth.user;
 
+    super.initState();
+
     //cache manager
     (() async {
       await cacheManager.mount({
@@ -48,8 +50,6 @@ class _SubscriberScreenState extends State<SubscriberScreen> {
       getSubscribers();
 
     }());
-
-    super.initState();
   }
 
   Future<void> getSubscribers() async {

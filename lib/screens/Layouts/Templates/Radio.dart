@@ -97,7 +97,7 @@ class _RadioTemplateState extends State<RadioTemplate> {
       }),
       child: Container(
         width: double.infinity,
-        height: 80,
+        height: 90,
         padding: EdgeInsets.all(5),
         margin: EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
@@ -108,7 +108,7 @@ class _RadioTemplateState extends State<RadioTemplate> {
           children: <Widget>[
             Container(
               width: 80,
-              height: 70,
+              height: 80,
               decoration: BoxDecoration(
                 color: AppColor.primary,
                 borderRadius: BorderRadius.circular(5)
@@ -225,10 +225,10 @@ class _RadioTemplateState extends State<RadioTemplate> {
                                         "No Twitter handle available at the moment."
                                       );
                                     },
-                                    child: Icon(
-                                      FontAwesomeIcons.twitter, 
-                                      color: AppColor.secondary,
-                                      size: 18,
+                                    child: ImageIcon(
+                                      AssetImage("assets/images/icons/x-white.png"),
+                                      size: 13,
+                                      color: Color(0XFF575C5F),
                                     ),
                                   ),
                                 ],

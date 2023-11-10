@@ -81,7 +81,7 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
       }),
       child: Container(
         width: double.infinity,
-        height: 80,
+        height: 90,
         padding: EdgeInsets.all(5),
         margin: EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
@@ -92,7 +92,7 @@ class _EpisodeTemplateState extends State<EpisodeTemplate> {
           children: <Widget>[
             Container(
               width: 80,
-              height: 70,
+              height: 80,
               decoration: BoxDecoration(
                 color: AppColor.primary,
                 borderRadius: BorderRadius.circular(5)

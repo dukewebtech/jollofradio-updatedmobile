@@ -132,11 +132,15 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
     });
   }
 
-  void callback(playlist, [Map? data]){
+  void callback(playlist, [Map? data]) 
+  async {
     data = data ?? {};
 
     if(data.containsKey ('sync')){
-      PlaylistController.delete(playlist.id);
+      await PlaylistController.delete(playlist.id); //spooling
+      Toaster.info(
+        "Deleting playlist... please wait."
+      );
       this.playlist.removeWhere((e) => e.id == (playlist.id));
 
       getPlaylists(true);

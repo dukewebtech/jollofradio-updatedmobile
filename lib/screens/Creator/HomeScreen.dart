@@ -33,6 +33,8 @@ class _HomeScreenState extends State<HomeScreen> {
     var auth = Provider.of<CreatorProvider>(context,listen: false);
     user = auth.user;
 
+    super.initState();
+
     //cache manager
     (() async {
       await cacheManager.mount({
@@ -51,8 +53,6 @@ class _HomeScreenState extends State<HomeScreen> {
       getStatistics();
 
     }());
-
-    super.initState();
   }
 
   @override
@@ -132,7 +132,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     GestureDetector(
                       onTap: () {
                         RouteGenerator.goto(NOTIFICATION, {
-                          "user": user
+                          "user": user,
+                          "callback": (user){
+                            setState(() {
+                              this.user = user;
+                            });
+                          }
                         });
                       },
                       child: Container(
@@ -258,7 +263,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           ?? '-'
                         ),
                       ],
-
                     )
                   ],
                 ),

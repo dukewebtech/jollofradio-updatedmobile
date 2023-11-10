@@ -376,9 +376,9 @@ class AuthController {
   }
 
   static Future<void> logout() async {
-    RouteGenerator.exit(SIGNIN);
+    // RouteGenerator.exit(SIGNIN);
 
-    var request = /*await*/ api(auth: true).get(endpoint(USER_LOGOUT_ROUTE))
+    /** - **/ await api(auth: true).get(endpoint(USER_LOGOUT_ROUTE))
     .then((_) {
       Storage.delete('user');
       Storage.delete('token');

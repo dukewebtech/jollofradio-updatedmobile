@@ -40,6 +40,8 @@ class _PodcastScreenState extends State<PodcastScreen> {
     var auth = Provider.of<CreatorProvider>(context,listen: false);
     user = auth.user;
 
+    super.initState();
+
     //cache manager
     (() async {
       await cacheManager.mount({
@@ -62,8 +64,6 @@ class _PodcastScreenState extends State<PodcastScreen> {
       });
 
     }());
-
-    super.initState();
   }
 
   Future<void> getPodcasts() async {

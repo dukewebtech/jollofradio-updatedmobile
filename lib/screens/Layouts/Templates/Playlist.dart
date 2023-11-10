@@ -5,6 +5,7 @@ import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/User/SubscriptionController.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
+import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Labels.dart';
 
 class PlaylistTemplate extends StatefulWidget {
@@ -38,9 +39,16 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
   final Map<bool, Map> popup = {
     true: <String, dynamic>{
       'Unsubscribe': (playlist, cb) async {
-        cb(playlist);
-        return await SubscriptionController.delete({
+        Toaster.info(
+          "Unsubscribing ... please wait. "
+        );
+
+        await SubscriptionController.delete({
           'podcast_id': playlist.id
+        });
+        
+        cb(playlist, {
+          "deleted": true
         });
       }
     },
@@ -90,6 +98,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
           RouteGenerator.goto(PLAYLIST_TRACK, {
             "playlist": widget.playlist
           });
+
           return;
         }
 
@@ -100,7 +109,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
       },
       child: Container(
         width: compact ? 140 : null,
-        height: compact ? 170 : null,
+        height: compact ? 180 : null,
         margin: EdgeInsets.only(
           bottom: compact ? 0 : 10,
           right: compact ? 10 : 0
@@ -116,8 +125,8 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              width: compact ? 140 : double.infinity,
-              height: compact ? 120 : 130,
+              width: compact ? 130 : double.infinity,
+              height: compact ? 130 : 130,
               margin: EdgeInsets.only(bottom: 5),
               decoration: BoxDecoration(
                 color: AppColor.primary,
@@ -130,7 +139,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                     memCacheWidth: 300,
                     memCacheHeight: 300,
                     width: double.infinity,
-                    height: compact ? 120 : 130,
+                    height: compact ? 130 : 130,
                     imageUrl: widget.playlist.logo,
                     placeholder: (context, url) {
                       return Image.asset(
@@ -166,6 +175,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
                       ),
                     ),
                   )
+                  
                 ],
               ),
             ),
@@ -235,7 +245,7 @@ class _PlaylistTemplateState extends State<PlaylistTemplate> {
             ),
             Text(
               isPodcast ?
-              "${widget.playlist.episodeCount} Episodes"  : //podcasts
+              "${widget.playlist.episodeCount} Episodes" : //podcasts
               "${widget.playlist.collection.length} Collection", //playlist
               style: TextStyle(
                 color: Colors.grey,

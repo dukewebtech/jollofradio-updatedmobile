@@ -144,7 +144,7 @@ class _LibraryScreenState extends State<LibraryScreen>
       stations    .removeWhere((e) => e.id == ( resource.id ));
     }
 
-    if(data.containsKey ('mounted')){
+    // if(data.containsKey ('mounted')){
       cacheManager.mount({
         'streams': {
           'data': () async {
@@ -163,7 +163,7 @@ class _LibraryScreenState extends State<LibraryScreen>
           },
         }
       }, null);
-    }
+    // }
     setState(() {});
   }
 

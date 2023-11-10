@@ -170,12 +170,12 @@ class _SiginInScreenState extends State<SiginInScreen> {
 
       if(auth['role'] == 'USER'){
         user.login(auth);
-        RouteGenerator.goto(DASHBOARD, {  });
+        RouteGenerator.exit(DASHBOARD, {  });
         return;
       }
       
       creator.login(auth);
-      RouteGenerator.goto(CREATOR_DASHBOARD);
+      RouteGenerator.exit(CREATOR_DASHBOARD);
       ///////////////////////////////////////////////////////////
     }
   }

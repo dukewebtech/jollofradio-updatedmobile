@@ -4,12 +4,15 @@ import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/AuthController.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
+import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
+import 'package:jollofradio/config/services/providers/UserProvider.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
 import 'package:jollofradio/utils/scope.dart';
 import 'package:jollofradio/config/services/auth/GoogleSignin.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Labels.dart';
+import 'package:provider/provider.dart';
 
 class ProfileScreen extends StatefulWidget {
   final dynamic user;
@@ -27,6 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   GoogleSigninAuth googleSignIn = GoogleSigninAuth();
   late dynamic user;
   bool creator = false;
+  bool isLoading = false;
   List<Map> menu = [
     {
       "label": "Edit Profile",
@@ -87,6 +91,13 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if(creator){
+      user = context.watch<CreatorProvider>().user;
+    }
+    else{
+      user = context.watch<UserProvider>().user;
+    }
+
     return Scaffold(
       appBar: AppBar(
         centerTitle: false,
@@ -231,12 +242,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   backgroundColor: Color(0XFF17252E)
                 ),
                 onPressed: () async {
+                  if(isLoading) 
+                    return;
+                    
+                  setState(() {
+                    isLoading = true;
+                  });
 
                   await AuthController.logout();
-                  audioHandler.stop();
-                  
+                  RouteGenerator.goBack();
+                  RouteGenerator.exit(SIGNIN);
+
+                  audioHandler.stop(); //stop player
                 },
-                
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
@@ -245,7 +263,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       color: Color(0XFF676767)
                     ),
                     SizedBox(width: 10),
-                    Text("Log Out", style: const TextStyle  (
+                    Text(!isLoading 
+                                ? "Log Out" : "Logging out...", 
+                    style: const TextStyle  (
                       color: Color(0XFF676767)
                     ))
                   ],
