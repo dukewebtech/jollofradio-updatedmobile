@@ -211,23 +211,23 @@ class _RadioTemplateState extends State<RadioTemplate> {
                                   ),
                                   GestureDetector(
                                     onTap: () async {
-                                      Map? social = station.handles; //fetch handles
-                                      if( social != null
-                                      && social.containsKey('twitter')){
-                                        String url = station. handles! [
-                                          'twitter'
-                                        ];
-                                        await launchUrl(Uri.parse(url)); //redirects
+                                      final twitter = /**/station.social('twitter');
+
+                                      if(twitter != null){
+
+                                        await launchUrl(Uri.parse(twitter));
                                         return;
+                                        
                                       }
                                       
                                       return Toaster.info(
                                         "No Twitter handle available at the moment."
                                       );
+                                      
                                     },
                                     child: ImageIcon(
                                       AssetImage("assets/images/icons/x-white.png"),
-                                      size: 13,
+                                      size: 12,
                                       color: Color(0XFF575C5F),
                                     ),
                                   ),

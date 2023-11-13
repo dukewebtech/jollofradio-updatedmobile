@@ -21,20 +21,21 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  bool welcome = false;
+  bool welcome = true;
 
   @override
   void initState() {
     _boostrapApp();
-
     super.initState();
   }
 
   Future<dynamic> _boostrapApp() async {
+    Storage.delete('startup');
     await Storage.get('guest', bool).then((guest) async {
 
       if(guest == true){
-
+        
+        Storage.set('startup', false);
         RouteGenerator.exit(PUBLIC);
         return;
 
@@ -48,7 +49,8 @@ class _SplashScreenState extends State<SplashScreen> {
 
       if(user.runtimeType == String){
         setState(() {
-          welcome = true;
+          welcome = false;
+          Storage.set('startup', false);
         });
 
         bool creator = await isCreator();
@@ -67,10 +69,8 @@ class _SplashScreenState extends State<SplashScreen> {
            .login(json.decode(user));
 
         }
-
         Player.user = auth; //prefmap
         RouteGenerator.exit(redirect);
-
       }
     });
   }
@@ -80,7 +80,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: null,
-      body: welcome == true ? SizedBox.shrink() : Container(
+      body: welcome != true ? SizedBox.shrink() : Container(
         width: MediaQuery.of(context).size.width,
         height: double.infinity,
         child: Stack(

@@ -216,7 +216,7 @@ class _SiginInScreenState extends State<SiginInScreen> {
                   ),
                   Labels.secondary(
                     "Skip >",
-                    onTap: () {
+                    onTap: () async {
                       RouteGenerator.goto(PUBLIC);
                       Storage.set('guest', true );
                     }

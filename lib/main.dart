@@ -88,7 +88,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   Widget build(BuildContext context) {
-    debugInvertOversizedImages = true;
+    // debugInvertOversizedImages = true;
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Jollof Radio',

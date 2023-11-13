@@ -4,6 +4,7 @@ import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Constants.dart';
+import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/screens/Public/HomeScreen.dart';
@@ -196,6 +197,7 @@ class _PublicLayoutState extends State<PublicLayout>
                         }seconds 😉",
                         fontSize: 14,
                         maxLines: 3
+                        
                       ),
                       SizedBox(
                         height: 40,
@@ -203,7 +205,7 @@ class _PublicLayoutState extends State<PublicLayout>
                       Buttons.primary(
                         label: "Create a free account",
                         onTap: () {
-                          Navigator.pop(context);
+                          RouteGenerator.goBack(2);
                           RouteGenerator.goto(ONBOARDING); // redirect signup
                         },
                       ),
@@ -218,9 +220,17 @@ class _PublicLayoutState extends State<PublicLayout>
                               top: -10,
                               child: Labels.secondary(
                                 "Signin",
-                                onTap: () {
-                                  Navigator.pop(context);
-                                  RouteGenerator.goto(SIGNIN); ///////////////
+                                onTap: () async {
+                                  var s = await Storage.get('startup', bool);
+                                  if (s == null)
+                                    RouteGenerator.goBack(2);
+                                    
+                                  else
+                                    RouteGenerator.goBack(1);
+                                    RouteGenerator.exit(    //goback to login
+                                      SIGNIN
+                                    );
+
                                 }
                               ),
                             ),

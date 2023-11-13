@@ -61,7 +61,7 @@ class Station {
     'created_at': createdAt,
   };
 
-  String? social(String handle) => /* %%% */ handles!['handle'];
+  String? social(String handle) => /* %%% */ handles![ handle ];
 
   String signal() => frequency.toString() + ' FM'; //full signal
     

@@ -111,6 +111,8 @@ class _HomeScreenState extends State<HomeScreen> {
       isLoading = true;
     });
 
+    await Future.delayed(Duration(seconds: 1),(){ /** ** */ });
+
     final streams = await cacheManager.stream( ////////////////
       'streams', 
       refresh: refresh,
@@ -206,6 +208,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    user = context.watch<UserProvider>().user; // listens state
+    
     // ignore: unnecessary_cast
     double width = MediaQuery.of(context).size.width as double;
     
@@ -359,7 +363,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           future: getCategory(),
                           builder: (context, snapshot) {
                             List<Category>? categories = snapshot.data;
-                            if(!snapshot.hasData || 
+                            if(isLoading == true || !snapshot.hasData || 
                             snapshot.data!.isEmpty){                            
                               return const CategoryShimmer(
                                 length: 3
@@ -885,6 +889,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   )).toList(),
 
                 SizedBox(height: 20),
+                
               ],
             ),
           ),

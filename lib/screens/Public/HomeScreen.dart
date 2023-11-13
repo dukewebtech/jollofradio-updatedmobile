@@ -19,6 +19,7 @@ import 'package:jollofradio/screens/Layouts/Templates/Radio.dart';
 import 'package:jollofradio/utils/date.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/utils/helpers/Factory.dart';
+import 'package:jollofradio/utils/helpers/Storage.dart';
 import 'package:jollofradio/widget/Labels.dart';
 import 'package:jollofradio/widget/Shared.dart';
 import 'package:liquid_pull_to_refresh/liquid_pull_to_refresh.dart';
@@ -106,6 +107,8 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       isLoading = true;
     });
+
+    await Future.delayed(Duration(seconds: 1),(){ /** ** */ });
 
     final streams = await cacheManager.stream( ////////////////
       'streams', 
@@ -204,10 +207,16 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                     Spacer(),
                     GestureDetector(
-                      onTap: () {
-                         RouteGenerator.goto(SIGNIN, {
-                          //
-                         });
+                      onTap: () async {
+                        var s = await Storage.get('startup', bool);
+                        if (s == null)
+                          RouteGenerator.goBack();
+                        
+                        else
+                          RouteGenerator.exit(SIGNIN, {
+                            //
+                          });
+                          
                       },
                       child: Container(
                         width: 40,
@@ -259,7 +268,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           future: getCategory(),
                           builder: (context, snapshot) {
                             List<Category>? categories = snapshot.data;
-                            if(!snapshot.hasData || 
+                            if(isLoading == true || !snapshot.hasData || 
                             snapshot.data!.isEmpty){                            
                               return const CategoryShimmer(
                                 length: 3
@@ -620,6 +629,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   )).toList(),
 
                 SizedBox(height: 20),
+                
               ],
             ),
           ),

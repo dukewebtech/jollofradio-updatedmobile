@@ -4,7 +4,6 @@ import 'package:audio_service/audio_service.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:dismissible_page/dismissible_page.dart';
 import 'package:flutter/material.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:jollofradio/config/models/Station.dart';
 import 'package:iconsax/iconsax.dart';
 import 'package:jollofradio/config/services/core/AudioService.dart';
@@ -12,6 +11,7 @@ import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/services/controllers/StationController.dart';
 import 'package:jollofradio/utils/colors.dart';
 import 'package:jollofradio/utils/helper.dart';
+import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/widget/Labels.dart';
@@ -67,7 +67,7 @@ with SingleTickerProviderStateMixin {
       Duration(seconds: 1), () => { ///////////////////////
       getEffects()
     });
-
+    
     syncAllStations();
     initializeRadio();
   }
@@ -111,6 +111,8 @@ with SingleTickerProviderStateMixin {
   }
 
   Future<dynamic> syncAllStations() async {
+
+    getFavorites();
 
     final stations = await cacheManager.stream( ///////////
       'stations', 
@@ -186,10 +188,7 @@ with SingleTickerProviderStateMixin {
           );     
         });
       }
-    });
-
-    getFavorites();
-    
+    });    
     ///////////////////////////////////////////////////////
   }
 
@@ -364,7 +363,9 @@ with SingleTickerProviderStateMixin {
                           onPressed: () async {
                             final twitter = radio.social ( 'twitter' );
                             if(twitter == null)
-                              return;
+                              return Toaster.info(
+                                "No Twitter handle available at the moment."
+                              );
 
                             await launchUrl(
                               Uri.parse(twitter),
@@ -372,11 +373,12 @@ with SingleTickerProviderStateMixin {
                               LaunchMode.externalNonBrowserApplication
                             );
                           },
-                          icon: Icon(
-                            FontAwesomeIcons.twitter, 
+                          icon: ImageIcon(
+                            AssetImage("assets/images/icons/x-white.png"),
+                            size: 20,
                             color: radio.social('twitter') == ( null )
-                            ? Colors.grey : Colors.white
-                          ),
+                            ? Colors.grey : Colors.white,
+                          )
                         ),
                         IconButton(
                           tooltip: "Favorite",
@@ -392,9 +394,7 @@ with SingleTickerProviderStateMixin {
                             else{
 
                               stations.removeWhere((item){
-
                                 return item['title'] == radio.title; //flush
-
                               });
 
                             }
