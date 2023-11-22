@@ -50,6 +50,10 @@
 	<string>Used to capture audio for image picker plugin.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Allow photo access to add photo to your profile and uploading image to your account.</string>
+	<key>NSAppleMusicUsageDescription</key>
+	<string>Allow audio access to read and upload music to your account</string>
+	<key>LSSupportsOpeningDocumentsInPlace</key>
+	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UIBackgroundModes</key>

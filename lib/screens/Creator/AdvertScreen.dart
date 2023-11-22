@@ -38,7 +38,6 @@ class _AdvertScreenState extends State<AdvertScreen> {
     });
     
     await AdvertController.enroll({}).then((dynamic data) async {
-      
       setState(() {
         isLoading = false;
       });
@@ -48,9 +47,7 @@ class _AdvertScreenState extends State<AdvertScreen> {
         return Toaster.info(data['message']); ///////////////////
 
       }
-  
       successDialog();
-
     });
   }
 
@@ -113,8 +110,11 @@ class _AdvertScreenState extends State<AdvertScreen> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
-              SizedBox(
-                width: 200,
+              Container(
+                constraints: BoxConstraints(
+                  minWidth: 200,
+                  maxWidth: 220
+                ),
                 child: Buttons.secondary(
                   label: isLoading 
                   ? "Enrolling ..." : !user.enrolled! ? 

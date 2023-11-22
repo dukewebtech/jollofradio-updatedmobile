@@ -90,7 +90,7 @@ class Stylesheet {
           fontWeight: FontWeight.bold
         ),
       ).apply(
-        bodyColor: Colors.white,
+        // bodyColor: Colors.white,
         displayColor: Colors.white
       ),
 
