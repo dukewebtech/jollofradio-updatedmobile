@@ -113,9 +113,15 @@ class _CreateScreenState extends State<CreateScreen> {
   Future _selectFile(type) async {
     File? imageFile;
     Uint8List data;
+    Map<bool, FileType> stream = {
+      true: FileType.audio,
+      false: FileType.custom
+    };
     FileType format = {
       "logo": FileType.image,
-      "file": FileType.audio
+      "file": stream[
+        Platform.isAndroid
+      ]
     }[type]!;
 
     if(type == 'file' && urlUpload)
@@ -124,7 +130,12 @@ class _CreateScreenState extends State<CreateScreen> {
     final dynamic result = await FilePicker.platform.pickFiles(
         type: format, 
         lockParentWindow: true, 
-        withData: true
+        withData: true,
+        allowedExtensions: <String>[
+          'mp3',
+          'wav',
+          'm4a',
+        ]
     );
 
     if (result == null) {
