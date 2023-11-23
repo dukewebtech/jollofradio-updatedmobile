@@ -9,9 +9,11 @@ import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/models/Podcast.dart';
 import 'package:jollofradio/config/routes/router.dart';
 import 'package:jollofradio/config/services/controllers/Creator/EpisodeController.dart';
+import 'package:jollofradio/config/services/controllers/Creator/PodcastController.dart';
 import 'package:jollofradio/config/services/providers/CreatorProvider.dart';
 import 'package:jollofradio/config/strings/AppColor.dart';
 import 'package:jollofradio/config/strings/Message.dart';
+import 'package:jollofradio/utils/helpers/Cache.dart';
 import 'package:jollofradio/utils/toaster.dart';
 import 'package:jollofradio/widget/Buttons.dart';
 import 'package:jollofradio/widget/Crop.dart';
@@ -113,15 +115,12 @@ class _CreateScreenState extends State<CreateScreen> {
   Future _selectFile(type) async {
     File? imageFile;
     Uint8List data;
-    Map<bool, FileType> stream = {
-      true: FileType.audio,
-      false: FileType.custom
-    };
     FileType format = {
       "logo": FileType.image,
-      "file": stream[
-        Platform.isAndroid
-      ]
+      "file": {
+        true: FileType.audio,
+        false: FileType.custom
+      }[Platform.isAndroid]
     }[type]!;
 
     if(type == 'file' && urlUpload)
@@ -131,11 +130,12 @@ class _CreateScreenState extends State<CreateScreen> {
         type: format, 
         lockParentWindow: true, 
         withData: true,
-        allowedExtensions: <String>[
+        allowedExtensions: 
+        type == 'file' && format == FileType.custom ? <String>[
           'mp3',
           'wav',
           'm4a',
-        ]
+        ] : null
     );
 
     if (result == null) {
@@ -147,7 +147,6 @@ class _CreateScreenState extends State<CreateScreen> {
       result.files.first.path
     );
 
-    //init crop
     if(type == 'logo'){
       dynamic cropImage = (await Cropper.cropImage(imageFile));
       if(cropImage == null)
@@ -270,7 +269,7 @@ class _CreateScreenState extends State<CreateScreen> {
     if(widget.callback != null){
       widget.callback();
     }
-    /*
+    // /*
     await CacheStream().mount({
       '_podcasts': {
         'data': () async {
@@ -281,7 +280,7 @@ class _CreateScreenState extends State<CreateScreen> {
         },
       },
     }, null);
-    */
+    // */
     if(episode != null){
       RouteGenerator.goBack(
         widget.history!

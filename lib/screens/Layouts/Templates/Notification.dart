@@ -49,7 +49,6 @@ class _NotificationTemplateState extends State<NotificationTemplate> {
     );
 
     final seen = NotificationController.update( data );
-
     setState(() {
       notification['status'] = 'read';
     });
@@ -66,7 +65,8 @@ class _NotificationTemplateState extends State<NotificationTemplate> {
           content: Text(
             alert['message'],
             style: TextStyle(
-              fontSize: 14
+              fontSize: 14,
+              color: AppColor.primary
             ),
           ),
         );

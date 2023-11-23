@@ -374,7 +374,6 @@ class _ManageScreenState extends State<ManageScreen> {
                                       "icon": Iconsax.trash,  //////////////
                                       "color": Colors.red
                                     },
-                                    
                                   ];
 
                                   return popupActions.map<PopupMenuItem>((e){
@@ -457,7 +456,8 @@ class _ManageScreenState extends State<ManageScreen> {
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Text('Edit Podcast', style: TextStyle(
-                                    // color: Colors.black
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold
                                   )),
                                   SizedBox(
                                     width: 5,
@@ -465,7 +465,7 @@ class _ManageScreenState extends State<ManageScreen> {
                                   Icon(
                                     Iconsax.edit_2,
                                     size: 18,
-                                    // color: Colors.black,
+                                    color: Colors.black,
                                   ),
                                 ],
                               ),

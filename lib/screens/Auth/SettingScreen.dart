@@ -214,7 +214,10 @@ class _SettingScreenState extends State<SettingScreen> {
                 }click on the confirm button to delete your ${ ///
                   ""
                 }account",
-                style: TextStyle(fontSize: 14),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: AppColor.primary
+                ),
               ),
             ],
           ),
@@ -309,7 +312,10 @@ class _SettingScreenState extends State<SettingScreen> {
                     "Enter your password to authorize deletion of all ${
                       ""
                     }related services on the JollofRadio platform", ////
-                    style: TextStyle(fontSize: 14),
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: AppColor.primary
+                    ),
                   ),
                   SizedBox(
                     height: 15,
