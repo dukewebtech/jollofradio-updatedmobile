@@ -105,8 +105,10 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
     });
     
     if (signup['error']){
-      Toaster.error(
-        signup['message']
+      Toaster.show(
+        position: 'TOP',
+        status: 'error',
+        message: signup['message'],
       );
     }
     else{
@@ -164,11 +166,17 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
   Future<void> _googleSignin() async {
     googleSignIn.signOut();
     final signIn = await googleSignIn.signIn(); // attempt login
+    
     if(signIn == null){
       setState(() {
         isLoading = false;
       });
-      return Toaster.error('Signin failed!, please try again!');
+
+      return Toaster.show(
+        position: 'TOP',
+        status: 'error',
+        message: 'Signin failed!, please try again!'.toString( ),
+      );
     }
 
     setState(() {
@@ -198,8 +206,10 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
     });
     
     if (result['error']){
-      Toaster.error(
-        result['message']
+      Toaster.show(
+        position: 'TOP',
+        status: 'error',
+        message: result['message'],
       );
     }
     else{
@@ -256,11 +266,13 @@ class _SiginUpScreenState extends State<SiginUpScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: null,
+      appBar: AppBar(
+        leading: Buttons.back(),
+      ),
       body: SingleChildScrollView(
         child: Container(          
           margin: EdgeInsets.only(
-            top: AppBar().preferredSize.height + 20,
+            // top: AppBar().preferredSize.height + 20,
             left: 30, 
             right: 30
           ),

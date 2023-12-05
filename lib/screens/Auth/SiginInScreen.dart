@@ -45,11 +45,9 @@ class _SiginInScreenState extends State<SiginInScreen> {
     },
   };
 
-
   @override
   void initState() {
     email.text = widget.email ?? '';
-
     Future(() async {
 
       token = await NotificationService.getToken(); // device ID
@@ -94,7 +92,12 @@ class _SiginInScreenState extends State<SiginInScreen> {
       setState(() {
         isLoading = false;
       });
-      return Toaster.error('Signin failed!, please try again!');
+
+      return Toaster.show(
+        position: 'TOP',
+        status: 'error',
+        message: 'Signin failed!, please try again!'.toString( ),
+      );
     }
 
     setState(() {
@@ -124,8 +127,10 @@ class _SiginInScreenState extends State<SiginInScreen> {
     });
     
     if (result['error']){
-      Toaster.error(
-        result['message']
+      Toaster.show(
+        position: 'TOP',
+        status: 'error',
+        message: result['message'],
       );
     }
     else{
@@ -133,7 +138,6 @@ class _SiginInScreenState extends State<SiginInScreen> {
       final String token = login(result)['token']; //////////////
       final Map? verification = auth['verification']; ///////////
 
-      //verificationing
       if(verification == null
       || verification
       ['data']['email']['status'] == 'unverified') { ////////////

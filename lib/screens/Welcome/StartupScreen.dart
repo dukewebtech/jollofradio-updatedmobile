@@ -12,7 +12,7 @@ class StartupScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        leading: Icon(null),
+        leading: Buttons.back(),
       ),
       body: Container(
         width: MediaQuery.of(context).size.width,
