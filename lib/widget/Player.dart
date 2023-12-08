@@ -115,7 +115,6 @@ class _PlayerState extends State<Player> {
         ///////////////////////////////////////////
         int index = player.getPlaylist().indexWhere
         ((e) => e.id == track['id'] ); ////////////
-
         player.skipToQueueItem(index); //skip track
         player.seek(
           Duration(milliseconds: track['position'])
@@ -130,7 +129,6 @@ class _PlayerState extends State<Player> {
     player.streams().listen((dynamic event) async {
       final playState = event['playState'];
       final currState = playState.processingState;
-
       final currentTrack = (player.currentTrack( ));
       dynamic track = "";
       bool isPodcast = 
@@ -175,7 +173,9 @@ class _PlayerState extends State<Player> {
       if(playState != this.playState 
       || track?.id != this.track?.id){//state check
         if(!mounted) return;
+        /*
         print('state rebuild fired!');
+        */
         setState(() {
           firstrun = (true) ;
           this.track = track;

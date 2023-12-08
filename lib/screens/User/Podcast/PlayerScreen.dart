@@ -296,7 +296,7 @@ with SingleTickerProviderStateMixin {
     }
 
     //trackng stream
-    if(currentTrack?.title != track.title ) {
+    if( currentTrack?.id != track.id ){
 
       stream(track);
     
@@ -324,16 +324,18 @@ with SingleTickerProviderStateMixin {
   }
 
   Future stream(Episode track) async {
+    // print('stream tracking for '+track.id.toString());
+    
     if(!await isCreator())
     await Storage.get('guest',bool).then((dynamic guest){
       
       if(guest == true){
-        
+
         HomeController.stream({'episode_id':  track.id});
 
       }
       else{
-        
+
         StreamController.create({'episode_id': track.id});
 
       }
@@ -481,7 +483,6 @@ with SingleTickerProviderStateMixin {
         );
       }
       Toaster.success("Episode added to playlist: $name");
-
       controller.clear();
       Navigator.pop(context);
     });
