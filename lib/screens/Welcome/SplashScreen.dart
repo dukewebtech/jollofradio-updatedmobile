@@ -34,11 +34,9 @@ class _SplashScreenState extends State<SplashScreen> {
     await Storage.get('guest', bool).then((guest) async {
 
       if(guest == true){
-        
         Storage.set('startup', false);
         RouteGenerator.exit(PUBLIC);
         return;
-
       }
 
     });
@@ -80,7 +78,7 @@ class _SplashScreenState extends State<SplashScreen> {
     return Scaffold(
       extendBodyBehindAppBar: false,
       appBar: null,
-      body: welcome != true ? SizedBox.shrink() : Container(
+      body: welcome != true ? SizedBox.shrink() : SizedBox(
         width: MediaQuery.of(context).size.width,
         height: double.infinity,
         child: Stack(
@@ -96,8 +94,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 alignment: Alignment.bottomRight,
                 margin: EdgeInsets.only(top: 30),
                 child: Image(
-                  image: AssetImage("assets/images/splash.png"), 
-                  fit: BoxFit.contain
+                  image: AssetImage("assets/images/girl.png"), 
+                  fit: BoxFit.cover,
+                  height: 600,
+                  alignment: Alignment.bottomCenter,
                 )
               ),
             ),
