@@ -33,6 +33,8 @@ class _SearchScreenState extends State<SearchScreen> {
     user = auth.user;
     */
 
+    super.initState();
+
     //cache manager
     (() async {
       await cacheManager.mount({
@@ -46,9 +48,7 @@ class _SearchScreenState extends State<SearchScreen> {
 
       getCategory();
 
-    }());
-    
-    super.initState();
+    }());    
   }
 
   Future<void> getCategory() async {

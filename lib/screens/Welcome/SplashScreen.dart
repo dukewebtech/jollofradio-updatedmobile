@@ -82,12 +82,12 @@ class _SplashScreenState extends State<SplashScreen> {
         width: MediaQuery.of(context).size.width,
         height: double.infinity,
         child: Stack(
-          key: ValueKey(10),
+          key: ValueKey(1),
           children: <Widget>[
             FadeIn(
               child: Image.asset("assets/images/illustration/shape.png")
             ),
-            FadeInUp(
+            FadeInLeft(
               delay: Duration(milliseconds: 500),
               child: Container(
                 width: double.infinity,
@@ -96,7 +96,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 child: Image(
                   image: AssetImage("assets/images/girl.png"), 
                   fit: BoxFit.cover,
-                  height: 600,
+                  height: 550,
                   alignment: Alignment.bottomCenter,
                 )
               ),

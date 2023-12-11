@@ -37,6 +37,7 @@ class _HomeScreenState extends State<HomeScreen> {
   // late User user;
   List categories = [];
   List stations = [];
+  late Future category;
   Map streams = {
     'latest': [],
     'trending': [],
@@ -46,6 +47,7 @@ class _HomeScreenState extends State<HomeScreen> {
     'playlist': [],
   };
   bool isLoading = true;
+  bool reload = false;
   bool refresh = false;
 
   List recently = PodcastFactory().get(0, 3);
@@ -59,6 +61,10 @@ class _HomeScreenState extends State<HomeScreen> {
     var auth = Provider.of<UserProvider>(context,listen: false);
     user = auth.user;
     */
+
+    super.initState();
+
+    category = /**/getCategory();
 
     //cache manager
     (() async {
@@ -93,8 +99,6 @@ class _HomeScreenState extends State<HomeScreen> {
       fetchStation();
       
     }());
-
-    super.initState();
   }
 
   @override
@@ -125,6 +129,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     setState(() {
       isLoading = false;
+      reload = false;
       refresh = false;
     });
   }
@@ -179,11 +184,12 @@ class _HomeScreenState extends State<HomeScreen> {
         height: 120,
         backgroundColor: AppColor.secondary,
         onRefresh: () async => {
-          await Future.delayed(Duration(seconds: 1), () async {
+          // await Future.delayed(Duration(seconds: 1), () {
             setState(() {
+              reload = true;
               fetchStreams();
-            });
-          })
+            })
+          // })
         },
         child: Container(
           width: MediaQuery.of(context).size.width,
@@ -265,7 +271,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       crossAxisAlignment: /**/CrossAxisAlignment.start,
                       children: <Widget>[
                         FutureBuilder(
-                          future: getCategory(),
+                          future: category,
                           builder: (context, snapshot) {
                             List<Category>? categories = snapshot.data;
                             if(isLoading == true || !snapshot.hasData || 

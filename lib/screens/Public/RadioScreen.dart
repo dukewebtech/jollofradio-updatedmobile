@@ -34,6 +34,8 @@ class _RadioScreenState extends State<RadioScreen> {
     user = auth.user;
     */
 
+    super.initState();
+
     //cache manager
     (() async {
       await cacheManager.mount({
@@ -49,9 +51,7 @@ class _RadioScreenState extends State<RadioScreen> {
 
       getRadioStation();
 
-    }());
-    
-    super.initState();
+    }());    
   }
 
   Future<void> getRadioStation() async {
