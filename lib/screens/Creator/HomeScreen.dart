@@ -249,7 +249,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         Tile(
                           context: context,
                           type: "secondary",
-                          label: "Impression",
+                          label: "Replays",
                           icon: Iconsax.graph,
                           data: statistics?['impression'] 
                           ?? '-'

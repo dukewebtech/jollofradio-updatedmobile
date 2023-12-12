@@ -163,19 +163,19 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void callback(episode, [Map? data]) async {
     data = data ?? {};
-
     /*
-
     streams['recent'].removeWhere((dynamic e) => e == episode);
     setState(() {  });
-
     */
     
     await StreamController.delete({'episode_id' : episode.id})
     .then((value) async {
 
-      // refresh = true;
-      // fetchStreams();
+      cacheManager.stream(
+        'streams',
+        refresh: true,
+        callback: StreamController.construct
+      );
       
     });
   }

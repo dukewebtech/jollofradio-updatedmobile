@@ -47,13 +47,13 @@ class _PlaylistScreenState extends State<PlaylistScreen> {
           'data': () async {
             return await PlaylistController.index();
           },
-          'rules': (data) => data.isNotEmpty,
+          // 'rules': (data) => data.isNotEmpty,
         }
       }, null);
 
       getPlaylists();
 
-    }());    
+    }());
   }
 
   Future<void> getPlaylists([cache]) async {

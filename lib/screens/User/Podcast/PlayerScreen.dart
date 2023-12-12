@@ -254,7 +254,6 @@ with SingleTickerProviderStateMixin {
       catch(error) {
 
         player.stop();
-
         print(error);
         Toaster.error(
           "We're having issues playing the track right now."
@@ -279,10 +278,10 @@ with SingleTickerProviderStateMixin {
       */
     }
     else{
-      if(currentTrack?.title != track.title){
+      if((currentTrack?.id != track.id.toString()) == true){
         if(playlist.length > 1){
           int index = playlist.indexWhere(
-            (media) => media.id == track.id.toString (   ) 
+            (media) => media.id  == track.id.toString (   ) 
           );
 
           if(index >= 0){
@@ -296,7 +295,7 @@ with SingleTickerProviderStateMixin {
     }
 
     //trackng stream
-    if( currentTrack?.id != track.id ){
+    if( (currentTrack?.id != track.id.toString()) == true ){
 
       stream(track);
     
@@ -318,6 +317,7 @@ with SingleTickerProviderStateMixin {
           currentIndex = tracks.indexOf(
             currentTrack!
           );
+          stream(track);
         });
       }
     });
