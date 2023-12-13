@@ -91,12 +91,12 @@ class _SplashScreenState extends State<SplashScreen> {
               delay: Duration(milliseconds: 500),
               child: Container(
                 width: double.infinity,
-                alignment: Alignment.bottomRight,
+                alignment: Alignment.center,
                 margin: EdgeInsets.only(top: 30),
                 child: Image(
                   image: AssetImage("assets/images/girl.png"),
-                  fit: BoxFit.cover,
-                  height: 550,
+                  fit: BoxFit.contain,
+                  // height: 550,
                   alignment: Alignment.bottomCenter,
                 )
               ),
@@ -107,7 +107,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 delay: Duration(milliseconds: 1000),
                 child: Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 400,
+                  height: 350,
                   padding: EdgeInsets.fromLTRB(40,0,40,0),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
