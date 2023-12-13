@@ -59,5 +59,6 @@ const SEARCH_ROUTE = '/services/search';
 const INTEREST_ROUTE = '/services/interests';
 const STATIONS_ROUTE = '/services/stations';
 const PODCASTS_ROUTE = '/services/podcasts';
+const ANALYTICS_ROUTE = '/services/analytics';
 
 ///////////////////////////////////////////////////////////

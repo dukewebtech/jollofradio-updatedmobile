@@ -158,13 +158,11 @@ with SingleTickerProviderStateMixin {
         if(player.currentTrack()?.title == (track.title)){
           return;
         }
-
         return safetyDialog();
       }
     }
 
     initializeAudio(); ////////////////////////////////////
-
   }
 
   MediaItem setTrackItems(Episode track) {
@@ -250,15 +248,21 @@ with SingleTickerProviderStateMixin {
         );
         player.play();
 
-      }  
+      }
       catch(error) {
-
         player.stop();
         print(error);
+
+        HomeController.analytics({
+          'type': 'playback',
+          'user_id': user?['id'],
+          'episode_id': track.id,
+          'log': error.toString()
+        });
+        
         Toaster.error(
           "We're having issues playing the track right now."
         );
-
       }
       /*
       await player.setPlaylist([
@@ -311,13 +315,13 @@ with SingleTickerProviderStateMixin {
         /*
         print('mounting for track: '+episode.id.toString());
         */
+        stream(episode);
         if(mounted)
         setState(() {
           track = episode;
           currentIndex = tracks.indexOf(
             currentTrack!
           );
-          stream(track);
         });
       }
     });
@@ -365,8 +369,6 @@ with SingleTickerProviderStateMixin {
       track = Episode.fromJson(
         media.extras!['episode']
       );
-
-      stream(track);
       
       currentIndex = tracks.indexOf(media);//set cur. index
     });
@@ -466,7 +468,6 @@ with SingleTickerProviderStateMixin {
     await PlaylistController.create(data).then((created) 
     async{
       setState(() => isSaving = false);
-
       //reload cache
       CacheStream().mount({
         'playlist': {
@@ -616,7 +617,6 @@ with SingleTickerProviderStateMixin {
                                           );
                                           return;
                                         }
-
                                         RouteGenerator.goto(PODCAST, {
                                           "podcast": podcast
                                         });

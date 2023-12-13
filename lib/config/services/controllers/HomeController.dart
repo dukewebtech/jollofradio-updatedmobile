@@ -1,3 +1,4 @@
+import 'dart:io' show Platform;
 import 'package:jollofradio/config/models/Episode.dart';
 import 'package:jollofradio/config/models/Podcast.dart';
 import 'package:jollofradio/config/services/api.dart';
@@ -75,6 +76,34 @@ class HomeController {
 
   static Future<bool> stream(Map data) async {
     var request = await api(/** ** */).post(endpoint(PUBLIC_STREAM_ROUTE), 
+      data
+    );
+        request = (request) as Map;
+
+    if (request.containsKey('data')){
+      dynamic data = request['data'];
+
+      return true;
+    }
+
+    return false;
+  }
+
+  static Future<bool> analytics(Map data) async {
+    String type = data['type'];
+    data.remove('type');
+
+    //getting device info
+    data['signature'] = {
+      "OS": Platform.isAndroid? 'Android': 'iOS',
+      "version": Platform.operatingSystemVersion,
+      "locale": Platform.localeName,
+      "processors": Platform.numberOfProcessors ,
+      "Dart VM": Platform.version
+    };
+
+    
+    var request = await api(/***/).post(endpoint(ANALYTICS_ROUTE+'/$type'), 
       data
     );
         request = (request) as Map;

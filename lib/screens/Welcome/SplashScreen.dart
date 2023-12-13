@@ -94,7 +94,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 alignment: Alignment.bottomRight,
                 margin: EdgeInsets.only(top: 30),
                 child: Image(
-                  image: AssetImage("assets/images/girl.png"), 
+                  image: AssetImage("assets/images/girl.png"),
                   fit: BoxFit.cover,
                   height: 550,
                   alignment: Alignment.bottomCenter,
@@ -107,7 +107,7 @@ class _SplashScreenState extends State<SplashScreen> {
                 delay: Duration(milliseconds: 1000),
                 child: Container(
                   width: MediaQuery.of(context).size.width,
-                  height: 350,
+                  height: 400,
                   padding: EdgeInsets.fromLTRB(40,0,40,0),
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
@@ -124,7 +124,7 @@ class _SplashScreenState extends State<SplashScreen> {
                       Text(Message.splash, style: TextStyle(
                         color: Colors.white,
                         height: 1.2,
-                        fontSize: 60,
+                        fontSize: 50,
                         fontWeight: FontWeight.bold
                       )),
                       SizedBox(height: 20),

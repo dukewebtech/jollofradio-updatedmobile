@@ -2,8 +2,8 @@
 
 class Message {
 
-  static String splash = "Listen on the go";
-  static String splash_message = "Explore the magic of audio streaming as we blend entertainment, education and inspiration to create an unforgettable streaming experience";
+  static String splash = "Explore, create, learn, have fun";
+  static String splash_message = "Experience Jollof Radio: Where Podcasters, Listeners, and Advertisers Connect for Great Entertainment and Mutual Benefits";
   static String startup_heading = "How do you want to Sign Up?";
   static String forgot_password = "Hang on captain! it happens sometimes. Let's get you back to your account";
   static String verify_code = "We sent an OTP to your email to confirm it's you. Enter to reset password";
